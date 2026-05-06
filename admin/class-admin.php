@@ -62,9 +62,16 @@ final class Admin {
 		'submissions' => [
 			'label' => 'Submissions',
 			'view'  => 'submissions-list.php',
+			'phase' => 4,
+			'icon'  => 'inbox',
+			'hint'  => 'Lead submissions table, filters, CSV export',
+		],
+		'analytics'   => [
+			'label' => 'Analytics',
+			'view'  => 'analytics.php',
 			'phase' => 5,
 			'icon'  => 'analytics',
-			'hint'  => 'Lead submissions table, CSV export, analytics dashboard',
+			'hint'  => 'Conversion funnel, top pages, per-event counts',
 		],
 	];
 
@@ -81,6 +88,7 @@ final class Admin {
 		'design'    => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 2.5C5.85 2.5 2.5 5.85 2.5 10s3.35 7.5 7.5 7.5c1.1 0 1.7-.85 1.4-1.7-.4-1.05.4-2.05 1.5-2.05h1.6c1.4 0 2.5-1.1 2.5-2.5C17 6.7 13.85 2.5 10 2.5z"/><circle cx="6.5" cy="9" r=".8" fill="currentColor"/><circle cx="9" cy="6" r=".8" fill="currentColor"/><circle cx="13" cy="6.5" r=".8" fill="currentColor"/></svg>',
 		'display'   => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 10s2.8-5 8-5 8 5 8 5-2.8 5-8 5-8-5-8-5z"/><circle cx="10" cy="10" r="2"/></svg>',
 		'analytics' => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17h14"/><rect x="5" y="11" width="2.5" height="5" rx=".4"/><rect x="9" y="7" width="2.5" height="9" rx=".4"/><rect x="13" y="3.5" width="2.5" height="12.5" rx=".4"/></svg>',
+		'inbox'     => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 11.5h4l1 2h5l1-2h4"/><path d="M3 11.5l1.7-6a1.5 1.5 0 0 1 1.45-1.1h7.7a1.5 1.5 0 0 1 1.45 1.1L17 11.5"/><rect x="2.5" y="11.5" width="15" height="5" rx="1.4"/></svg>',
 	];
 
 	public static function init(): void {

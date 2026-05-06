@@ -241,15 +241,3 @@ $status_options = [
 		<?php endif; ?>
 	<?php endif; ?>
 </section>
-
-<section class="bspe-card bspe-card--ghost">
-	<header class="bspe-card__head">
-		<div class="bspe-card__head-text">
-			<h2><?php esc_html_e( 'Analytics', 'bspe-connect' ); ?></h2>
-			<p class="bspe-card__lead">
-				<?php esc_html_e( 'Conversion funnel and top pages dashboard arrives in Phase 5.', 'bspe-connect' ); ?>
-			</p>
-		</div>
-		<span class="bspe-pill bspe-pill--phase"><?php esc_html_e( 'Phase 5', 'bspe-connect' ); ?></span>
-	</header>
-</section>

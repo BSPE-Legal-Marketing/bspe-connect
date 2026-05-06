@@ -44,6 +44,10 @@ final class Plugin {
 		// admin-ajax.php is reached from the frontend bar but reports is_admin() true.
 		Form_Handler::init();
 
+		// REST API for analytics events — same reason: rest_api_init runs in
+		// both admin and frontend contexts.
+		Rest::init();
+
 		if ( is_admin() ) {
 			Admin\Admin::init();
 		} else {

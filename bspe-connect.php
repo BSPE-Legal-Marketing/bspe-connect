@@ -3,7 +3,7 @@
  * Plugin Name:       BSPE Connect
  * Plugin URI:        https://github.com/BSPE-Legal-Marketing/bspe-connect
  * Description:       Mobile-only contact bar with lead capture for law firm sites. Adds a bottom-fixed bar with up to 4 buttons (Connect, Call, Text, Email) and a built-in lead form.
- * Version:           1.4.0
+ * Version:           1.5.0
  * Requires at least: 6.0
  * Requires PHP:      8.0
  * Author:            BSPE Legal Marketing
@@ -18,7 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'BSPE_CONNECT_VERSION', '1.4.0' );
+define( 'BSPE_CONNECT_VERSION', '1.5.0' );
 define( 'BSPE_CONNECT_FILE', __FILE__ );
 define( 'BSPE_CONNECT_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BSPE_CONNECT_URL', plugin_dir_url( __FILE__ ) );
@@ -30,12 +30,15 @@ require_once BSPE_CONNECT_DIR . 'includes/class-deactivator.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-settings.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-updater.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-submissions.php';
+require_once BSPE_CONNECT_DIR . 'includes/class-events.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-mailer.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-form-handler.php';
+require_once BSPE_CONNECT_DIR . 'includes/class-rest.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-frontend.php';
 require_once BSPE_CONNECT_DIR . 'admin/class-admin.php';
 require_once BSPE_CONNECT_DIR . 'admin/class-settings-saver.php';
 require_once BSPE_CONNECT_DIR . 'admin/class-submissions-controller.php';
+require_once BSPE_CONNECT_DIR . 'admin/class-analytics-controller.php';
 require_once BSPE_CONNECT_DIR . 'admin/views/components.php';
 
 register_activation_hook( __FILE__, [ 'BSPE\\Connect\\Activator', 'activate' ] );

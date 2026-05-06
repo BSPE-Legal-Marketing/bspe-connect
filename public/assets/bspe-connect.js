@@ -189,13 +189,58 @@
 	}
 
 	// ----- Analytics dispatch -----
+	var sessionId = ensureSessionId();
+	var restEndpoint = data.restEndpoint || '';
+
+	function ensureSessionId() {
+		var key = 'bspe_connect_session_id';
+		try {
+			var existing = sessionStorage.getItem(key);
+			if (existing) { return existing; }
+			var fresh = generateUUID();
+			sessionStorage.setItem(key, fresh);
+			return fresh;
+		} catch (e) {
+			return generateUUID();
+		}
+	}
+
+	function generateUUID() {
+		if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+			try { return window.crypto.randomUUID(); } catch (e) { /* fall through */ }
+		}
+		// Fallback: RFC4122-ish v4 from Math.random.
+		return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+			var r = Math.random() * 16 | 0;
+			var v = c === 'x' ? r : (r & 0x3) | 0x8;
+			return v.toString(16);
+		});
+	}
+
+	function deliverEvent(eventType) {
+		if (!restEndpoint) { return; }
+		try {
+			fetch(restEndpoint, {
+				method: 'POST',
+				keepalive: true,
+				headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+				body: JSON.stringify({
+					event_type: eventType,
+					page_url:   window.location.href,
+					session_id: sessionId
+				})
+			}).catch(function () { /* swallow — analytics is best-effort */ });
+		} catch (e) { /* swallow */ }
+	}
+
 	function fire(eventType, detail) {
 		try {
 			window.dispatchEvent(new CustomEvent('bspe:' + eventType, {
 				detail: Object.assign({ type: eventType }, detail || {})
 			}));
 		} catch (e) { /* ignore */ }
-		// Phase 5 will deliver these to /event REST endpoint here.
+
+		deliverEvent(eventType);
 	}
 
 	// ----- Form modal -----

@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -37,31 +37,38 @@ Legal Marketing organization.
 4. Activate the plugin from the Plugins screen.
 5. Configure under the new "BSPE Connect" admin menu item.
 
-== Phase 4 status ==
+== Phase 5 status ==
 
-This release wires up the entire admin settings UI:
+This release wires up analytics — REST event ingestion plus the dashboard:
 
-* Plugin activates / deactivates cleanly
-* Database tables for submissions and analytics events are created
-* Default settings are seeded (master-enable defaults to OFF until configured)
-* Admin shell uses a left-sidebar nav rail with the BSPE brand palette
-* All six admin tabs are functional: General, Buttons, Form, Design,
-  Display Rules, Submissions
-* Mobile-only contact bar with up to 4 buttons (Connect, Call, Text, Email)
-* Welcome bubble that appears 3 seconds after the bar first becomes visible
-* Bottom-sheet modal form for Text (inline mode) and Email buttons
-* Settings save via admin-post.php with per-tab sanitization and CSRF nonces
-* WP color picker, Media Library integration for the avatar and Connect image,
-  custom-styled toggles + checkboxes + radio pills + icon-radio previews,
-  conditional field disabling, live phone mask
-* Submissions table with date / source / status filters, paginated 25 per
-  page, expandable rows for full message + user agent, CSV export
+* All Phase 1-4 features (admin shell, contact bar, welcome bubble,
+  form modal, anti-spam, full settings UI, submissions table, CSV export)
+* Anonymous session_id generated client-side (UUID v4, sessionStorage)
+* Frontend dispatches every interaction to /wp-json/bspe-connect/v1/event
+  via fetch(keepalive: true). Public endpoint, rate-limited 60/min per
+  hashed IP, always returns { ok: true } so bots can't probe state.
+* Analytics tab with 7/30/60/90-day window selector, distinct-session
+  conversion funnel (5 stages), per-event-type bento grid, Top 10 pages
+  by submission and Top 10 pages by bar impressions
 * Self-update mechanism is wired up; degrades gracefully if the GitHub token
   is not configured
 
-Analytics dashboard (Phase 5) ships in the next release.
+Polish + GitHub Actions release workflow + auto-update flag (Phase 6) ships
+in the next release.
 
 == Changelog ==
+
+= 1.5.0 =
+* Phase 5: analytics. New Events class for the wp_bspe_connect_events
+  table (insert + per-type counts + distinct-session counts + top-pages
+  + daily histogram). New Rest class registering POST
+  /wp-json/bspe-connect/v1/event with same-host page_url filter and
+  per-IP rate limiting. New Analytics_Controller with funnel-stage
+  resolution. Sidebar gets a 7th tab "Analytics" (Submissions tab keeps
+  its inbox icon; analytics gets the bar-chart icon). Frontend JS
+  generates a session_id (crypto.randomUUID with Math.random fallback)
+  and POSTs every event in fire() with keepalive so unloads don't
+  drop them.
 
 = 1.4.0 =
 * Phase 4: full admin settings UI. All six tabs functional with per-tab
