@@ -67,9 +67,11 @@ final class Form_Handler {
 			}
 		}
 
-		// 5. Turnstile verification (only if enabled and both keys configured).
+		// 5. Turnstile verification (only if enabled and a secret is configured).
+		// The secret may come from wp-config.php (preferred — keeps the secret out
+		// of the database / options export) or from settings as a fallback.
 		$turnstile_enabled = (bool) Settings::get( 'form.antispam.turnstile_enabled', false );
-		$secret_key        = (string) Settings::get( 'form.antispam.turnstile_secret_key', '' );
+		$secret_key        = self::resolve_turnstile_secret();
 		if ( $turnstile_enabled && '' !== $secret_key ) {
 			$token = isset( $_POST['cf-turnstile-response'] ) ? trim( wp_unslash( (string) $_POST['cf-turnstile-response'] ) ) : '';
 			if ( '' === $token || ! self::verify_turnstile( $token, $secret_key, $ip_raw ) ) {
@@ -252,6 +254,21 @@ final class Form_Handler {
 	 */
 	private static function error_response( array $errors, int $status = 400 ): void {
 		wp_send_json_error( [ 'errors' => $errors ], $status );
+	}
+
+	/**
+	 * Prefer BSPE_CONNECT_TURNSTILE_SECRET from wp-config.php so the secret
+	 * never lands in the database or in a settings export. Falls back to
+	 * the value saved in settings if the constant isn't defined.
+	 */
+	private static function resolve_turnstile_secret(): string {
+		if ( defined( 'BSPE_CONNECT_TURNSTILE_SECRET' ) ) {
+			$constant = (string) constant( 'BSPE_CONNECT_TURNSTILE_SECRET' );
+			if ( '' !== trim( $constant ) ) {
+				return $constant;
+			}
+		}
+		return (string) Settings::get( 'form.antispam.turnstile_secret_key', '' );
 	}
 
 	private static function verify_turnstile( string $token, string $secret, string $remote_ip ): bool {

@@ -1,0 +1,47 @@
+# Files excluded from the distributed plugin zip.
+# Used by .github/workflows/release.yml when building bspe-connect.zip.
+
+# VCS
+.git
+.gitignore
+.gitattributes
+.github
+
+# Editor / OS
+.editorconfig
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# Build / packaging
+.distignore
+build
+dist
+*.zip
+node_modules
+composer.lock
+.phpcs-cache
+phpcs.xml
+phpcs.xml.dist
+phpunit.xml
+phpunit.xml.dist
+tests
+
+# Dev docs (the spec ships with the repo but not in client installs)
+bspe-connect-spec.md
+README-dev.md
+
+# Vendored dev-only paths inside plugin-update-checker (already cloned w/o examples,
+# but defense in depth in case someone re-clones it manually)
+vendor/plugin-update-checker/examples
+vendor/plugin-update-checker/tests
+vendor/plugin-update-checker/build
+
+# Logs and runtime
+*.log
+debug.log
+*.swp
+*.swo
+.env
+.env.local

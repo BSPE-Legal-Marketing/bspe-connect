@@ -243,7 +243,7 @@ Components::row(
 	},
 	[
 		'id'          => 'bspe-form-antispam-turnstile_secret_key',
-		'description' => __( 'Stored in WP options. For higher security, define BSPE_CONNECT_TURNSTILE_SECRET in wp-config.php (Phase 6).', 'bspe-connect' ),
+		'description' => __( 'Stored in WP options. For higher security, define <code>BSPE_CONNECT_TURNSTILE_SECRET</code> in <code>wp-config.php</code> — when set, that constant takes precedence over this field.', 'bspe-connect' ),
 	]
 );
 Components::close_card();

@@ -1,0 +1,72 @@
+name: Build release zip
+
+# When a vN.N.N tag is pushed (or a release is published), build a clean
+# bspe-connect.zip and attach it to the GitHub release. The zip strips
+# .git, .github, the spec, and other dev-only paths via .distignore so
+# the WordPress install matches the production install.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  release:
+    types: [ published ]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Resolve tag name
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "name=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build clean plugin tree
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          # rsync from . into build/bspe-connect/, applying .distignore as exclude rules.
+          rsync -a \
+            --exclude='build/' \
+            --exclude-from=.distignore \
+            ./ build/bspe-connect/
+
+      - name: Verify required files made it
+        run: |
+          set -euo pipefail
+          test -f build/bspe-connect/bspe-connect.php
+          test -f build/bspe-connect/uninstall.php
+          test -f build/bspe-connect/readme.txt
+          test -f build/bspe-connect/vendor/plugin-update-checker/plugin-update-checker.php
+          test -d build/bspe-connect/public/assets/icons
+          test -d build/bspe-connect/admin/views
+
+      - name: Pack zip
+        run: |
+          set -euo pipefail
+          cd build
+          zip -rq bspe-connect.zip bspe-connect
+          ls -lh bspe-connect.zip
+
+      - name: Attach to GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.name }}
+          files: build/bspe-connect.zip
+          fail_on_unmatched_files: true

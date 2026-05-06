@@ -94,6 +94,11 @@ final class Rest {
 			}
 		}
 
+		// Redact privacy-sensitive query strings before persistence.
+		if ( '' !== $page_url ) {
+			$page_url = self::redact_url( $page_url );
+		}
+
 		Events::insert( [
 			'event_type'  => $event_type,
 			'occurred_at' => current_time( 'mysql' ),
@@ -102,5 +107,88 @@ final class Rest {
 		] );
 
 		return $response;
+	}
+
+	/**
+	 * Strip known sensitive query keys from a URL before storing it.
+	 * Keys can be extended by site code via the `bspe_connect_redact_query_keys`
+	 * filter; the URL itself can be rewritten via `bspe_connect_redact_url`.
+	 */
+	private static function redact_url( string $url ): string {
+		$default_keys = [
+			'token',
+			'access_token',
+			'auth',
+			'auth_token',
+			'session',
+			'session_id',
+			'sid',
+			'pwd',
+			'password',
+			'email',
+			'user_email',
+			'user_id',
+			'uid',
+			'api_key',
+			'apikey',
+			'key',
+			'secret',
+			'reset_key',
+			'magic_link',
+		];
+
+		/**
+		 * @param string[] $default_keys
+		 */
+		$keys = (array) apply_filters( 'bspe_connect_redact_query_keys', $default_keys );
+
+		$parts = wp_parse_url( $url );
+		if ( ! is_array( $parts ) || empty( $parts['query'] ) ) {
+			/**
+			 * @param string $url
+			 */
+			return (string) apply_filters( 'bspe_connect_redact_url', $url );
+		}
+
+		$query = [];
+		wp_parse_str( (string) $parts['query'], $query );
+
+		$redacted = false;
+		foreach ( $keys as $key ) {
+			$key = (string) $key;
+			if ( '' === $key ) {
+				continue;
+			}
+			if ( array_key_exists( $key, $query ) ) {
+				$query[ $key ] = '[redacted]';
+				$redacted = true;
+			}
+		}
+
+		if ( $redacted ) {
+			$parts['query'] = http_build_query( $query );
+			$url            = self::reassemble_url( $parts );
+		}
+
+		return (string) apply_filters( 'bspe_connect_redact_url', $url );
+	}
+
+	/**
+	 * Reassemble a parsed URL array back into a string. Used after redacting
+	 * the query component.
+	 *
+	 * @param array<string,mixed> $parts
+	 */
+	private static function reassemble_url( array $parts ): string {
+		$scheme   = isset( $parts['scheme'] )   ? $parts['scheme'] . '://' : '';
+		$host     = isset( $parts['host'] )     ? $parts['host'] : '';
+		$port     = isset( $parts['port'] )     ? ':' . $parts['port'] : '';
+		$user     = isset( $parts['user'] )     ? $parts['user'] : '';
+		$pass     = isset( $parts['pass'] )     ? ':' . $parts['pass']  : '';
+		$auth     = ( '' !== $user || '' !== $pass ) ? $user . $pass . '@' : '';
+		$path     = isset( $parts['path'] )     ? $parts['path'] : '';
+		$query    = isset( $parts['query'] )    && '' !== $parts['query'] ? '?' . $parts['query']    : '';
+		$fragment = isset( $parts['fragment'] ) && '' !== $parts['fragment'] ? '#' . $parts['fragment'] : '';
+		return $scheme . $auth . $host . $port . $path . $query . $fragment;
 	}
 }

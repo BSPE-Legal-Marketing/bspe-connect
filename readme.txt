@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 1.5.0
+Stable tag: 2.0.0
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -23,40 +23,121 @@ Legal Marketing organization.
 
 1. Upload the plugin zip via Plugins -> Add New -> Upload, or unpack into
    `wp-content/plugins/bspe-connect`.
-2. Add the GitHub Personal Access Token to your `wp-config.php`:
+2. Configure the wp-config.php constants below.
+3. Activate the plugin from the Plugins screen.
+4. Configure under the new "BSPE Connect" admin menu item (sidebar tabs
+   from General through Analytics).
 
-   define('BSPE_CONNECT_GITHUB_TOKEN', 'ghp_...');
+== wp-config.php constants ==
 
-   The token must have `repo` scope on the private
-   `BSPE-Legal-Marketing/bspe-connect` repository.
+All three are optional. Constants always win over settings stored in the
+database — define them when you want secrets out of options exports and
+out of admin UIs.
 
-3. (Optional) opt into the beta channel:
+* `BSPE_CONNECT_GITHUB_TOKEN` (string)
+  GitHub Personal Access Token with `repo` scope on
+  `BSPE-Legal-Marketing/bspe-connect`. Required for self-update polling.
+  Without it the plugin still runs; only the update check is skipped and
+  the plugins screen shows a dismissible notice.
 
-   define('BSPE_CONNECT_UPDATE_CHANNEL', 'beta');
+  define('BSPE_CONNECT_GITHUB_TOKEN', 'ghp_...');
 
-4. Activate the plugin from the Plugins screen.
-5. Configure under the new "BSPE Connect" admin menu item.
+* `BSPE_CONNECT_UPDATE_CHANNEL` (string, 'stable' or 'beta')
+  Default 'stable' — discovers updates via GitHub tags + releases.
+  Set to 'beta' to follow the tip of the `beta` branch instead.
 
-== Phase 5 status ==
+  define('BSPE_CONNECT_UPDATE_CHANNEL', 'beta');
 
-This release wires up analytics — REST event ingestion plus the dashboard:
+* `BSPE_CONNECT_TURNSTILE_SECRET` (string)
+  Cloudflare Turnstile secret key. When defined, takes precedence over
+  the value stored in plugin settings (Form -> Anti-spam -> Turnstile
+  secret key) so the secret never lands in the options table.
 
-* All Phase 1-4 features (admin shell, contact bar, welcome bubble,
-  form modal, anti-spam, full settings UI, submissions table, CSV export)
-* Anonymous session_id generated client-side (UUID v4, sessionStorage)
-* Frontend dispatches every interaction to /wp-json/bspe-connect/v1/event
-  via fetch(keepalive: true). Public endpoint, rate-limited 60/min per
-  hashed IP, always returns { ok: true } so bots can't probe state.
-* Analytics tab with 7/30/60/90-day window selector, distinct-session
-  conversion funnel (5 stages), per-event-type bento grid, Top 10 pages
-  by submission and Top 10 pages by bar impressions
-* Self-update mechanism is wired up; degrades gracefully if the GitHub token
-  is not configured
+  define('BSPE_CONNECT_TURNSTILE_SECRET', '0x4AAAAAAA...');
 
-Polish + GitHub Actions release workflow + auto-update flag (Phase 6) ships
-in the next release.
+== Phase 6 status ==
+
+This release is the first stable client release:
+
+* All Phase 1-5 features (admin shell, contact bar, welcome bubble,
+  form modal, anti-spam, full settings UI, submissions table, CSV export,
+  analytics REST endpoint and dashboard)
+* GitHub Actions release workflow auto-builds and attaches a clean
+  bspe-connect.zip on every tag push (uses .distignore to strip dev files)
+* Auto-update flag — releases with "Auto-Update: yes" in their notes
+  install silently via WP's auto_update_plugin filter; everything else
+  surfaces as a one-click manual update
+* URL redaction filter for analytics page_url — sensitive query keys
+  (token, password, email, etc.) are replaced with [redacted] before
+  storage; extensible via the bspe_connect_redact_query_keys filter
+* Turnstile secret can live in wp-config.php instead of options
+* Documented wp-config.php constants and acceptance checklist in this
+  readme
+
+== Acceptance checklist (spec section 13) ==
+
+Run through this list before installing on a new client site:
+
+* [ ] Plugin activates without errors on PHP 8.0, 8.1, 8.2, 8.3
+* [ ] Plugin activates without errors on WP 6.0, 6.4, 6.6, latest
+* [ ] Default settings written on activation
+* [ ] DB tables wp_bspe_connect_submissions and wp_bspe_connect_events
+      created on activation
+* [ ] Tables and options removed via uninstall.php
+* [ ] Bar appears after 200px scroll on mobile only
+* [ ] Bar hides on scroll up, shows on scroll down
+* [ ] Welcome bubble appears 3s after bar, dismisses, persists per session
+* [ ] All 4 buttons render and function (call dialer, sms app, two
+      bottom-sheet form modes)
+* [ ] Connect button toggles between text label and image mode
+* [ ] Form submits via AJAX, validates, sanitizes, sends email, stores
+      in DB
+* [ ] Honeypot blocks submissions with the bspe_website field filled
+* [ ] Time check blocks submissions under 2 seconds
+* [ ] Rate limit blocks after 5 submissions per hour per IP
+* [ ] Turnstile verifies when enabled (with site + secret keys)
+* [ ] All admin pages require manage_options capability
+* [ ] All form / settings POSTs verify nonces
+* [ ] All output is escaped
+* [ ] CSV export works on submissions page (filters honored)
+* [ ] Analytics records events via /wp-json/bspe-connect/v1/event
+* [ ] Analytics dashboard funnel + tiles + top pages render correctly
+* [ ] Plugin-update-checker connects to private GitHub repo with token
+* [ ] Standard update flow: tag, GitHub Actions builds zip,
+      WP detects update, one-click update succeeds
+* [ ] Auto-update flow: tagged release with "Auto-Update: yes"
+      in the notes installs silently within 12 hours
+* [ ] No PHP notices / warnings in debug.log under WP_DEBUG=true
+* [ ] No JS console errors on the bar or in admin
+* [ ] No CSS conflicts with major themes (Astra, GeneratePress, Divi,
+      Elementor's Hello)
+
+== Releasing a new version ==
+
+1. Update Plugin Version + BSPE_CONNECT_VERSION in bspe-connect.php
+2. Update Stable tag + Changelog block in this file
+3. Commit with the conventional message format
+4. git tag -a vX.Y.Z and push the tag
+5. gh release create vX.Y.Z (the GitHub Actions workflow will attach
+   the clean bspe-connect.zip to the release)
+6. To enable silent auto-install on client sites, add the marker line
+   "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.0.0 =
+* Phase 6: first stable release. Adds GitHub Actions workflow that builds
+  and attaches a clean bspe-connect.zip to every tag release (uses
+  .distignore so the install matches production exactly). Implements the
+  Auto-Update: yes flag — releases marked with this string in their
+  release notes (or readme changelog block) install silently via WP's
+  auto_update_plugin filter; everything else stays as a manual one-click
+  update. Adds a URL redaction pass on analytics page_url to strip
+  sensitive query keys (token, password, email, etc.) before storage,
+  extensible via the bspe_connect_redact_query_keys filter. Reads
+  BSPE_CONNECT_TURNSTILE_SECRET from wp-config.php with precedence over
+  the options-stored secret. Documents all three wp-config.php constants
+  and the spec section 13 acceptance checklist in this readme.
 
 = 1.5.0 =
 * Phase 5: analytics. New Events class for the wp_bspe_connect_events
