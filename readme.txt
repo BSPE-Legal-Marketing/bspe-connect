@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -37,9 +37,9 @@ Legal Marketing organization.
 4. Activate the plugin from the Plugins screen.
 5. Configure under the new "BSPE Connect" admin menu item.
 
-== Phase 2 status ==
+== Phase 3 status ==
 
-This release adds the user-facing contact bar:
+This release adds the lead capture form:
 
 * Plugin activates / deactivates cleanly
 * Database tables for submissions and analytics events are created
@@ -47,16 +47,30 @@ This release adds the user-facing contact bar:
 * Admin shell uses a left-sidebar nav rail with the BSPE brand palette
 * Mobile-only contact bar with up to 4 buttons (Connect, Call, Text, Email)
 * Welcome bubble that appears 3 seconds after the bar first becomes visible
-* Scroll-trigger show/hide behavior with rAF-paced scroll handler
-* Display rules: site-wide, pages-only, posts-only, plus include/exclude
-  slug lists
+* Bottom-sheet modal form for Text (inline mode) and Email buttons
+* AJAX submission with full anti-spam pipeline: nonce + honeypot + time
+  trap + per-IP rate limit (transient-based, hourly window) + optional
+  Cloudflare Turnstile
+* Server-side validation, sanitization, and per-field inline errors
+* Phone number live mask with 10-digit US validation
+* HTML email delivery with template-variable substitution and header
+  injection protection
+* Submissions persisted to the wp_bspe_connect_submissions table with
+  hashed IP (SHA-256, never the raw value)
 * Self-update mechanism is wired up; degrades gracefully if the GitHub token
   is not configured
 
-Lead form handling (Phase 3), settings UI (Phase 4), and the analytics
-dashboard (Phase 5) ship in subsequent releases.
+Settings UI (Phase 4) and analytics dashboard (Phase 5) ship in subsequent
+releases.
 
 == Changelog ==
+
+= 1.3.0 =
+* Phase 3: bottom-sheet lead capture modal, AJAX submission handler with
+  the full anti-spam pipeline (nonce, honeypot, time trap, rate limit,
+  Cloudflare Turnstile), HTML mailer with template variables and header
+  safety, phone live mask with 10-digit US validation, and the success
+  state with auto-close after 3 seconds.
 
 = 1.2.0 =
 * Phase 2: mobile contact bar with bottom-fixed positioning, scroll-trigger

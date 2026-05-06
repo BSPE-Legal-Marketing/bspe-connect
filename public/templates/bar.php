@@ -76,5 +76,8 @@ if ( empty( $buttons ) ) {
 	if ( $bubble_enabled ) {
 		require BSPE_CONNECT_DIR . 'public/templates/welcome-bubble.php';
 	}
+
+	// Form modal — rendered alongside the bar so JS can show it without a fetch.
+	require BSPE_CONNECT_DIR . 'public/templates/form-modal.php';
 	?>
 </div>

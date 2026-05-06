@@ -178,6 +178,19 @@ final class Frontend {
 				wp_enqueue_style( 'bspe-connect-font', $font_url, [], null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 			}
 		}
+
+		// Cloudflare Turnstile widget — only when both flag and key are configured.
+		$turnstile_enabled  = (bool) Settings::get( 'form.antispam.turnstile_enabled', false );
+		$turnstile_site_key = (string) Settings::get( 'form.antispam.turnstile_site_key', '' );
+		if ( $turnstile_enabled && '' !== $turnstile_site_key ) {
+			wp_enqueue_script(
+				'bspe-connect-turnstile',
+				'https://challenges.cloudflare.com/turnstile/v0/api.js',
+				[],
+				null,  // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+				[ 'in_footer' => true, 'strategy' => 'defer' ]
+			);
+		}
 	}
 
 	/**

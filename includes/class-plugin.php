@@ -40,6 +40,10 @@ final class Plugin {
 
 		Updater::init();
 
+		// Form submission handler — registered regardless of context because
+		// admin-ajax.php is reached from the frontend bar but reports is_admin() true.
+		Form_Handler::init();
+
 		if ( is_admin() ) {
 			Admin\Admin::init();
 		} else {
