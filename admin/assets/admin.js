@@ -1,34 +1,38 @@
 /**
  * BSPE Connect — admin shell JS.
  *
- * Phase 1 only handles tab keyboard navigation (Left/Right/Home/End) so
- * the tablist is accessible. Phase 4 will add settings-form behaviors
- * (color pickers, Media Library, conditional fields).
+ * Phase 1 only handles sidebar nav keyboard navigation (Up/Down/Left/Right
+ * /Home/End) so the tablist is accessible. Phase 4 will add settings-form
+ * behaviors (color pickers, Media Library, conditional fields).
  */
 (function () {
 	'use strict';
 
-	function initTablistKeyboard() {
-		var tabs = Array.prototype.slice.call(document.querySelectorAll('.bspe-tabs .bspe-tab'));
-		if (tabs.length === 0) {
+	function initSidebarKeyboard() {
+		var items = Array.prototype.slice.call(
+			document.querySelectorAll('.bspe-nav .bspe-nav__item')
+		);
+		if (items.length === 0) {
 			return;
 		}
 
-		tabs.forEach(function (tab, index) {
-			tab.addEventListener('keydown', function (event) {
+		items.forEach(function (item, index) {
+			item.addEventListener('keydown', function (event) {
 				var target = null;
 				switch (event.key) {
+					case 'ArrowDown':
 					case 'ArrowRight':
-						target = tabs[(index + 1) % tabs.length];
+						target = items[(index + 1) % items.length];
 						break;
+					case 'ArrowUp':
 					case 'ArrowLeft':
-						target = tabs[(index - 1 + tabs.length) % tabs.length];
+						target = items[(index - 1 + items.length) % items.length];
 						break;
 					case 'Home':
-						target = tabs[0];
+						target = items[0];
 						break;
 					case 'End':
-						target = tabs[tabs.length - 1];
+						target = items[items.length - 1];
 						break;
 					default:
 						return;
@@ -42,8 +46,8 @@
 	}
 
 	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', initTablistKeyboard);
+		document.addEventListener('DOMContentLoaded', initSidebarKeyboard);
 	} else {
-		initTablistKeyboard();
+		initSidebarKeyboard();
 	}
 })();
