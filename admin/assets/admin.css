@@ -1,0 +1,350 @@
+/**
+ * BSPE Connect — admin shell styles.
+ *
+ * Phase 1 establishes the brand chrome (header, tab nav, content cards).
+ * Phase 4 fills in form controls, tables, and the analytics dashboard.
+ *
+ * Brand palette:
+ *   Plum Noir #351E28 — primary surface
+ *   Midnight Navy #0D1B2A — secondary accent
+ *   Warm Ivory #FAF7F2 — background canvas
+ *   Logo Teal #3AAFB9 — CTA / focus
+ *   Gold #D4AF37 — texture only (hairlines, sparingly)
+ */
+
+.toplevel_page_bspe-connect {
+	--bspe-plum: #351E28;
+	--bspe-plum-soft: #4a2d3a;
+	--bspe-navy: #0D1B2A;
+	--bspe-ivory: #FAF7F2;
+	--bspe-teal: #3AAFB9;
+	--bspe-teal-deep: #2d8a91;
+	--bspe-gold: #D4AF37;
+	--bspe-text: #2a1820;
+	--bspe-muted: #6b5862;
+	--bspe-card-border: rgba(53, 30, 40, 0.08);
+}
+
+/* Reset WP default chrome around the page. */
+#wpbody-content .toplevel_page_bspe-connect .bspe-shell {
+	margin: -10px -20px -10px -22px;
+}
+
+.bspe-shell {
+	background: var(--bspe-ivory);
+	min-height: calc(100vh - 32px);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+	color: var(--bspe-text);
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Header band                                                            */
+/* ---------------------------------------------------------------------- */
+.bspe-header {
+	background: linear-gradient(135deg, var(--bspe-plum) 0%, var(--bspe-navy) 140%);
+	border-bottom: 1px solid rgba(212, 175, 55, 0.4);
+	box-shadow: 0 1px 0 rgba(212, 175, 55, 0.08);
+}
+
+.bspe-header__inner {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 22px 32px;
+	max-width: 1280px;
+	margin: 0 auto;
+}
+
+.bspe-brand {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+}
+
+.bspe-brand__mark {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	border-radius: 10px;
+	background: rgba(58, 175, 185, 0.12);
+	border: 1px solid rgba(58, 175, 185, 0.35);
+}
+
+.bspe-brand__text h1 {
+	margin: 0;
+	color: var(--bspe-ivory);
+	font-size: 20px;
+	font-weight: 600;
+	letter-spacing: 0.01em;
+	line-height: 1.2;
+}
+
+.bspe-brand__tagline {
+	margin: 2px 0 0;
+	color: rgba(250, 247, 242, 0.62);
+	font-size: 12px;
+	font-weight: 400;
+	letter-spacing: 0.02em;
+}
+
+.bspe-version {
+	display: inline-flex;
+	align-items: center;
+	height: 24px;
+	padding: 0 10px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	color: var(--bspe-gold);
+	background: rgba(212, 175, 55, 0.08);
+	border: 1px solid rgba(212, 175, 55, 0.35);
+	text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Tab nav                                                                */
+/* ---------------------------------------------------------------------- */
+.bspe-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	padding: 10px 32px;
+	background: var(--bspe-plum);
+	border-bottom: 1px solid rgba(212, 175, 55, 0.18);
+	max-width: 1280px;
+	margin: 0 auto;
+}
+
+.bspe-tab {
+	display: inline-flex;
+	align-items: center;
+	height: 36px;
+	padding: 0 16px;
+	border-radius: 999px;
+	color: rgba(250, 247, 242, 0.72);
+	font-size: 13px;
+	font-weight: 500;
+	letter-spacing: 0.01em;
+	text-decoration: none;
+	transition: background 0.18s ease, color 0.18s ease;
+	box-shadow: none;
+}
+
+.bspe-tab:hover,
+.bspe-tab:focus {
+	color: var(--bspe-ivory);
+	background: rgba(250, 247, 242, 0.06);
+	box-shadow: none;
+}
+
+.bspe-tab.is-active {
+	background: var(--bspe-teal);
+	color: var(--bspe-ivory);
+	box-shadow: 0 1px 2px rgba(13, 27, 42, 0.25);
+}
+
+.bspe-tab.is-active:hover {
+	background: var(--bspe-teal-deep);
+}
+
+.bspe-tab:focus-visible {
+	outline: 2px solid var(--bspe-teal);
+	outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Content area + cards                                                   */
+/* ---------------------------------------------------------------------- */
+.bspe-content {
+	padding: 28px 32px 56px;
+	max-width: 1100px;
+	margin: 0 auto;
+}
+
+.bspe-card {
+	background: #ffffff;
+	border: 1px solid var(--bspe-card-border);
+	border-radius: 14px;
+	padding: 28px 32px;
+	box-shadow: 0 1px 2px rgba(53, 30, 40, 0.04);
+}
+
+.bspe-card + .bspe-card {
+	margin-top: 16px;
+}
+
+.bspe-card__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 8px;
+}
+
+.bspe-card__head h2 {
+	margin: 0;
+	color: var(--bspe-plum);
+	font-size: 18px;
+	font-weight: 600;
+	letter-spacing: 0.01em;
+}
+
+.bspe-card__lead {
+	margin: 0 0 18px;
+	color: var(--bspe-muted);
+	font-size: 14px;
+	line-height: 1.55;
+	max-width: 70ch;
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Pills + checklist                                                      */
+/* ---------------------------------------------------------------------- */
+.bspe-pill {
+	display: inline-flex;
+	align-items: center;
+	height: 22px;
+	padding: 0 10px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.bspe-pill--phase {
+	background: rgba(58, 175, 185, 0.12);
+	color: var(--bspe-teal-deep);
+	border: 1px solid rgba(58, 175, 185, 0.3);
+}
+
+.bspe-checklist {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.bspe-checklist li {
+	position: relative;
+	padding: 10px 12px 10px 30px;
+	border-bottom: 1px solid var(--bspe-card-border);
+	color: var(--bspe-text);
+	font-size: 13px;
+	line-height: 1.4;
+}
+
+.bspe-checklist li:last-child {
+	border-bottom: none;
+}
+
+.bspe-checklist li::before {
+	content: "";
+	position: absolute;
+	left: 8px;
+	top: 14px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--bspe-teal);
+	box-shadow: 0 0 0 3px rgba(58, 175, 185, 0.18);
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Buttons preview row (Buttons tab)                                      */
+/* ---------------------------------------------------------------------- */
+.bspe-button-preview {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 16px;
+	background: var(--bspe-plum);
+	border-radius: 10px;
+	border: 1px solid rgba(212, 175, 55, 0.18);
+}
+
+.bspe-button-preview__chip {
+	flex: 1 1 0;
+	min-width: 110px;
+	text-align: center;
+	padding: 14px 12px;
+	background: var(--bspe-plum-soft);
+	color: var(--bspe-ivory);
+	border-radius: 8px;
+	font-size: 13px;
+	font-weight: 500;
+	letter-spacing: 0.02em;
+	border: 1px solid rgba(58, 175, 185, 0.18);
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Palette swatches (Design tab)                                          */
+/* ---------------------------------------------------------------------- */
+.bspe-palette {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+	gap: 16px;
+	margin-top: 8px;
+}
+
+.bspe-swatch {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 16px;
+	border: 1px solid var(--bspe-card-border);
+	border-radius: 12px;
+	background: #fff;
+}
+
+.bspe-swatch__chip {
+	display: block;
+	height: 64px;
+	border-radius: 8px;
+	border: 1px solid var(--bspe-card-border);
+	margin-bottom: 8px;
+}
+
+.bspe-swatch__name {
+	color: var(--bspe-plum);
+	font-weight: 600;
+	font-size: 13px;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.bspe-swatch__hex {
+	color: var(--bspe-text);
+	font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+	font-size: 13px;
+}
+
+.bspe-swatch__role {
+	color: var(--bspe-muted);
+	font-size: 11px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Responsive                                                             */
+/* ---------------------------------------------------------------------- */
+@media (max-width: 782px) {
+	.bspe-header__inner,
+	.bspe-tabs,
+	.bspe-content {
+		padding-left: 16px;
+		padding-right: 16px;
+	}
+
+	.bspe-tabs {
+		overflow-x: auto;
+		flex-wrap: nowrap;
+	}
+
+	.bspe-tab {
+		flex: 0 0 auto;
+	}
+}

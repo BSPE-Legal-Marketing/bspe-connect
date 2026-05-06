@@ -1,0 +1,42 @@
+<?php
+/**
+ * Plugin Name:       BSPE Connect
+ * Plugin URI:        https://github.com/BSPE-Legal-Marketing/bspe-connect
+ * Description:       Mobile-only contact bar with lead capture for law firm sites. Adds a bottom-fixed bar with up to 4 buttons (Connect, Call, Text, Email) and a built-in lead form.
+ * Version:           1.0.0
+ * Requires at least: 6.0
+ * Requires PHP:      8.0
+ * Author:            BSPE Legal Marketing
+ * Author URI:        https://bspelegalmarketing.com
+ * License:           Proprietary
+ * Text Domain:       bspe-connect
+ * Domain Path:       /languages
+ * Update URI:        false
+ *
+ * @package BSPE\Connect
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+define( 'BSPE_CONNECT_VERSION', '1.0.0' );
+define( 'BSPE_CONNECT_FILE', __FILE__ );
+define( 'BSPE_CONNECT_DIR', plugin_dir_path( __FILE__ ) );
+define( 'BSPE_CONNECT_URL', plugin_dir_url( __FILE__ ) );
+define( 'BSPE_CONNECT_BASENAME', plugin_basename( __FILE__ ) );
+
+require_once BSPE_CONNECT_DIR . 'includes/class-plugin.php';
+require_once BSPE_CONNECT_DIR . 'includes/class-activator.php';
+require_once BSPE_CONNECT_DIR . 'includes/class-deactivator.php';
+require_once BSPE_CONNECT_DIR . 'includes/class-settings.php';
+require_once BSPE_CONNECT_DIR . 'includes/class-updater.php';
+require_once BSPE_CONNECT_DIR . 'admin/class-admin.php';
+
+register_activation_hook( __FILE__, [ 'BSPE\\Connect\\Activator', 'activate' ] );
+register_deactivation_hook( __FILE__, [ 'BSPE\\Connect\\Deactivator', 'deactivate' ] );
+
+add_action(
+	'plugins_loaded',
+	static function () {
+		\BSPE\Connect\Plugin::instance()->boot();
+	}
+);

@@ -1,0 +1,20 @@
+{
+    "name": "bspe/bspe-connect",
+    "description": "Mobile contact bar plugin for WordPress (BSPE Legal Marketing).",
+    "type": "wordpress-plugin",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "BSPE\\Connect\\": "includes/",
+            "BSPE\\Connect\\Admin\\": "admin/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "minimum-stability": "stable"
+}

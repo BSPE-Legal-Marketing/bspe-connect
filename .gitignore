@@ -1,0 +1,29 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Logs
+*.log
+npm-debug.log*
+debug.log
+
+# Build artifacts
+build/
+dist/
+*.zip
+
+# Composer dev-only — vendor/ IS committed per spec §2 (plugin-update-checker is bundled)
+composer.lock
+.phpcs-cache
+
+# Local env / runtime
+.env
+.env.local
+.htaccess.bak
+
+# Node — only if Phase 4 ever needs a build step
+node_modules/
