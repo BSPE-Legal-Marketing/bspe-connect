@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.2.0
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -37,21 +37,36 @@ Legal Marketing organization.
 4. Activate the plugin from the Plugins screen.
 5. Configure under the new "BSPE Connect" admin menu item.
 
-== Phase 1 status ==
+== Phase 2 status ==
 
-This release is the structural skeleton:
+This release adds the user-facing contact bar:
 
 * Plugin activates / deactivates cleanly
 * Database tables for submissions and analytics events are created
-* Default settings are seeded
-* Admin menu and tab navigation render with the brand palette
+* Default settings are seeded (master-enable defaults to OFF until configured)
+* Admin shell uses a left-sidebar nav rail with the BSPE brand palette
+* Mobile-only contact bar with up to 4 buttons (Connect, Call, Text, Email)
+* Welcome bubble that appears 3 seconds after the bar first becomes visible
+* Scroll-trigger show/hide behavior with rAF-paced scroll handler
+* Display rules: site-wide, pages-only, posts-only, plus include/exclude
+  slug lists
 * Self-update mechanism is wired up; degrades gracefully if the GitHub token
   is not configured
 
-Settings UI, frontend bar rendering, lead form handling, and the analytics
-dashboard ship in subsequent phases.
+Lead form handling (Phase 3), settings UI (Phase 4), and the analytics
+dashboard (Phase 5) ship in subsequent releases.
 
 == Changelog ==
+
+= 1.2.0 =
+* Phase 2: mobile contact bar with bottom-fixed positioning, scroll-trigger
+  show/hide, welcome bubble with avatar/dismissal, display rules, inline
+  CSS variables driven by Design settings, Google Font enqueueing, and 16
+  line-icon SVG variants (4 per button type).
+
+= 1.1.0 =
+* Admin shell: replaced top tabs with a left sidebar nav rail; added
+  inline-SVG section icons and a pulsing teal active indicator.
 
 = 1.0.0 =
 * Phase 1 skeleton: activation, database schema, default settings, admin
