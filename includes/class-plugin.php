@@ -42,6 +42,8 @@ final class Plugin {
 
 		if ( is_admin() ) {
 			Admin\Admin::init();
+		} else {
+			Frontend::init();
 		}
 	}
 }

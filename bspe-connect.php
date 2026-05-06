@@ -29,6 +29,7 @@ require_once BSPE_CONNECT_DIR . 'includes/class-activator.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-deactivator.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-settings.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-updater.php';
+require_once BSPE_CONNECT_DIR . 'includes/class-frontend.php';
 require_once BSPE_CONNECT_DIR . 'admin/class-admin.php';
 
 register_activation_hook( __FILE__, [ 'BSPE\\Connect\\Activator', 'activate' ] );

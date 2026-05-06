@@ -1,0 +1,280 @@
+/**
+ * BSPE Connect — frontend bar + welcome bubble.
+ *
+ * Mobile-only widget. Visibility above the configured breakpoint is killed
+ * by an inline media query printed in wp_head (see Frontend::print_inline_css_vars).
+ *
+ * Color custom properties are also set inline from settings; the values
+ * below are the brand defaults used in case the inline styles fail to load.
+ */
+
+.bspe-connect {
+	--bspe-bar-bg: #351E28;
+	--bspe-button-bg: #351E28;
+	--bspe-button-fg: #FAF7F2;
+	--bspe-bubble-bg: #FAF7F2;
+	--bspe-bubble-fg: #351E28;
+	--bspe-accent: #3AAFB9;
+	--bspe-bar-h: 60px;
+	--bspe-ease: cubic-bezier(0.16, 1, 0.3, 1);
+	--bspe-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 9998;
+	pointer-events: none;
+	font-family: var(--bspe-font-family);
+}
+
+.bspe-connect *,
+.bspe-connect *::before,
+.bspe-connect *::after {
+	box-sizing: border-box;
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Bar                                                                    */
+/* ---------------------------------------------------------------------- */
+.bspe-connect__bar {
+	display: flex;
+	align-items: stretch;
+	min-height: var(--bspe-bar-h);
+	background: var(--bspe-bar-bg);
+	pointer-events: auto;
+	transform: translateY(110%);
+	transition: transform 280ms var(--bspe-ease);
+	will-change: transform;
+	box-shadow: 0 -8px 24px -16px rgba(0, 0, 0, 0.28);
+	padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.bspe-connect__bar[data-bspe-state="visible"] {
+	transform: translateY(0);
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Buttons                                                                */
+/* ---------------------------------------------------------------------- */
+.bspe-connect__btn {
+	flex: 1 1 0;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	padding: 8px 6px 10px;
+	background: var(--bspe-button-bg);
+	color: var(--bspe-button-fg);
+	border: 0;
+	border-right: 1px solid rgba(250, 247, 242, 0.06);
+	font: inherit;
+	font-size: 11px;
+	font-weight: 500;
+	letter-spacing: 0.02em;
+	line-height: 1.2;
+	text-align: center;
+	text-decoration: none;
+	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
+	transition: background 0.18s var(--bspe-ease), transform 0.12s var(--bspe-ease);
+	position: relative;
+	overflow: hidden;
+}
+
+.bspe-connect__btn:last-child {
+	border-right: 0;
+}
+
+.bspe-connect__btn:hover,
+.bspe-connect__btn:focus-visible {
+	background: color-mix(in srgb, var(--bspe-button-bg) 88%, white);
+	outline: none;
+}
+
+.bspe-connect__btn:focus-visible {
+	box-shadow: inset 0 0 0 2px var(--bspe-accent);
+}
+
+.bspe-connect__btn:active {
+	transform: scale(0.97);
+	background: color-mix(in srgb, var(--bspe-button-bg) 80%, white);
+}
+
+.bspe-connect__btn--connect {
+	background: color-mix(in srgb, var(--bspe-button-bg) 90%, var(--bspe-accent));
+}
+
+.bspe-connect__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	color: var(--bspe-button-fg);
+}
+
+/* SVG icon rendered via mask-image so the active button_fg color themes it. */
+.bspe-connect__icon-svg {
+	display: block;
+	width: 22px;
+	height: 22px;
+	background: currentColor;
+	-webkit-mask-image: var(--bspe-icon-url);
+	        mask-image: var(--bspe-icon-url);
+	-webkit-mask-size: contain;
+	        mask-size: contain;
+	-webkit-mask-position: center;
+	        mask-position: center;
+	-webkit-mask-repeat: no-repeat;
+	        mask-repeat: no-repeat;
+}
+
+/* User-uploaded Connect avatar: keep full color, circular crop. */
+.bspe-connect__icon-img {
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	object-fit: cover;
+	display: block;
+}
+
+.bspe-connect__label {
+	color: var(--bspe-button-fg);
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Welcome bubble                                                         */
+/* ---------------------------------------------------------------------- */
+.bspe-connect__bubble {
+	position: fixed;
+	left: 8px;
+	right: 8px;
+	bottom: calc(var(--bspe-bar-h) + 12px + env(safe-area-inset-bottom, 0px));
+	z-index: 9999;
+	background: var(--bspe-bubble-bg);
+	color: var(--bspe-bubble-fg);
+	border-radius: 16px;
+	box-shadow: 0 18px 40px -16px rgba(13, 27, 42, 0.42), 0 4px 10px -4px rgba(13, 27, 42, 0.18);
+	pointer-events: auto;
+	opacity: 0;
+	transform: translateY(8px);
+	transition: opacity 220ms var(--bspe-ease), transform 220ms var(--bspe-ease);
+	will-change: opacity, transform;
+}
+
+.bspe-connect__bubble[data-bspe-state="visible"] {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+/* Triangle pointer pointing to Connect button on the bar. */
+.bspe-connect__bubble::after {
+	content: "";
+	position: absolute;
+	bottom: -7px;
+	left: var(--bspe-pointer-pos, 50%);
+	transform: translateX(-50%) rotate(45deg);
+	width: 14px;
+	height: 14px;
+	background: var(--bspe-bubble-bg);
+	border-radius: 2px;
+	box-shadow: 4px 4px 6px -4px rgba(13, 27, 42, 0.18);
+}
+
+.bspe-connect__bubble-inner {
+	display: grid;
+	grid-template-columns: auto 1fr auto;
+	align-items: center;
+	gap: 12px;
+	padding: 14px 14px 14px 16px;
+}
+
+.bspe-connect__bubble-inner > .bspe-connect__bubble-body {
+	min-width: 0;
+}
+
+.bspe-connect__bubble-avatar {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	overflow: hidden;
+	background: rgba(53, 30, 40, 0.06);
+	flex-shrink: 0;
+}
+
+.bspe-connect__bubble-avatar img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.bspe-connect__bubble-heading {
+	margin: 0 0 2px;
+	font-size: 14px;
+	font-weight: 700;
+	line-height: 1.25;
+	color: var(--bspe-bubble-fg);
+	letter-spacing: -0.005em;
+}
+
+.bspe-connect__bubble-message {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 1.4;
+	color: var(--bspe-bubble-fg);
+	opacity: 0.85;
+}
+
+.bspe-connect__bubble-close {
+	flex-shrink: 0;
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	border: 0;
+	background: transparent;
+	color: var(--bspe-bubble-fg);
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	-webkit-tap-highlight-color: transparent;
+	transition: background 0.18s var(--bspe-ease), transform 0.12s var(--bspe-ease);
+	margin: -6px -4px -6px 0;
+	opacity: 0.7;
+}
+
+.bspe-connect__bubble-close:hover,
+.bspe-connect__bubble-close:focus-visible {
+	background: rgba(53, 30, 40, 0.08);
+	opacity: 1;
+	outline: none;
+}
+
+.bspe-connect__bubble-close:focus-visible {
+	box-shadow: 0 0 0 2px var(--bspe-accent);
+}
+
+.bspe-connect__bubble-close:active {
+	transform: scale(0.92);
+}
+
+/* ---------------------------------------------------------------------- */
+/*  Reduced motion                                                         */
+/* ---------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+	.bspe-connect__bar,
+	.bspe-connect__bubble,
+	.bspe-connect__btn,
+	.bspe-connect__bubble-close {
+		transition: none !important;
+	}
+}
