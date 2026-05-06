@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -37,33 +37,40 @@ Legal Marketing organization.
 4. Activate the plugin from the Plugins screen.
 5. Configure under the new "BSPE Connect" admin menu item.
 
-== Phase 3 status ==
+== Phase 4 status ==
 
-This release adds the lead capture form:
+This release wires up the entire admin settings UI:
 
 * Plugin activates / deactivates cleanly
 * Database tables for submissions and analytics events are created
 * Default settings are seeded (master-enable defaults to OFF until configured)
 * Admin shell uses a left-sidebar nav rail with the BSPE brand palette
+* All six admin tabs are functional: General, Buttons, Form, Design,
+  Display Rules, Submissions
 * Mobile-only contact bar with up to 4 buttons (Connect, Call, Text, Email)
 * Welcome bubble that appears 3 seconds after the bar first becomes visible
 * Bottom-sheet modal form for Text (inline mode) and Email buttons
-* AJAX submission with full anti-spam pipeline: nonce + honeypot + time
-  trap + per-IP rate limit (transient-based, hourly window) + optional
-  Cloudflare Turnstile
-* Server-side validation, sanitization, and per-field inline errors
-* Phone number live mask with 10-digit US validation
-* HTML email delivery with template-variable substitution and header
-  injection protection
-* Submissions persisted to the wp_bspe_connect_submissions table with
-  hashed IP (SHA-256, never the raw value)
+* Settings save via admin-post.php with per-tab sanitization and CSRF nonces
+* WP color picker, Media Library integration for the avatar and Connect image,
+  custom-styled toggles + checkboxes + radio pills + icon-radio previews,
+  conditional field disabling, live phone mask
+* Submissions table with date / source / status filters, paginated 25 per
+  page, expandable rows for full message + user agent, CSV export
 * Self-update mechanism is wired up; degrades gracefully if the GitHub token
   is not configured
 
-Settings UI (Phase 4) and analytics dashboard (Phase 5) ship in subsequent
-releases.
+Analytics dashboard (Phase 5) ships in the next release.
 
 == Changelog ==
+
+= 1.4.0 =
+* Phase 4: full admin settings UI. All six tabs functional with per-tab
+  sanitization. Adds reusable Components helpers (toggle switch, checkbox,
+  radio pills, icon radio, color picker, media library picker, number with
+  suffix, select). Adds the Submissions list with filters, paginated table
+  with expandable rows, and CSV export. Saved-state notice with brand-tinted
+  styling. Conditional field handling (required disabled when visible off,
+  avatar field shown only when "Show avatar" is on).
 
 = 1.3.0 =
 * Phase 3: bottom-sheet lead capture modal, AJAX submission handler with

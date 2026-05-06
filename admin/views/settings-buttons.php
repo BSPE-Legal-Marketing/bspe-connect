@@ -1,6 +1,6 @@
 <?php
 /**
- * Stub view for the Buttons tab.
+ * Buttons settings tab — per-button cards (Connect, Call, Text, Email).
  *
  * @package BSPE\Connect\Admin
  *
@@ -8,19 +8,205 @@
  */
 
 defined( 'ABSPATH' ) || exit;
-?>
-<section class="bspe-card">
-	<header class="bspe-card__head">
-		<h2><?php esc_html_e( 'Buttons', 'bspe-connect' ); ?></h2>
-		<span class="bspe-pill bspe-pill--phase"><?php echo esc_html( sprintf( /* translators: %d: phase number */ __( 'Phase %d', 'bspe-connect' ), $current_phase ) ); ?></span>
-	</header>
-	<p class="bspe-card__lead">
-		<?php esc_html_e( 'Per-button configuration: Connect, Call, Text, Email — labels, icons, phone numbers, modes.', 'bspe-connect' ); ?>
-	</p>
-	<div class="bspe-button-preview">
-		<div class="bspe-button-preview__chip"><?php esc_html_e( 'Connect', 'bspe-connect' ); ?></div>
-		<div class="bspe-button-preview__chip"><?php esc_html_e( 'Call', 'bspe-connect' ); ?></div>
-		<div class="bspe-button-preview__chip"><?php esc_html_e( 'Text', 'bspe-connect' ); ?></div>
-		<div class="bspe-button-preview__chip"><?php esc_html_e( 'Email', 'bspe-connect' ); ?></div>
-	</div>
-</section>
+
+use BSPE\Connect\Settings;
+use BSPE\Connect\Admin\Components;
+
+$buttons    = is_array( Settings::get( 'buttons', [] ) ) ? Settings::get( 'buttons', [] ) : [];
+$action_url = admin_url( 'admin-post.php' );
+
+$connect = is_array( $buttons['connect'] ?? null ) ? $buttons['connect'] : [];
+$call    = is_array( $buttons['call']    ?? null ) ? $buttons['call']    : [];
+$text    = is_array( $buttons['text']    ?? null ) ? $buttons['text']    : [];
+$email   = is_array( $buttons['email']   ?? null ) ? $buttons['email']   : [];
+
+$format_phone = static function ( string $digits ): string {
+	$d = preg_replace( '/\D/', '', $digits ) ?? '';
+	if ( strlen( $d ) === 10 ) {
+		return sprintf( '(%s) %s-%s', substr( $d, 0, 3 ), substr( $d, 3, 3 ), substr( $d, 6, 4 ) );
+	}
+	return $d;
+};
+
+Components::open_form( 'buttons', $action_url );
+
+/* ----------------- Connect ----------------- */
+Components::open_card(
+	__( 'Connect', 'bspe-connect' ),
+	__( 'The first button. Optionally toggles the welcome bubble.', 'bspe-connect' )
+);
+Components::row(
+	__( 'Enabled', 'bspe-connect' ),
+	static function () use ( $connect ): void {
+		Components::toggle( 'bspe[buttons][connect][enabled]', ! empty( $connect['enabled'] ), [
+			'label' => __( 'Show this button on the bar', 'bspe-connect' ),
+		] );
+	}
+);
+Components::row(
+	__( 'Mode', 'bspe-connect' ),
+	static function () use ( $connect ): void {
+		Components::radio_pills( 'bspe[buttons][connect][mode]', (string) ( $connect['mode'] ?? 'text' ), [
+			'text'  => __( 'Text label', 'bspe-connect' ),
+			'image' => __( 'Custom image', 'bspe-connect' ),
+		] );
+	}
+);
+Components::row(
+	__( 'Label', 'bspe-connect' ),
+	static function () use ( $connect ): void {
+		Components::text( 'bspe[buttons][connect][label]', (string) ( $connect['label'] ?? 'Connect' ), [
+			'maxlength' => 24,
+		] );
+	},
+	[ 'id' => 'bspe-buttons-connect-label' ]
+);
+Components::row(
+	__( 'Custom image', 'bspe-connect' ),
+	static function () use ( $connect ): void {
+		Components::media( 'bspe[buttons][connect][image_id]', (int) ( $connect['image_id'] ?? 0 ), [
+			'button_text' => __( 'Choose image', 'bspe-connect' ),
+			'modal_title' => __( 'Select Connect image', 'bspe-connect' ),
+		] );
+	},
+	[ 'description' => __( 'Used when Mode is set to Custom image. A square image works best.', 'bspe-connect' ) ]
+);
+Components::row(
+	__( 'Icon', 'bspe-connect' ),
+	static function () use ( $connect ): void {
+		Components::icon_radio( 'bspe[buttons][connect][icon]', (string) ( $connect['icon'] ?? 'connect-1' ), 'connect' );
+	},
+	[ 'description' => __( 'Used when Mode is Text label.', 'bspe-connect' ) ]
+);
+Components::close_card();
+
+/* ----------------- Call ----------------- */
+Components::open_card(
+	__( 'Call', 'bspe-connect' ),
+	__( 'Opens the phone dialer with the configured number.', 'bspe-connect' )
+);
+Components::row(
+	__( 'Enabled', 'bspe-connect' ),
+	static function () use ( $call ): void {
+		Components::toggle( 'bspe[buttons][call][enabled]', ! empty( $call['enabled'] ), [
+			'label' => __( 'Show this button on the bar', 'bspe-connect' ),
+		] );
+	}
+);
+Components::row(
+	__( 'Phone', 'bspe-connect' ),
+	static function () use ( $call, $format_phone ): void {
+		Components::text( 'bspe[buttons][call][phone]', $format_phone( (string) ( $call['phone'] ?? '' ) ), [
+			'placeholder' => '(555) 123-4567',
+			'inputmode'   => 'tel',
+			'maxlength'   => 16,
+			'data'        => [ 'bspe-phone-mask' => '1' ],
+		] );
+	},
+	[
+		'id'          => 'bspe-buttons-call-phone',
+		'description' => __( 'US numbers only. Stored as 10 digits and rendered as a tel: link.', 'bspe-connect' ),
+	]
+);
+Components::row(
+	__( 'Label', 'bspe-connect' ),
+	static function () use ( $call ): void {
+		Components::text( 'bspe[buttons][call][label]', (string) ( $call['label'] ?? 'Call' ), [
+			'maxlength' => 24,
+		] );
+	},
+	[ 'id' => 'bspe-buttons-call-label' ]
+);
+Components::row(
+	__( 'Icon', 'bspe-connect' ),
+	static function () use ( $call ): void {
+		Components::icon_radio( 'bspe[buttons][call][icon]', (string) ( $call['icon'] ?? 'call-1' ), 'call' );
+	}
+);
+Components::close_card();
+
+/* ----------------- Text ----------------- */
+Components::open_card(
+	__( 'Text', 'bspe-connect' ),
+	__( 'Opens the SMS app with the firm number, OR opens the inline lead form.', 'bspe-connect' )
+);
+Components::row(
+	__( 'Enabled', 'bspe-connect' ),
+	static function () use ( $text ): void {
+		Components::toggle( 'bspe[buttons][text][enabled]', ! empty( $text['enabled'] ), [
+			'label' => __( 'Show this button on the bar', 'bspe-connect' ),
+		] );
+	}
+);
+Components::row(
+	__( 'Mode', 'bspe-connect' ),
+	static function () use ( $text ): void {
+		Components::radio_pills( 'bspe[buttons][text][mode]', (string) ( $text['mode'] ?? 'sms' ), [
+			'sms'    => __( 'SMS link', 'bspe-connect' ),
+			'inline' => __( 'Inline form', 'bspe-connect' ),
+		] );
+	}
+);
+Components::row(
+	__( 'Phone', 'bspe-connect' ),
+	static function () use ( $text, $format_phone ): void {
+		Components::text( 'bspe[buttons][text][phone]', $format_phone( (string) ( $text['phone'] ?? '' ) ), [
+			'placeholder' => '(555) 123-4567',
+			'inputmode'   => 'tel',
+			'maxlength'   => 16,
+			'data'        => [ 'bspe-phone-mask' => '1' ],
+		] );
+	},
+	[
+		'id'          => 'bspe-buttons-text-phone',
+		'description' => __( 'Used when Mode is SMS link. Ignored for the Inline form.', 'bspe-connect' ),
+	]
+);
+Components::row(
+	__( 'Label', 'bspe-connect' ),
+	static function () use ( $text ): void {
+		Components::text( 'bspe[buttons][text][label]', (string) ( $text['label'] ?? 'Text' ), [
+			'maxlength' => 24,
+		] );
+	},
+	[ 'id' => 'bspe-buttons-text-label' ]
+);
+Components::row(
+	__( 'Icon', 'bspe-connect' ),
+	static function () use ( $text ): void {
+		Components::icon_radio( 'bspe[buttons][text][icon]', (string) ( $text['icon'] ?? 'text-1' ), 'text' );
+	}
+);
+Components::close_card();
+
+/* ----------------- Email ----------------- */
+Components::open_card(
+	__( 'Email', 'bspe-connect' ),
+	__( 'Always opens the inline lead form modal.', 'bspe-connect' )
+);
+Components::row(
+	__( 'Enabled', 'bspe-connect' ),
+	static function () use ( $email ): void {
+		Components::toggle( 'bspe[buttons][email][enabled]', ! empty( $email['enabled'] ), [
+			'label' => __( 'Show this button on the bar', 'bspe-connect' ),
+		] );
+	}
+);
+Components::row(
+	__( 'Label', 'bspe-connect' ),
+	static function () use ( $email ): void {
+		Components::text( 'bspe[buttons][email][label]', (string) ( $email['label'] ?? 'Email' ), [
+			'maxlength' => 24,
+		] );
+	},
+	[ 'id' => 'bspe-buttons-email-label' ]
+);
+Components::row(
+	__( 'Icon', 'bspe-connect' ),
+	static function () use ( $email ): void {
+		Components::icon_radio( 'bspe[buttons][email][icon]', (string) ( $email['icon'] ?? 'email-1' ), 'email' );
+	}
+);
+Components::close_card();
+
+Components::close_form();

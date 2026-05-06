@@ -86,6 +86,9 @@ final class Admin {
 	public static function init(): void {
 		add_action( 'admin_menu', [ self::class, 'register_menu' ] );
 		add_action( 'admin_enqueue_scripts', [ self::class, 'enqueue_assets' ] );
+
+		Settings_Saver::init();
+		Submissions_Controller::init();
 	}
 
 	public static function register_menu(): void {
@@ -104,16 +107,24 @@ final class Admin {
 		if ( 'toplevel_page_' . self::PAGE_SLUG !== $hook ) {
 			return;
 		}
+
+		// WP color picker (CSS + JS depend on jQuery + iris).
+		wp_enqueue_style( 'wp-color-picker' );
+		wp_enqueue_script( 'wp-color-picker' );
+
+		// Media library framework so the avatar / Connect-image picker can call wp.media.
+		wp_enqueue_media();
+
 		wp_enqueue_style(
 			'bspe-connect-admin',
 			BSPE_CONNECT_URL . 'admin/assets/admin.css',
-			[],
+			[ 'wp-color-picker' ],
 			BSPE_CONNECT_VERSION
 		);
 		wp_enqueue_script(
 			'bspe-connect-admin',
 			BSPE_CONNECT_URL . 'admin/assets/admin.js',
-			[],
+			[ 'wp-color-picker', 'jquery' ],
 			BSPE_CONNECT_VERSION,
 			true
 		);
