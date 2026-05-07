@@ -51,7 +51,21 @@ $event_groups = [
 $total_events = array_sum( $counts );
 
 $base_url = Admin::tab_url( 'analytics' );
+$tested   = isset( $_GET['tested'] ) ? sanitize_text_field( wp_unslash( (string) $_GET['tested'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only feedback
 ?>
+
+<?php if ( '1' === $tested ) : ?>
+	<div class="bspe-notice" role="status">
+		<span class="bspe-notice__icon" aria-hidden="true">
+			<svg viewBox="0 0 14 14" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5l3 3 6-7"/></svg>
+		</span>
+		<?php esc_html_e( 'Test event inserted. The funnel and tiles below should reflect it on the next page load.', 'bspe-connect' ); ?>
+	</div>
+<?php elseif ( '0' === $tested ) : ?>
+	<div class="bspe-notice" role="status" style="background: rgba(192,57,43,.1); border-color: rgba(192,57,43,.28); color: #c0392b;">
+		<?php esc_html_e( 'Test event INSERT returned 0 — the DB write failed. Check the Logs tab.', 'bspe-connect' ); ?>
+	</div>
+<?php endif; ?>
 
 <section class="bspe-card bspe-card--analytics">
 	<header class="bspe-card__head">
@@ -68,22 +82,31 @@ $base_url = Admin::tab_url( 'analytics' );
 				?>
 			</p>
 		</div>
-		<nav class="bspe-window-picker" aria-label="<?php esc_attr_e( 'Time window', 'bspe-connect' ); ?>">
-			<?php foreach ( Analytics_Controller::ALLOWED_WINDOWS as $w ) :
-				$is_active = $w === $window;
-				$href      = add_query_arg(
-					[ 'page' => Admin::PAGE_SLUG, 'tab' => 'analytics', 'window' => $w ],
-					admin_url( 'admin.php' )
-				);
-				?>
-				<a class="bspe-window-picker__btn<?php echo $is_active ? ' is-active' : ''; ?>" href="<?php echo esc_url( $href ); ?>" aria-current="<?php echo $is_active ? 'true' : 'false'; ?>">
-					<?php
-					/* translators: %d: window length in days */
-					printf( esc_html__( '%dd', 'bspe-connect' ), (int) $w );
+		<div style="display: inline-flex; gap: 12px; align-items: center;">
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin: 0;">
+				<input type="hidden" name="action" value="<?php echo esc_attr( Analytics_Controller::TEST_ACTION ); ?>" />
+				<?php wp_nonce_field( Analytics_Controller::TEST_NONCE ); ?>
+				<button type="submit" class="bspe-button bspe-button--ghost" title="<?php esc_attr_e( 'Insert a single bar_shown event directly via the admin — bypasses the public JS / REST round-trip so we can isolate where breakages happen', 'bspe-connect' ); ?>">
+					<?php esc_html_e( 'Insert test event', 'bspe-connect' ); ?>
+				</button>
+			</form>
+			<nav class="bspe-window-picker" aria-label="<?php esc_attr_e( 'Time window', 'bspe-connect' ); ?>">
+				<?php foreach ( Analytics_Controller::ALLOWED_WINDOWS as $w ) :
+					$is_active = $w === $window;
+					$href      = add_query_arg(
+						[ 'page' => Admin::PAGE_SLUG, 'tab' => 'analytics', 'window' => $w ],
+						admin_url( 'admin.php' )
+					);
 					?>
-				</a>
-			<?php endforeach; ?>
-		</nav>
+					<a class="bspe-window-picker__btn<?php echo $is_active ? ' is-active' : ''; ?>" href="<?php echo esc_url( $href ); ?>" aria-current="<?php echo $is_active ? 'true' : 'false'; ?>">
+						<?php
+						/* translators: %d: window length in days */
+						printf( esc_html__( '%dd', 'bspe-connect' ), (int) $w );
+						?>
+					</a>
+				<?php endforeach; ?>
+			</nav>
+		</div>
 	</header>
 </section>
 

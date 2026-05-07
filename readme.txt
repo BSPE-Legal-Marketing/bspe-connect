@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.2.1
+Stable tag: 2.2.2
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,20 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.2.2 =
+* Analytics pipeline instrumented end-to-end. Every Rest::handle_event
+  decision (received / invalid type / rate-limited / cross-host /
+  saved / DB-insert-failed) now writes a Logger entry so the Logs tab
+  shows the exact path each request took.
+* Frontend deliverEvent() now writes to the browser console on
+  non-OK / failure / threw — covers the case where the request never
+  reaches the server (page cache, content blocker, CSP).
+* New "Insert test event" button on the Analytics tab — bypasses the
+  JS + REST round-trip and inserts a single bar_shown row directly via
+  the admin. Useful for isolating "is the JS not firing?" from "is the
+  DB write failing?" — if the dashboard updates after clicking this,
+  we know the gap is on the frontend / network side.
 
 = 2.2.1 =
 * Fix: admin select dropdowns rendered TWO chevron icons (the WP-admin

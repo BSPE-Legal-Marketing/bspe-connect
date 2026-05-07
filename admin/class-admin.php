@@ -105,6 +105,7 @@ final class Admin {
 
 		Settings_Saver::init();
 		Submissions_Controller::init();
+		Analytics_Controller::init();
 	}
 
 	public static function register_menu(): void {

@@ -198,7 +198,10 @@
 	}
 
 	function deliverEvent(eventType) {
-		if (!restEndpoint) { return; }
+		if (!restEndpoint) {
+			console.warn('[BSPE Connect] No REST endpoint configured — analytics dropped:', eventType);
+			return;
+		}
 		try {
 			fetch(restEndpoint, {
 				method: 'POST',
@@ -209,8 +212,16 @@
 					page_url:   window.location.href,
 					session_id: sessionId
 				})
-			}).catch(function () { /* swallow — analytics is best-effort */ });
-		} catch (e) { /* swallow */ }
+			}).then(function (resp) {
+				if (!resp.ok) {
+					console.warn('[BSPE Connect] Analytics event got non-OK', resp.status, eventType);
+				}
+			}).catch(function (err) {
+				console.warn('[BSPE Connect] Analytics event fetch failed', eventType, err);
+			});
+		} catch (e) {
+			console.warn('[BSPE Connect] Analytics event threw', eventType, e);
+		}
 	}
 
 	function fire(eventType, detail) {

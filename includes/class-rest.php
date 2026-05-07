@@ -66,7 +66,17 @@ final class Rest {
 		$response = new \WP_REST_Response( [ 'ok' => true ], 200 );
 
 		$event_type = (string) $request->get_param( 'event_type' );
+		$page_url   = (string) $request->get_param( 'page_url' );
+		$session_id = (string) $request->get_param( 'session_id' );
+
+		Logger::log( 'info', 'Analytics event received', [
+			'event_type' => $event_type,
+			'session_id' => $session_id,
+			'page_url'   => $page_url,
+		] );
+
 		if ( '' === $event_type || ! Events::is_allowed_type( $event_type ) ) {
+			Logger::log( 'warn', 'Analytics event rejected — invalid type', [ 'event_type' => $event_type ] );
 			return $response;
 		}
 
@@ -77,19 +87,18 @@ final class Rest {
 			$key  = 'bspe_connect_evt_rl_' . $hash;
 			$bucket = (int) get_transient( $key );
 			if ( $bucket >= self::RATE_LIMIT_PER ) {
+				Logger::log( 'warn', 'Analytics event rate-limited', [ 'event_type' => $event_type, 'count' => $bucket, 'limit' => self::RATE_LIMIT_PER ] );
 				return $response;
 			}
 			set_transient( $key, $bucket + 1, self::RATE_LIMIT_TTL );
 		}
-
-		$page_url   = (string) $request->get_param( 'page_url' );
-		$session_id = (string) $request->get_param( 'session_id' );
 
 		// Discard URLs not in the same site host — defends against arbitrary referer logging.
 		if ( '' !== $page_url ) {
 			$home_host = wp_parse_url( home_url(), PHP_URL_HOST );
 			$page_host = wp_parse_url( $page_url,    PHP_URL_HOST );
 			if ( $home_host && $page_host && strtolower( (string) $home_host ) !== strtolower( (string) $page_host ) ) {
+				Logger::log( 'warn', 'Analytics event page_url cleared — cross-host', [ 'event_type' => $event_type, 'home_host' => $home_host, 'page_host' => $page_host ] );
 				$page_url = '';
 			}
 		}
@@ -99,12 +108,18 @@ final class Rest {
 			$page_url = self::redact_url( $page_url );
 		}
 
-		Events::insert( [
+		$row_id = Events::insert( [
 			'event_type'  => $event_type,
 			'occurred_at' => current_time( 'mysql' ),
 			'page_url'    => substr( $page_url,   0, self::PAGE_URL_MAX ),
 			'session_id'  => substr( $session_id, 0, self::SESSION_ID_MAX ),
 		] );
+
+		Logger::log(
+			$row_id > 0 ? 'info' : 'error',
+			$row_id > 0 ? 'Analytics event saved' : 'Analytics event INSERT returned 0 — DB write failed',
+			[ 'event_type' => $event_type, 'row_id' => $row_id ]
+		);
 
 		return $response;
 	}

@@ -16,6 +16,47 @@ final class Analytics_Controller {
 	public const ALLOWED_WINDOWS = [ 7, 30, 60, 90 ];
 	public const DEFAULT_WINDOW  = 30;
 
+	public const TEST_ACTION = 'bspe_connect_analytics_test';
+	public const TEST_NONCE  = 'bspe_connect_analytics_test';
+
+	public static function init(): void {
+		add_action( 'admin_post_' . self::TEST_ACTION, [ self::class, 'handle_test_event' ] );
+	}
+
+	/**
+	 * Insert a single bar_shown event with a fixed test session_id, then
+	 * redirect back to the Analytics tab. Mirrors the JS-side path the
+	 * frontend bar uses, but without any browser involvement — so if the
+	 * dashboard updates after this, we know the DB + query side works
+	 * and the gap is on the JS / network side.
+	 */
+	public static function handle_test_event(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'No permission.', 'bspe-connect' ), 403 );
+		}
+		check_admin_referer( self::TEST_NONCE );
+
+		$row_id = \BSPE\Connect\Events::insert( [
+			'event_type'  => 'bar_shown',
+			'occurred_at' => current_time( 'mysql' ),
+			'page_url'    => admin_url( 'admin.php?page=bspe-connect&tab=analytics' ),
+			'session_id'  => 'admin-test-' . wp_generate_password( 8, false ),
+		] );
+
+		\BSPE\Connect\Logger::log(
+			$row_id > 0 ? 'info' : 'error',
+			$row_id > 0 ? 'Admin "Insert test event" — saved' : 'Admin "Insert test event" — DB insert returned 0',
+			[ 'row_id' => $row_id ]
+		);
+
+		$redirect = add_query_arg(
+			[ 'page' => 'bspe-connect', 'tab' => 'analytics', 'tested' => $row_id > 0 ? '1' : '0' ],
+			admin_url( 'admin.php' )
+		);
+		wp_safe_redirect( $redirect );
+		exit;
+	}
+
 	public static function active_window(): int {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only navigation
 		$candidate = isset( $_GET['window'] ) ? (int) $_GET['window'] : self::DEFAULT_WINDOW;
