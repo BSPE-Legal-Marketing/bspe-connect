@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,18 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.0.2 =
+* Fix: Elementor's per-kit inline CSS uses descendant selectors like
+  `.elementor-kit-9604 button { ... }` (specificity 0,1,1) which beat
+  our class-only `.bspe-connect__btn` rule (0,1,0) — leaving the bar's
+  Connect and Email buttons rendered with the kit's light-gray fill,
+  modal close buttons unstyled, and form inputs styled with Elementor's
+  zero-padding underline-only treatment. Re-prefixed every <button>-
+  and <input>-targeting rule with `#bspe-connect ` (the wrapper's id)
+  so our specificity (1,1,0+) wins against any descendant override
+  from page-builders / themes. Verified against the Hello Elementor +
+  Elementor Pro stack.
 
 = 2.0.1 =
 * Fix: iOS Safari rendered Connect and Email buttons (and the bubble's
