@@ -397,7 +397,14 @@
 
 			var fd = new FormData(form);
 
-			fetch(form.action, {
+			// Use getAttribute('action') and the localized fallback so we
+			// don't trip the iOS Safari named-element collision: when a
+			// form has an <input name="action"> (which admin-ajax requires),
+			// `form.action` returns the input element instead of the URL,
+			// and fetch coerces it to "[object HTMLInputElement]" → 404.
+			var endpoint = form.getAttribute('action') || (data && data.ajaxUrl) || '';
+
+			fetch(endpoint, {
 				method: 'POST',
 				credentials: 'same-origin',
 				body: fd

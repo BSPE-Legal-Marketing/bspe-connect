@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.1.5
+Stable tag: 2.1.6
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,22 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.1.6 =
+* CRITICAL FIX: form submissions on iOS Safari were 404'ing because
+  the JS read `form.action` (HTMLFormElement.action property) which
+  WebKit shadows with the form's named input — and our form has a
+  hidden `<input name="action">` because admin-ajax.php requires it.
+  Result: fetch() received an HTMLInputElement, coerced it to the
+  string "[object HTMLInputElement]", resolved that relative to the
+  page URL, and POSTed to a nonsense path. WP returned 404 → the JS
+  caught the non-JSON response → showed "Something went wrong.
+  Please try again."
+
+  Fixed by reading the action attribute via `form.getAttribute('action')`,
+  which always returns the attribute string regardless of named-input
+  collisions. Also added `ajaxUrl` to the localized BSPE_CONNECT_DATA
+  as a belt-and-suspenders fallback.
 
 = 2.1.5 =
 * Fix: mobile breakpoint setting was off by one — entering 768 actually

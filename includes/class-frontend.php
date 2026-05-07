@@ -155,6 +155,7 @@ final class Frontend {
 			[
 				'showDelay'        => (int) Settings::get( 'display.show_delay', 3 ),
 				'mobileBreakpoint' => (int) Settings::get( 'display.mobile_breakpoint', 768 ),
+				'ajaxUrl'          => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
 				'bubble'           => [
 					'enabled' => (bool) Settings::get( 'welcome_bubble.enabled', true ),
 					'trigger' => (string) Settings::get( 'welcome_bubble.trigger', 'auto' ),
