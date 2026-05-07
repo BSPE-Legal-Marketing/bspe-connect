@@ -154,6 +154,8 @@ final class Frontend {
 			'BSPE_CONNECT_DATA',
 			[
 				'showDelay'        => (int) Settings::get( 'display.show_delay', 3 ),
+				'scrollThreshold'  => max( 0, (int) Settings::get( 'display.scroll_threshold', 0 ) ),
+				'hideOnScrollUp'   => (bool) Settings::get( 'display.hide_on_scroll_up', false ),
 				'mobileBreakpoint' => (int) Settings::get( 'display.mobile_breakpoint', 768 ),
 				'ajaxUrl'          => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
 				'bubble'           => [

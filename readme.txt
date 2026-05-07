@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.2.3
+Stable tag: 2.2.4
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,20 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.2.4 =
+* Restore: General → Display behavior now has back the two scroll
+  controls that used to live there before v2.1.2 collapsed them into
+  pure delay-based showing —
+    - "Hide at top of page" (px). When > 0 the bar stays hidden until
+      the visitor scrolls past N pixels. 0 keeps the current always-
+      shown-after-delay behavior, so existing installs see no change.
+    - "Hide on scroll up" toggle. When on, the bar slides away as the
+      visitor scrolls back up the page and reappears on the next
+      downward scroll. Off by default.
+  Both triggers are rAF-paced (no scroll-event spam) and the scroll
+  listener only attaches when at least one is configured, so the
+  default install pays no cost.
 
 = 2.2.3 =
 * Fix: analytics events were silently dropped on installs whose schema

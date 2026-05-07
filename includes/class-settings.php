@@ -45,6 +45,8 @@ final class Settings {
 			],
 			'display'        => [
 				'show_delay'        => 3,
+				'scroll_threshold'  => 0,
+				'hide_on_scroll_up' => false,
 				'mobile_breakpoint' => 768,
 			],
 			'buttons'        => [

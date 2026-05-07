@@ -140,6 +140,32 @@ Components::row(
 	]
 );
 Components::row(
+	__( 'Hide at top of page', 'bspe-connect' ),
+	static function () use ( $display ): void {
+		Components::number( 'bspe[display][scroll_threshold]', (int) ( $display['scroll_threshold'] ?? 0 ), [
+			'min'    => 0,
+			'max'    => 5000,
+			'step'   => 10,
+			'suffix' => __( 'px', 'bspe-connect' ),
+		] );
+	},
+	[
+		'id'          => 'bspe-display-scroll_threshold',
+		'description' => __( 'Keep the bar hidden until the visitor scrolls down at least this far. Set to 0 to always show the bar (after the delay above).', 'bspe-connect' ),
+	]
+);
+Components::row(
+	__( 'Hide on scroll up', 'bspe-connect' ),
+	static function () use ( $display ): void {
+		Components::toggle( 'bspe[display][hide_on_scroll_up]', ! empty( $display['hide_on_scroll_up'] ), [
+			'label' => __( 'Slide the bar away when the visitor scrolls back up the page.', 'bspe-connect' ),
+		] );
+	},
+	[
+		'description' => __( 'Off by default. Pairs naturally with “Hide at top of page” — the bar reappears when the visitor scrolls down again.', 'bspe-connect' ),
+	]
+);
+Components::row(
 	__( 'Mobile breakpoint', 'bspe-connect' ),
 	static function () use ( $display ): void {
 		Components::number( 'bspe[display][mobile_breakpoint]', (int) ( $display['mobile_breakpoint'] ?? 768 ), [

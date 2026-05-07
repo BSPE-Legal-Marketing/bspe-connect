@@ -39,6 +39,11 @@
 	if (!isFinite(showDelay) || showDelay < 0) { showDelay = 3; }
 	showDelay *= 1000;
 
+	// Scroll-trigger config (off when threshold is 0 — current default).
+	var scrollThreshold = parseInt(data.scrollThreshold, 10);
+	if (!isFinite(scrollThreshold) || scrollThreshold < 0) { scrollThreshold = 0; }
+	var hideOnScrollUp = data.hideOnScrollUp === true;
+
 	var bubbleEnabled = bubbleData.enabled !== false;
 	var bubbleTrigger = bubbleData.trigger || 'auto';
 	var bubbleRepeat = bubbleData.repeat || 'session';
@@ -65,10 +70,67 @@
 		}
 	}
 
-	// Show the bar after the configured delay. No scroll trigger anymore —
-	// the user always sees the bar as long as they stay on the page past
-	// the delay window.
-	setTimeout(function () { setBarState(true); }, showDelay);
+	// ----- Bar show / hide ---------------------------------------------
+	// Two layered triggers. Both are opt-in via the General → Display
+	// behavior settings; with defaults (threshold = 0, hideOnScrollUp =
+	// false) the bar simply slides in once the show-delay elapses and
+	// stays put for the rest of the visit.
+	//
+	//   1. scrollThreshold > 0  → keep the bar hidden until the visitor
+	//      scrolls past N pixels. Pairs with show-delay: the timer runs
+	//      independently, so the bar appears at whichever signal fires
+	//      LAST — meaning the threshold can't beat the delay and vice
+	//      versa.
+	//
+	//   2. hideOnScrollUp = true → once the bar is visible, slide it
+	//      back down on any meaningful upward scroll (>4 px) and bring
+	//      it back on the next downward scroll. Threshold still applies
+	//      while at the top.
+	var delayElapsed = false;
+	setTimeout(function () {
+		delayElapsed = true;
+		// If no scroll trigger is configured we just show the bar now;
+		// otherwise we let the scroll handler decide whether the threshold
+		// has been passed.
+		if (scrollThreshold === 0) {
+			setBarState(true);
+		} else {
+			updateBarFromScroll();
+		}
+	}, showDelay);
+
+	var lastScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+	var scrollFrame = 0;
+	function updateBarFromScroll() {
+		if (!delayElapsed) { return; }
+		var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+		var delta = y - lastScrollY;
+		var passedThreshold = scrollThreshold === 0 || y >= scrollThreshold;
+
+		if (!passedThreshold) {
+			setBarState(false);
+		} else if (hideOnScrollUp && delta < -4 && y > 0) {
+			// Visitor scrolling up — slide the bar away.
+			setBarState(false);
+		} else if (delta > 0 || !hideOnScrollUp) {
+			// Visitor scrolling down OR scroll-up-hide disabled.
+			setBarState(true);
+		}
+		lastScrollY = y;
+	}
+
+	// Only attach the scroll listener if at least one scroll-driven
+	// behavior is configured — saves a passive listener on default
+	// installs.
+	if (scrollThreshold > 0 || hideOnScrollUp) {
+		window.addEventListener('scroll', function () {
+			if (scrollFrame) { return; }
+			scrollFrame = requestAnimationFrame(function () {
+				scrollFrame = 0;
+				updateBarFromScroll();
+			});
+		}, { passive: true });
+	}
 
 	// ----- Welcome bubble -----
 	function scheduleBubble() {

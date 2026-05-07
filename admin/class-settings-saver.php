@@ -173,6 +173,8 @@ final class Settings_Saver {
 	private static function sanitize_display( array $input, array $current ): array {
 		return [
 			'show_delay'        => max( 0, min( 60, (int) ( $input['show_delay'] ?? 3 ) ) ),
+			'scroll_threshold'  => max( 0, min( 5000, (int) ( $input['scroll_threshold'] ?? 0 ) ) ),
+			'hide_on_scroll_up' => ! empty( $input['hide_on_scroll_up'] ),
 			'mobile_breakpoint' => max( 320, min( 2000, (int) ( $input['mobile_breakpoint'] ?? 768 ) ) ),
 		];
 	}
