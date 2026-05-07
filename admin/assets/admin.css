@@ -692,7 +692,15 @@
 
 .bspe-select {
 	padding-right: 32px;
-	background: #fff;
+	background-color: #fff;
+	/* Force-clear the WP-admin core forms.css chevron background-image
+	   and any UA / page-builder override that re-enables the native
+	   select arrow — without this we'd render BOTH the WP arrow AND
+	   our custom .bspe-select-wrap::after chevron. */
+	background-image: none !important;
+	-webkit-appearance: none !important;
+	   -moz-appearance: none !important;
+	        appearance: none !important;
 	cursor: pointer;
 }
 

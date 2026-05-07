@@ -262,7 +262,7 @@ final class Frontend {
 		if ( ! in_array( $label_weight, [ 400, 500, 600, 700 ], true ) ) {
 			$label_weight = 500;
 		}
-		$label_transform = Settings::get( 'design.label_uppercase', true ) ? 'uppercase' : 'none';
+		$label_transform = Settings::get( 'design.label_uppercase', false ) ? 'uppercase' : 'none';
 		// Per-side button padding. If only the legacy button_padding_y is
 		// stored (pre-v2.2.0), use it for top + bottom and apply 4px to
 		// the horizontal sides.
@@ -298,22 +298,30 @@ final class Frontend {
 		// set a non-empty value on that button. Each rule scopes the
 		// CSS variables to a specific button class so the existing
 		// .bspe-connect__btn rule reads the per-button value.
+		//
+		// `!important` on the custom property means the per-button override
+		// wins decisively over the global var on `.bspe-connect` even when
+		// some intermediate rule (theme reset, page-builder kit) tries to
+		// stomp values on `:root` or `body`.
 		foreach ( [ 'connect', 'call', 'text', 'email' ] as $btn_key ) {
 			$btn_weight    = (string) Settings::get( "buttons.{$btn_key}.label_weight",    '' );
 			$btn_uppercase = (string) Settings::get( "buttons.{$btn_key}.label_uppercase", '' );
 
 			$declarations = [];
 			if ( in_array( $btn_weight, [ '400', '500', '600', '700' ], true ) ) {
-				$declarations[] = '--bspe-label-weight: ' . esc_html( $btn_weight );
+				$declarations[] = '--bspe-label-weight: ' . esc_html( $btn_weight ) . ' !important';
 			}
 			if ( 'yes' === $btn_uppercase ) {
-				$declarations[] = '--bspe-label-transform: uppercase';
+				$declarations[] = '--bspe-label-transform: uppercase !important';
 			} elseif ( 'no' === $btn_uppercase ) {
-				$declarations[] = '--bspe-label-transform: none';
+				$declarations[] = '--bspe-label-transform: none !important';
 			}
 
 			if ( ! empty( $declarations ) ) {
-				echo "#bspe-connect .bspe-connect__btn--" . esc_html( $btn_key ) . " {\n";
+				// Double-class selector + id prefix gives specificity 1,2,0
+				// — beats the wrapper var rule (1,1,0) and almost any
+				// theme-side override.
+				echo '#bspe-connect .bspe-connect__btn.bspe-connect__btn--' . esc_html( $btn_key ) . " {\n";
 				foreach ( $declarations as $decl ) {
 					echo "\t" . $decl . ";\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- decl values are escaped above
 				}

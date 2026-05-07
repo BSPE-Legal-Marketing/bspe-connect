@@ -54,7 +54,9 @@ final class Settings {
 					'icon_library'    => 'none',
 					'icon'            => '',
 					'label_weight'    => '',
-					'label_uppercase' => '',
+					// Connect specifically forces UPPERCASE by default — the
+					// other buttons inherit (which now defaults to off).
+					'label_uppercase' => 'yes',
 				],
 				'call'    => [
 					'enabled'         => true,
@@ -139,7 +141,7 @@ final class Settings {
 				'icon_size'             => 16,
 				'label_size'            => 12,
 				'label_weight'          => 500,
-				'label_uppercase'       => true,
+				'label_uppercase'       => false,
 				'button_padding_top'    => 6,
 				'button_padding_right'  => 4,
 				'button_padding_bottom' => 6,

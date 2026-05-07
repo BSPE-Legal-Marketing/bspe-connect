@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.2.0
+Stable tag: 2.2.1
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,24 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.2.1 =
+* Fix: admin select dropdowns rendered TWO chevron icons (the WP-admin
+  forms.css background-image arrow + our custom .bspe-select-wrap::after
+  arrow). Forced background-image: none + appearance: none with
+  !important on .bspe-select so the native arrow is suppressed
+  reliably across themes / page builders.
+* Defaults flipped: global "Uppercase labels" defaults to OFF (was ON);
+  Connect button defaults to "Force UPPERCASE" per its own override.
+  Existing installs keep their saved values — only fresh activations
+  pick up the new defaults. To match the new defaults on an existing
+  site: Design tab → Uppercase labels → off; Buttons tab → Connect →
+  Label case → Force UPPERCASE.
+* Per-button label overrides now emit with `!important` on the CSS
+  custom property and a double-class selector (specificity 1,2,0) so
+  they win against any global var stomp from a theme or page-builder
+  kit. The earlier 1,1,0 selector was tied with the wrapper rule and
+  could lose source-order ties on some sites.
 
 = 2.2.0 =
 * Per-side button padding: replaced the single "Button vertical padding"
