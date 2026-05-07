@@ -40,9 +40,12 @@
 	showDelay *= 1000;
 
 	// Scroll-trigger config (off when threshold is 0 — current default).
+	// wp_localize_script casts top-level scalars to strings, so the bool
+	// arrives as "1" / "0" — strict === true would always miss it. Truthy
+	// check that explicitly rejects "0" and "false" handles every form.
 	var scrollThreshold = parseInt(data.scrollThreshold, 10);
 	if (!isFinite(scrollThreshold) || scrollThreshold < 0) { scrollThreshold = 0; }
-	var hideOnScrollUp = data.hideOnScrollUp === true;
+	var hideOnScrollUp = !!data.hideOnScrollUp && data.hideOnScrollUp !== '0' && data.hideOnScrollUp !== 'false';
 
 	var bubbleEnabled = bubbleData.enabled !== false;
 	var bubbleTrigger = bubbleData.trigger || 'auto';

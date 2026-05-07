@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.2.4
+Stable tag: 2.2.5
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,15 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.2.5 =
+* Fix: the "Hide on scroll up" toggle from v2.2.4 saved correctly but
+  did nothing on the frontend. Root cause — wp_localize_script casts
+  top-level scalars to strings, so the boolean arrived in JS as the
+  string "1" / "0", and a strict `=== true` check always missed it.
+  Replaced with a tolerant truthy check that explicitly rejects "0"
+  and "false". Confirmed against the staging install where the data
+  blob shows `"hideOnScrollUp":"1"`.
 
 = 2.2.4 =
 * Restore: General → Display behavior now has back the two scroll
