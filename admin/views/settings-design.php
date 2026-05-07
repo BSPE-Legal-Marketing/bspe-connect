@@ -16,14 +16,6 @@ $design     = is_array( Settings::get( 'design', [] ) ) ? Settings::get( 'design
 $colors     = is_array( $design['colors'] ?? null ) ? $design['colors'] : [];
 $action_url = admin_url( 'admin-post.php' );
 
-$brand_palette = [
-	[ 'name' => __( 'Plum Noir', 'bspe-connect' ),     'hex' => '#351E28', 'role' => __( 'Primary', 'bspe-connect' ) ],
-	[ 'name' => __( 'Midnight Navy', 'bspe-connect' ), 'hex' => '#0D1B2A', 'role' => __( 'Secondary', 'bspe-connect' ) ],
-	[ 'name' => __( 'Warm Ivory', 'bspe-connect' ),    'hex' => '#FAF7F2', 'role' => __( 'Background', 'bspe-connect' ) ],
-	[ 'name' => __( 'Logo Teal', 'bspe-connect' ),     'hex' => '#3AAFB9', 'role' => __( 'Pop / CTA', 'bspe-connect' ) ],
-	[ 'name' => __( 'Gold', 'bspe-connect' ),          'hex' => '#D4AF37', 'role' => __( 'Texture only', 'bspe-connect' ) ],
-];
-
 $google_fonts = [
 	'DM Sans'           => 'DM Sans',
 	'Inter'             => 'Inter',
@@ -62,25 +54,6 @@ Components::row(
 		'description' => __( 'If empty, falls back to the WordPress site title.', 'bspe-connect' ),
 	]
 );
-Components::close_card();
-
-/* ----------------- Brand palette reference ----------------- */
-Components::open_card(
-	__( 'BSPE brand palette', 'bspe-connect' ),
-	__( 'Reference colors. Default values below preserve the brand; you can override per-element using the Colors card.', 'bspe-connect' )
-);
-?>
-<div class="bspe-palette">
-	<?php foreach ( $brand_palette as $swatch ) : ?>
-		<div class="bspe-swatch">
-			<span class="bspe-swatch__chip" style="background:<?php echo esc_attr( $swatch['hex'] ); ?>;" aria-hidden="true"></span>
-			<span class="bspe-swatch__name"><?php echo esc_html( $swatch['name'] ); ?></span>
-			<span class="bspe-swatch__hex"><?php echo esc_html( $swatch['hex'] ); ?></span>
-			<span class="bspe-swatch__role"><?php echo esc_html( $swatch['role'] ); ?></span>
-		</div>
-	<?php endforeach; ?>
-</div>
-<?php
 Components::close_card();
 
 /* ----------------- Colors ----------------- */

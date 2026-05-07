@@ -29,31 +29,47 @@ $format_phone = static function ( string $digits ): string {
 };
 
 $library_options = [
-	'brand'       => __( 'Brand SVGs (bundled)', 'bspe-connect' ),
-	'fa-solid'    => __( 'Font Awesome — Solid (filled)', 'bspe-connect' ),
-	'fa-regular'  => __( 'Font Awesome — Regular (outline)', 'bspe-connect' ),
-	'ion-filled'  => __( 'Ionicons — Filled', 'bspe-connect' ),
-	'ion-outline' => __( 'Ionicons — Outline', 'bspe-connect' ),
-	'dripicons'   => __( 'Dripicons (outline only)', 'bspe-connect' ),
-	'none'        => __( 'No icon (label only)', 'bspe-connect' ),
+	'none'       => __( 'No icon (label only)', 'bspe-connect' ),
+	'fa-solid'   => __( 'Font Awesome — Solid (filled)', 'bspe-connect' ),
+	'fa-regular' => __( 'Font Awesome — Regular (outline)', 'bspe-connect' ),
 ];
 
-$library_help = static function ( string $type ): string {
-	$examples = [
-		'connect' => [ 'fa' => 'comments',     'ion' => 'chatbubbles', 'drip' => 'dripicons-message' ],
-		'call'    => [ 'fa' => 'phone',        'ion' => 'call',        'drip' => 'dripicons-phone' ],
-		'text'    => [ 'fa' => 'message',      'ion' => 'chatbox',     'drip' => 'dripicons-message-reply' ],
-		'email'   => [ 'fa' => 'envelope',     'ion' => 'mail',        'drip' => 'dripicons-mail' ],
-	];
-	$ex = $examples[ $type ] ?? $examples['call'];
+/**
+ * Render the icon-library select + visual fa-solid / fa-regular pickers
+ * for one button, all wired up for the live-swap JS.
+ *
+ * @param string $key       Button key (connect / call / text / email).
+ * @param array  $cfg       Saved button settings.
+ * @param array  $options   Library options map.
+ */
+$render_icon_picker = static function ( string $key, array $cfg, array $options ): void {
+	$current_lib = (string) ( $cfg['icon_library'] ?? 'fa-solid' );
+	if ( ! in_array( $current_lib, [ 'none', 'fa-solid', 'fa-regular' ], true ) ) {
+		$current_lib = 'fa-solid';
+	}
 
-	return sprintf(
-		/* translators: 1-3: example slugs per library */
-		__( 'Type the icon slug from your selected library:<br>• <strong>Font Awesome</strong> (<a href="https://fontawesome.com/icons?ic=free" target="_blank" rel="noopener">browse</a>) — e.g. <code>%1$s</code> (no <code>fa-</code> prefix)<br>• <strong>Ionicons</strong> (<a href="https://ionic.io/ionicons" target="_blank" rel="noopener">browse</a>) — e.g. <code>%2$s</code> (no <code>-outline</code> suffix)<br>• <strong>Dripicons</strong> (<a href="http://demo.amitjakhu.com/dripicons/" target="_blank" rel="noopener">browse</a>) — full class, e.g. <code>%3$s</code>', 'bspe-connect' ),
-		esc_html( $ex['fa'] ),
-		esc_html( $ex['ion'] ),
-		esc_html( $ex['drip'] )
+	Components::row(
+		__( 'Icon library', 'bspe-connect' ),
+		static function () use ( $key, $current_lib, $options ): void {
+			Components::select(
+				'bspe[buttons][' . $key . '][icon_library]',
+				$current_lib,
+				$options,
+				[ 'data' => [ 'bspe-icon-library-select' => $key ] ]
+			);
+		},
+		[ 'description' => __( 'Pick "No icon" for a label-only button, or one of the Font Awesome variants for a filled / outline glyph.', 'bspe-connect' ) ]
 	);
+
+	foreach ( [ 'fa-solid', 'fa-regular' ] as $lib ) :
+		Components::row(
+			__( 'Icon', 'bspe-connect' ),
+			static function () use ( $cfg, $key, $lib ): void {
+				Components::library_icon_picker( 'bspe[buttons][' . $key . '][icon]', (string) ( $cfg['icon'] ?? '' ), $key, $lib );
+			},
+			[ 'data' => [ 'bspe-icon-pane' => $lib, 'bspe-button' => $key ] ]
+		);
+	endforeach;
 };
 
 Components::open_form( 'buttons', $action_url );
@@ -80,35 +96,7 @@ Components::row(
 	},
 	[ 'id' => 'bspe-buttons-connect-label' ]
 );
-$connect_lib = (string) ( $connect['icon_library'] ?? 'none' );
-Components::row(
-	__( 'Icon library', 'bspe-connect' ),
-	static function () use ( $connect_lib, $library_options ): void {
-		Components::select(
-			'bspe[buttons][connect][icon_library]',
-			$connect_lib,
-			$library_options,
-			[ 'data' => [ 'bspe-icon-library-select' => 'connect' ] ]
-		);
-	},
-	[ 'description' => __( 'Switch live between bundled brand SVGs, Font Awesome, Ionicons, Dripicons, or no icon at all.', 'bspe-connect' ) ]
-);
-Components::row(
-	__( 'Icon', 'bspe-connect' ),
-	static function () use ( $connect ): void {
-		Components::icon_radio( 'bspe[buttons][connect][icon]', (string) ( $connect['icon'] ?? 'connect-1' ), 'connect' );
-	},
-	[ 'data' => [ 'bspe-icon-pane' => 'brand', 'bspe-button' => 'connect' ] ]
-);
-foreach ( [ 'fa-solid', 'fa-regular', 'ion-filled', 'ion-outline', 'dripicons' ] as $lib ) :
-	Components::row(
-		__( 'Icon', 'bspe-connect' ),
-		static function () use ( $connect, $lib ): void {
-			Components::library_icon_picker( 'bspe[buttons][connect][icon]', (string) ( $connect['icon'] ?? '' ), 'connect', $lib );
-		},
-		[ 'data' => [ 'bspe-icon-pane' => $lib, 'bspe-button' => 'connect' ] ]
-	);
-endforeach;
+$render_icon_picker( 'connect', $connect, $library_options );
 Components::close_card();
 
 /* ----------------- Call ----------------- */
@@ -148,34 +136,7 @@ Components::row(
 	},
 	[ 'id' => 'bspe-buttons-call-label' ]
 );
-$call_lib = (string) ( $call['icon_library'] ?? 'brand' );
-Components::row(
-	__( 'Icon library', 'bspe-connect' ),
-	static function () use ( $call_lib, $library_options ): void {
-		Components::select(
-			'bspe[buttons][call][icon_library]',
-			$call_lib,
-			$library_options,
-			[ 'data' => [ 'bspe-icon-library-select' => 'call' ] ]
-		);
-	}
-);
-Components::row(
-	__( 'Icon', 'bspe-connect' ),
-	static function () use ( $call ): void {
-		Components::icon_radio( 'bspe[buttons][call][icon]', (string) ( $call['icon'] ?? 'call-1' ), 'call' );
-	},
-	[ 'data' => [ 'bspe-icon-pane' => 'brand', 'bspe-button' => 'call' ] ]
-);
-foreach ( [ 'fa-solid', 'fa-regular', 'ion-filled', 'ion-outline', 'dripicons' ] as $lib ) :
-	Components::row(
-		__( 'Icon', 'bspe-connect' ),
-		static function () use ( $call, $lib ): void {
-			Components::library_icon_picker( 'bspe[buttons][call][icon]', (string) ( $call['icon'] ?? '' ), 'call', $lib );
-		},
-		[ 'data' => [ 'bspe-icon-pane' => $lib, 'bspe-button' => 'call' ] ]
-	);
-endforeach;
+$render_icon_picker( 'call', $call, $library_options );
 Components::close_card();
 
 /* ----------------- Text ----------------- */
@@ -224,34 +185,7 @@ Components::row(
 	},
 	[ 'id' => 'bspe-buttons-text-label' ]
 );
-$text_lib = (string) ( $text['icon_library'] ?? 'brand' );
-Components::row(
-	__( 'Icon library', 'bspe-connect' ),
-	static function () use ( $text_lib, $library_options ): void {
-		Components::select(
-			'bspe[buttons][text][icon_library]',
-			$text_lib,
-			$library_options,
-			[ 'data' => [ 'bspe-icon-library-select' => 'text' ] ]
-		);
-	}
-);
-Components::row(
-	__( 'Icon', 'bspe-connect' ),
-	static function () use ( $text ): void {
-		Components::icon_radio( 'bspe[buttons][text][icon]', (string) ( $text['icon'] ?? 'text-1' ), 'text' );
-	},
-	[ 'data' => [ 'bspe-icon-pane' => 'brand', 'bspe-button' => 'text' ] ]
-);
-foreach ( [ 'fa-solid', 'fa-regular', 'ion-filled', 'ion-outline', 'dripicons' ] as $lib ) :
-	Components::row(
-		__( 'Icon', 'bspe-connect' ),
-		static function () use ( $text, $lib ): void {
-			Components::library_icon_picker( 'bspe[buttons][text][icon]', (string) ( $text['icon'] ?? '' ), 'text', $lib );
-		},
-		[ 'data' => [ 'bspe-icon-pane' => $lib, 'bspe-button' => 'text' ] ]
-	);
-endforeach;
+$render_icon_picker( 'text', $text, $library_options );
 Components::close_card();
 
 /* ----------------- Email ----------------- */
@@ -276,34 +210,7 @@ Components::row(
 	},
 	[ 'id' => 'bspe-buttons-email-label' ]
 );
-$email_lib = (string) ( $email['icon_library'] ?? 'brand' );
-Components::row(
-	__( 'Icon library', 'bspe-connect' ),
-	static function () use ( $email_lib, $library_options ): void {
-		Components::select(
-			'bspe[buttons][email][icon_library]',
-			$email_lib,
-			$library_options,
-			[ 'data' => [ 'bspe-icon-library-select' => 'email' ] ]
-		);
-	}
-);
-Components::row(
-	__( 'Icon', 'bspe-connect' ),
-	static function () use ( $email ): void {
-		Components::icon_radio( 'bspe[buttons][email][icon]', (string) ( $email['icon'] ?? 'email-1' ), 'email' );
-	},
-	[ 'data' => [ 'bspe-icon-pane' => 'brand', 'bspe-button' => 'email' ] ]
-);
-foreach ( [ 'fa-solid', 'fa-regular', 'ion-filled', 'ion-outline', 'dripicons' ] as $lib ) :
-	Components::row(
-		__( 'Icon', 'bspe-connect' ),
-		static function () use ( $email, $lib ): void {
-			Components::library_icon_picker( 'bspe[buttons][email][icon]', (string) ( $email['icon'] ?? '' ), 'email', $lib );
-		},
-		[ 'data' => [ 'bspe-icon-pane' => $lib, 'bspe-button' => 'email' ] ]
-	);
-endforeach;
+$render_icon_picker( 'email', $email, $library_options );
 Components::close_card();
 
 Components::close_form();

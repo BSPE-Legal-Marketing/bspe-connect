@@ -16,8 +16,8 @@
 	--bspe-bubble-fg: #351E28;
 	--bspe-accent: #3AAFB9;
 	--bspe-bar-h: 52px;
-	--bspe-icon-size: 18px;
-	--bspe-label-size: 11px;
+	--bspe-icon-size: 16px;
+	--bspe-label-size: 12px;
 	--bspe-ease: cubic-bezier(0.16, 1, 0.3, 1);
 	--bspe-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 
@@ -82,7 +82,7 @@
 	border-right: 1px solid rgba(250, 247, 242, 0.06);
 	border-radius: 0;
 	font: inherit;
-	font-size: var(--bspe-label-size, 11px);
+	font-size: var(--bspe-label-size, 12px);
 	font-weight: 500;
 	letter-spacing: 0.02em;
 	line-height: 1.2;
@@ -190,16 +190,16 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: calc(var(--bspe-icon-size, 18px) + 4px);
-	height: calc(var(--bspe-icon-size, 18px) + 4px);
+	width: calc(var(--bspe-icon-size, 16px) + 4px);
+	height: calc(var(--bspe-icon-size, 16px) + 4px);
 	color: inherit;
 }
 
 /* Brand SVG via mask-image so the active button_fg color themes it. */
 #bspe-connect .bspe-connect__icon-svg {
 	display: block;
-	width: var(--bspe-icon-size, 18px);
-	height: var(--bspe-icon-size, 18px);
+	width: var(--bspe-icon-size, 16px);
+	height: var(--bspe-icon-size, 16px);
 	background: currentColor;
 	-webkit-mask-image: var(--bspe-icon-url);
 	        mask-image: var(--bspe-icon-url);
@@ -217,7 +217,7 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	font-size: var(--bspe-icon-size, 18px);
+	font-size: var(--bspe-icon-size, 16px);
 	line-height: 1;
 	color: inherit;
 }
@@ -225,16 +225,16 @@
 /* Ionicons web component */
 #bspe-connect .bspe-connect__icon-ion {
 	display: inline-flex;
-	font-size: var(--bspe-icon-size, 18px);
-	width: var(--bspe-icon-size, 18px);
-	height: var(--bspe-icon-size, 18px);
+	font-size: var(--bspe-icon-size, 16px);
+	width: var(--bspe-icon-size, 16px);
+	height: var(--bspe-icon-size, 16px);
 	color: inherit;
 }
 
 /* User-uploaded Connect avatar: keep full color, circular crop. */
 #bspe-connect .bspe-connect__icon-img {
-	width: calc(var(--bspe-icon-size, 18px) + 6px);
-	height: calc(var(--bspe-icon-size, 18px) + 6px);
+	width: calc(var(--bspe-icon-size, 16px) + 6px);
+	height: calc(var(--bspe-icon-size, 16px) + 6px);
 	border-radius: 50%;
 	object-fit: cover;
 	display: block;
@@ -242,20 +242,11 @@
 
 #bspe-connect .bspe-connect__btn .bspe-connect__label {
 	color: inherit;
-	font-size: var(--bspe-label-size, 11px);
+	font-size: var(--bspe-label-size, 12px);
 	max-width: 100%;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-}
-
-/* Label-only buttons (icon_library = none) — give the label more
-   weight so it doesn't look like a tiny stranded word in a tall row. */
-#bspe-connect .bspe-connect__btn:not(:has(.bspe-connect__icon)) .bspe-connect__label {
-	font-size: calc(var(--bspe-label-size, 11px) + 2px);
-	font-weight: 600;
-	letter-spacing: 0.04em;
-	text-transform: uppercase;
 }
 
 /* ---------------------------------------------------------------------- */

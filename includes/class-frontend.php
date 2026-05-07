@@ -201,18 +201,21 @@ final class Frontend {
 	 * nothing to load for those.
 	 */
 	private static function enqueue_icon_libraries(): void {
-		$libraries = [];
+		// Only Font Awesome is supported (v2.1.4+). Enqueue the CDN if any
+		// configured button uses fa-solid or fa-regular.
+		$needs_fa = false;
 		foreach ( [ 'connect', 'call', 'text', 'email' ] as $key ) {
 			if ( ! Settings::get( "buttons.{$key}.enabled", false ) ) {
 				continue;
 			}
-			$lib = (string) Settings::get( "buttons.{$key}.icon_library", 'brand' );
-			if ( '' !== $lib && 'brand' !== $lib ) {
-				$libraries[ self::library_family( $lib ) ] = true;
+			$lib = (string) Settings::get( "buttons.{$key}.icon_library", 'fa-solid' );
+			if ( 0 === strpos( $lib, 'fa-' ) ) {
+				$needs_fa = true;
+				break;
 			}
 		}
 
-		if ( isset( $libraries['fa'] ) ) {
+		if ( $needs_fa ) {
 			wp_enqueue_style(
 				'bspe-connect-fa',
 				'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',
@@ -220,39 +223,6 @@ final class Frontend {
 				'6.5.0'
 			);
 		}
-
-		if ( isset( $libraries['ion'] ) ) {
-			// Ionicons web components — single-script CDN bundle works in modern browsers.
-			wp_enqueue_script(
-				'bspe-connect-ionicons',
-				'https://unpkg.com/ionicons@7.1.0/dist/ionicons.js',
-				[],
-				'7.1.0',
-				[ 'in_footer' => true, 'strategy' => 'defer' ]
-			);
-		}
-
-		if ( isset( $libraries['drip'] ) ) {
-			wp_enqueue_style(
-				'bspe-connect-dripicons',
-				'https://cdn.jsdelivr.net/npm/dripicons-v2@2.0.0/webfont/webfont.css',
-				[],
-				'2.0.0'
-			);
-		}
-	}
-
-	/**
-	 * Given an icon-library setting value (e.g. "fa-solid", "ion-outline"),
-	 * return the CDN family key ("fa", "ion", "drip", "brand").
-	 */
-	private static function library_family( string $library ): string {
-		if ( 'none' === $library )                             return 'none';
-		if ( 'brand' === $library )                            return 'brand';
-		if ( 0 === strpos( $library, 'fa-' ) )                 return 'fa';
-		if ( 0 === strpos( $library, 'ion-' ) )                return 'ion';
-		if ( 'dripicons' === $library )                        return 'drip';
-		return 'brand';
 	}
 
 	/**
@@ -352,15 +322,18 @@ final class Frontend {
 				continue;
 			}
 
-			$icon_library = (string) ( $cfg['icon_library'] ?? 'brand' );
-			$icon_key     = (string) ( $cfg['icon'] ?? "{$key}-1" );
+			[ $icon_library, $icon_key ] = self::migrate_icon_settings(
+				(string) ( $cfg['icon_library'] ?? 'fa-solid' ),
+				(string) ( $cfg['icon'] ?? '' ),
+				$key
+			);
 
 			$entry = [
 				'key'          => $key,
 				'label'        => (string) ( $cfg['label'] ?? ucfirst( $key ) ),
 				'icon_library' => $icon_library,
 				'icon'         => $icon_key,
-				'icon_url'     => 'brand' === $icon_library ? self::icon_url( $icon_key, $key ) : '',
+				'icon_url'     => '',
 				'href'         => '#',
 				'tag'          => 'button',
 				'attrs'        => [],
@@ -398,6 +371,63 @@ final class Frontend {
 
 	private static function digits( string $value ): string {
 		return preg_replace( '/\D/', '', $value ) ?? '';
+	}
+
+	/**
+	 * Migrate pre-v2.1.4 icon settings (brand, ion-*, dripicons) to a
+	 * supported library + name on the fly so existing client configs
+	 * keep rendering after upgrade until the next save.
+	 *
+	 * @return array{0:string,1:string}
+	 */
+	private static function migrate_icon_settings( string $library, string $icon, string $type ): array {
+		$library = strtolower( trim( $library ) );
+		$icon    = trim( $icon );
+
+		// "none" stays as-is — no icon rendered.
+		if ( 'none' === $library ) {
+			return [ 'none', '' ];
+		}
+
+		if ( 'fa-solid' === $library || 'fa-regular' === $library ) {
+			if ( '' === $icon ) {
+				$icon = self::default_fa_icon_for_type( $type );
+			}
+			return [ $library, $icon ];
+		}
+
+		// Legacy library values — map to fa-solid + a sensible icon.
+		$legacy_map = [
+			'connect-1' => 'comments',
+			'connect-2' => 'comment-dots',
+			'connect-3' => 'message',
+			'call-1'    => 'phone',
+			'call-2'    => 'mobile',
+			'call-3'    => 'phone-volume',
+			'text-1'    => 'comment-dots',
+			'text-2'    => 'comments',
+			'text-3'    => 'message',
+			'email-1'   => 'envelope',
+			'email-2'   => 'envelope-open',
+			'email-3'   => 'at',
+		];
+
+		if ( isset( $legacy_map[ $icon ] ) ) {
+			return [ 'fa-solid', $legacy_map[ $icon ] ];
+		}
+
+		// Anything we can't map → button-type default.
+		return [ 'fa-solid', self::default_fa_icon_for_type( $type ) ];
+	}
+
+	private static function default_fa_icon_for_type( string $type ): string {
+		switch ( $type ) {
+			case 'connect': return 'comments';
+			case 'call':    return 'phone';
+			case 'text':    return 'comment-dots';
+			case 'email':   return 'envelope';
+		}
+		return 'phone';
 	}
 
 	private static function icon_url( string $icon_key, string $type ): string {

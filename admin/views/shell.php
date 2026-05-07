@@ -36,6 +36,15 @@ $svg_kses   = \BSPE\Connect\Admin\Admin::svg_kses();
 				</div>
 			</div>
 			<div class="bspe-header__meta">
+				<a class="bspe-built-by"
+					href="https://bsplegalmarketing.com/"
+					target="_blank"
+					rel="noopener"
+					title="<?php esc_attr_e( 'Visit BSPE Legal Marketing', 'bspe-connect' ); ?>"
+				>
+					<?php esc_html_e( 'Built by', 'bspe-connect' ); ?>
+					<strong><?php esc_html_e( 'BSPE Legal Marketing', 'bspe-connect' ); ?></strong>
+				</a>
 				<span class="bspe-version" aria-label="<?php esc_attr_e( 'Plugin version', 'bspe-connect' ); ?>">
 					v<?php echo esc_html( BSPE_CONNECT_VERSION ); ?>
 				</span>

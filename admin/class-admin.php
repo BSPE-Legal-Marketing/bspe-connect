@@ -137,10 +137,9 @@ final class Admin {
 			true
 		);
 
-		// On the Buttons tab the visual icon picker needs the icon-library
-		// glyphs themselves (Font Awesome / Ionicons / Dripicons) so the
-		// previews render real icons rather than empty squares. Other tabs
-		// don't show the picker, so we only enqueue when on the Buttons tab.
+		// On the Buttons tab the visual icon picker needs Font Awesome
+		// loaded so the previews render real glyphs. Other tabs skip the
+		// load.
 		$active_tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( (string) $_GET['tab'] ) ) : 'general'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only navigation
 		if ( 'buttons' === $active_tab ) {
 			wp_enqueue_style(
@@ -148,19 +147,6 @@ final class Admin {
 				'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',
 				[],
 				'6.5.0'
-			);
-			wp_enqueue_script(
-				'bspe-connect-ionicons',
-				'https://unpkg.com/ionicons@7.1.0/dist/ionicons.js',
-				[],
-				'7.1.0',
-				[ 'in_footer' => true, 'strategy' => 'defer' ]
-			);
-			wp_enqueue_style(
-				'bspe-connect-dripicons',
-				'https://cdn.jsdelivr.net/npm/dripicons-v2@2.0.0/webfont/webfont.css',
-				[],
-				'2.0.0'
 			);
 		}
 	}

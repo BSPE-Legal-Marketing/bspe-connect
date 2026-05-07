@@ -435,57 +435,28 @@ final class Components {
 	public static function icon_catalog(): array {
 		return [
 			'connect' => [
-				'brand'       => [ 'connect-1', 'connect-2', 'connect-3' ],
 				'fa-solid'    => [ 'comment', 'comment-dots', 'comments', 'message', 'paper-plane' ],
 				'fa-regular'  => [ 'comment', 'comment-dots', 'comments', 'message', 'paper-plane' ],
-				'ion-filled'  => [ 'chatbox', 'chatbubble', 'chatbubbles' ],
-				'ion-outline' => [ 'chatbox', 'chatbubble', 'chatbubbles' ],
-				'dripicons'   => [ 'dripicons-message', 'dripicons-message-reply', 'dripicons-conversation' ],
 			],
 			'call'    => [
-				'brand'       => [ 'call-1', 'call-2', 'call-3' ],
 				'fa-solid'    => [ 'phone', 'mobile-screen-button', 'mobile', 'phone-flip', 'phone-volume' ],
 				'fa-regular'  => [ 'phone', 'mobile-screen-button', 'mobile', 'phone-flip', 'phone-volume' ],
-				'ion-filled'  => [ 'call' ],
-				'ion-outline' => [ 'call' ],
-				'dripicons'   => [ 'dripicons-phone' ],
 			],
 			'text'    => [
-				'brand'       => [ 'text-1', 'text-2', 'text-3' ],
 				'fa-solid'    => [ 'comment', 'comment-dots', 'comments', 'message', 'paper-plane' ],
 				'fa-regular'  => [ 'comment', 'comment-dots', 'comments', 'message', 'paper-plane' ],
-				'ion-filled'  => [ 'chatbox', 'chatbubble', 'chatbubbles' ],
-				'ion-outline' => [ 'chatbox', 'chatbubble', 'chatbubbles' ],
-				'dripicons'   => [ 'dripicons-message', 'dripicons-message-reply' ],
 			],
 			'email'   => [
-				'brand'       => [ 'email-1', 'email-2', 'email-3' ],
 				'fa-solid'    => [ 'envelope', 'envelope-open', 'paper-plane', 'at' ],
 				'fa-regular'  => [ 'envelope', 'envelope-open', 'paper-plane', 'at' ],
-				'ion-filled'  => [ 'mail' ],
-				'ion-outline' => [ 'mail' ],
-				'dripicons'   => [ 'dripicons-mail' ],
 			],
 		];
 	}
 
 	private static function render_library_glyph( string $library, string $icon_name ): void {
-		switch ( $library ) {
-			case 'fa-solid':
-			case 'fa-regular':
-				$style = substr( $library, 3 );
-				echo '<i class="fa-' . esc_attr( $style ) . ' fa-' . esc_attr( $icon_name ) . '" aria-hidden="true"></i>';
-				return;
-			case 'ion-filled':
-				echo '<ion-icon name="' . esc_attr( $icon_name ) . '" aria-hidden="true"></ion-icon>';
-				return;
-			case 'ion-outline':
-				$ion_full = ( substr( $icon_name, -8 ) !== '-outline' ) ? $icon_name . '-outline' : $icon_name;
-				echo '<ion-icon name="' . esc_attr( $ion_full ) . '" aria-hidden="true"></ion-icon>';
-				return;
-			case 'dripicons':
-				echo '<i class="' . esc_attr( $icon_name ) . '" aria-hidden="true"></i>';
-				return;
+		if ( 'fa-solid' === $library || 'fa-regular' === $library ) {
+			$style = substr( $library, 3 );
+			echo '<i class="fa-' . esc_attr( $style ) . ' fa-' . esc_attr( $icon_name ) . '" aria-hidden="true"></i>';
 		}
 	}
 

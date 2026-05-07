@@ -26,9 +26,37 @@ final class Settings_Saver {
 
 	private const ALLOWED_TABS = [ 'general', 'buttons', 'form', 'design', 'display' ];
 
-	private const ALLOWED_ICONS = [ 'connect-1', 'connect-2', 'connect-3', 'call-1', 'call-2', 'call-3', 'text-1', 'text-2', 'text-3', 'email-1', 'email-2', 'email-3' ];
+	private const ALLOWED_ICON_LIBRARIES = [ 'none', 'fa-solid', 'fa-regular' ];
 
-	private const ALLOWED_ICON_LIBRARIES = [ 'none', 'brand', 'fa-solid', 'fa-regular', 'ion-filled', 'ion-outline', 'dripicons' ];
+	/**
+	 * Drop-in replacements for legacy library / icon values that were
+	 * removed in v2.1.4. Anything not listed here falls back to the
+	 * button-type default below.
+	 *
+	 * @var array<string,array{0:string,1:string}>
+	 */
+	private const LEGACY_ICON_MIGRATIONS = [
+		// brand → FA solid
+		'connect-1' => [ 'fa-solid', 'comments' ],
+		'connect-2' => [ 'fa-solid', 'comment-dots' ],
+		'connect-3' => [ 'fa-solid', 'message' ],
+		'call-1'    => [ 'fa-solid', 'phone' ],
+		'call-2'    => [ 'fa-solid', 'mobile' ],
+		'call-3'    => [ 'fa-solid', 'phone-volume' ],
+		'text-1'    => [ 'fa-solid', 'comment-dots' ],
+		'text-2'    => [ 'fa-solid', 'comments' ],
+		'text-3'    => [ 'fa-solid', 'message' ],
+		'email-1'   => [ 'fa-solid', 'envelope' ],
+		'email-2'   => [ 'fa-solid', 'envelope-open' ],
+		'email-3'   => [ 'fa-solid', 'at' ],
+	];
+
+	private const FALLBACK_FA_ICON_BY_TYPE = [
+		'connect' => 'comments',
+		'call'    => 'phone',
+		'text'    => 'comment-dots',
+		'email'   => 'envelope',
+	];
 
 	private const ALLOWED_GOOGLE_FONTS = [ 'DM Sans', 'Inter', 'Lato', 'Roboto', 'Open Sans', 'Source Sans 3', 'Poppins', 'Manrope', 'Nunito', 'Work Sans', 'Plus Jakarta Sans', 'IBM Plex Sans', 'Figtree', 'Montserrat', 'Public Sans' ];
 
@@ -161,7 +189,11 @@ final class Settings_Saver {
 
 		// Connect.
 		$connect          = is_array( $input['connect'] ?? null ) ? $input['connect'] : [];
-		$connect_lib      = self::sanitize_icon_library( (string) ( $connect['icon_library'] ?? 'none' ) );
+		$connect_lib_raw  = (string) ( $connect['icon_library'] ?? 'none' );
+		// "none" survives sanitize unchanged; legacy values get migrated.
+		$connect_lib      = 'none' === strtolower( trim( $connect_lib_raw ) )
+			? 'none'
+			: self::sanitize_icon_library( $connect_lib_raw );
 		$out['connect']   = [
 			'enabled'      => ! empty( $connect['enabled'] ),
 			'label'        => sanitize_text_field( (string) ( $connect['label'] ?? 'Connect' ) ),
@@ -171,7 +203,7 @@ final class Settings_Saver {
 
 		// Call.
 		$call           = is_array( $input['call'] ?? null ) ? $input['call'] : [];
-		$call_lib       = self::sanitize_icon_library( (string) ( $call['icon_library'] ?? 'brand' ) );
+		$call_lib       = self::sanitize_icon_library( (string) ( $call['icon_library'] ?? 'fa-solid' ) );
 		$out['call']    = [
 			'enabled'      => ! empty( $call['enabled'] ),
 			'phone'        => self::sanitize_phone( (string) ( $call['phone'] ?? '' ) ),
@@ -183,7 +215,7 @@ final class Settings_Saver {
 		// Text.
 		$text           = is_array( $input['text'] ?? null ) ? $input['text'] : [];
 		$text_mode      = (string) ( $text['mode'] ?? 'sms' );
-		$text_lib       = self::sanitize_icon_library( (string) ( $text['icon_library'] ?? 'brand' ) );
+		$text_lib       = self::sanitize_icon_library( (string) ( $text['icon_library'] ?? 'fa-solid' ) );
 		$out['text']    = [
 			'enabled'      => ! empty( $text['enabled'] ),
 			'mode'         => in_array( $text_mode, [ 'sms', 'inline' ], true ) ? $text_mode : 'sms',
@@ -195,7 +227,7 @@ final class Settings_Saver {
 
 		// Email.
 		$email          = is_array( $input['email'] ?? null ) ? $input['email'] : [];
-		$email_lib      = self::sanitize_icon_library( (string) ( $email['icon_library'] ?? 'brand' ) );
+		$email_lib      = self::sanitize_icon_library( (string) ( $email['icon_library'] ?? 'fa-solid' ) );
 		$out['email']   = [
 			'enabled'      => ! empty( $email['enabled'] ),
 			'label'        => sanitize_text_field( (string) ( $email['label'] ?? 'Email' ) ),
@@ -212,33 +244,53 @@ final class Settings_Saver {
 		return strlen( $digits ) === 10 ? $digits : ( '' === $digits ? '' : substr( $digits, 0, 10 ) );
 	}
 
+	/**
+	 * Sanitize an icon library value. Migrates pre-v2.1.4 values
+	 * (brand, ion-*, dripicons) to fa-solid silently so existing client
+	 * configs don't break on upgrade.
+	 */
 	private static function sanitize_icon_library( string $raw ): string {
 		$raw = strtolower( trim( $raw ) );
-		return in_array( $raw, self::ALLOWED_ICON_LIBRARIES, true ) ? $raw : 'brand';
+		if ( in_array( $raw, self::ALLOWED_ICON_LIBRARIES, true ) ) {
+			return $raw;
+		}
+		// Anything legacy → fa-solid.
+		return 'fa-solid';
 	}
 
 	/**
-	 * Sanitize the per-button icon name relative to its selected library.
-	 * Brand library uses the bundled SVG list; third-party libs accept any
-	 * value matching their naming pattern.
+	 * Sanitize the per-button icon name. Migrates legacy brand / ion /
+	 * drip icon names to FA equivalents so upgrading clients see a
+	 * sensible default rather than an empty icon slot.
 	 */
 	private static function sanitize_icon_name( string $raw, string $library, string $type ): string {
 		$raw = trim( $raw );
+
+		// Library = none → no icon, regardless of stored name.
+		if ( 'none' === $library ) {
+			return '';
+		}
+
+		// Empty name → button-type default.
 		if ( '' === $raw ) {
-			return 'brand' === $library ? $type . '-1' : '';
+			return self::FALLBACK_FA_ICON_BY_TYPE[ $type ] ?? 'phone';
 		}
 
-		if ( 'brand' === $library ) {
-			$raw = strtolower( $raw );
-			if ( in_array( $raw, self::ALLOWED_ICONS, true ) && str_starts_with( $raw, $type . '-' ) ) {
-				return $raw;
-			}
-			return $type . '-1';
+		// Migrate legacy slugs (connect-1, dripicons-message, etc.).
+		$lower = strtolower( $raw );
+		if ( isset( self::LEGACY_ICON_MIGRATIONS[ $lower ] ) ) {
+			return self::LEGACY_ICON_MIGRATIONS[ $lower ][1];
+		}
+		if ( 0 === strpos( $lower, 'dripicons-' ) ) {
+			return self::FALLBACK_FA_ICON_BY_TYPE[ $type ] ?? 'phone';
+		}
+		if ( substr( $lower, -8 ) === '-outline' ) {
+			$lower = substr( $lower, 0, -8 );
 		}
 
-		// FA / Ionicons / Dripicons — accept any kebab-case-ish identifier.
-		$cleaned = strtolower( preg_replace( '/[^a-z0-9-]/i', '', $raw ) ?? '' );
-		return substr( $cleaned, 0, 60 );
+		// FA — accept any kebab-case identifier.
+		$cleaned = preg_replace( '/[^a-z0-9-]/i', '', $lower ) ?? '';
+		return '' === $cleaned ? ( self::FALLBACK_FA_ICON_BY_TYPE[ $type ] ?? 'phone' ) : substr( $cleaned, 0, 60 );
 	}
 
 	/* -----------------------------------------------------------------

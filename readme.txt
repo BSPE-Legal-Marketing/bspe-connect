@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.1.3
+Stable tag: 2.1.4
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,32 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.1.4 =
+* Icon libraries: removed Brand SVGs, Ionicons, and Dripicons. Only
+  Font Awesome 6 Free (Solid + Regular variants) and "No icon" are
+  available now. Drops a CSS + JS dependency on every public page that
+  used Ionicons (web component script ~70KB) or Dripicons (~80KB
+  webfont) and removes the bundled brand SVGs (~15KB) — net public
+  bundle weight is smaller.
+* Defaults: Call / Text / Email default to Font Awesome Solid with
+  sensible icons (phone / comment-dots / envelope). Connect stays
+  label-only. Existing settings pointing at brand / Ionicons /
+  Dripicons icons get migrated to a Font Awesome equivalent at read
+  time so upgrading clients see no broken icons before their next save.
+* Default sizes: icon 16 px (was 18), label 12 px (was 11). Smaller
+  bar footprint by default; still adjustable in Design -> Sizing.
+* Connect button label size now matches the others — removed the
+  uppercase / bumped-size treatment that fired when the button had
+  no icon.
+* Design tab: removed the "BSPE brand palette" reference card. The
+  default color values in the Colors card already preserve the brand;
+  the read-only swatches were redundant.
+* Admin header: new "Built by <strong>BSPE Legal Marketing</strong>"
+  link in the top-right meta area, alongside the version badge. Links
+  to https://bsplegalmarketing.com/ in a new tab.
+* Plugin Author URI in the header docblock updated to
+  https://bsplegalmarketing.com/ (was https://bspelegalmarketing.com).
 
 = 2.1.3 =
 * "Save changes" button on every settings form now sits at 50% opacity
