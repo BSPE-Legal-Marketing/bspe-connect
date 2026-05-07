@@ -20,7 +20,10 @@
 	--bspe-label-size: 12px;
 	--bspe-label-weight: 500;
 	--bspe-label-transform: uppercase;
-	--bspe-button-padding-y: 6px;
+	--bspe-button-padding-top: 6px;
+	--bspe-button-padding-right: 4px;
+	--bspe-button-padding-bottom: 6px;
+	--bspe-button-padding-left: 4px;
 	--bspe-icon-label-gap: 2px;
 	--bspe-ease: cubic-bezier(0.16, 1, 0.3, 1);
 	--bspe-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -79,7 +82,11 @@
 	align-items: center;
 	justify-content: center;
 	gap: var(--bspe-icon-label-gap, 2px);
-	padding: var(--bspe-button-padding-y, 6px) 4px;
+	padding:
+		var(--bspe-button-padding-top, 6px)
+		var(--bspe-button-padding-right, 4px)
+		var(--bspe-button-padding-bottom, 6px)
+		var(--bspe-button-padding-left, 4px);
 	background: var(--bspe-button-bg);
 	color: var(--bspe-button-fg);
 	border: 0;

@@ -262,9 +262,18 @@ final class Frontend {
 		if ( ! in_array( $label_weight, [ 400, 500, 600, 700 ], true ) ) {
 			$label_weight = 500;
 		}
-		$label_transform   = Settings::get( 'design.label_uppercase', true ) ? 'uppercase' : 'none';
-		$button_padding_y  = max( 2, min( 24, (int) Settings::get( 'design.button_padding_y', 6 ) ) );
-		$icon_label_gap    = max( 0, min( 16, (int) Settings::get( 'design.icon_label_gap', 2 ) ) );
+		$label_transform = Settings::get( 'design.label_uppercase', true ) ? 'uppercase' : 'none';
+		// Per-side button padding. If only the legacy button_padding_y is
+		// stored (pre-v2.2.0), use it for top + bottom and apply 4px to
+		// the horizontal sides.
+		$pad_legacy_y    = (int) Settings::get( 'design.button_padding_y', -1 );
+		$default_top     = $pad_legacy_y >= 0 ? $pad_legacy_y : 6;
+		$default_bottom  = $pad_legacy_y >= 0 ? $pad_legacy_y : 6;
+		$pad_top         = max( 0, min( 32, (int) Settings::get( 'design.button_padding_top',    $default_top ) ) );
+		$pad_right       = max( 0, min( 32, (int) Settings::get( 'design.button_padding_right',  4 ) ) );
+		$pad_bottom      = max( 0, min( 32, (int) Settings::get( 'design.button_padding_bottom', $default_bottom ) ) );
+		$pad_left        = max( 0, min( 32, (int) Settings::get( 'design.button_padding_left',   4 ) ) );
+		$icon_label_gap  = max( 0, min( 16, (int) Settings::get( 'design.icon_label_gap', 2 ) ) );
 
 		echo "<style id=\"bspe-connect-vars\">\n";
 		echo ":root, .bspe-connect, #bspe-connect {\n";
@@ -275,7 +284,10 @@ final class Frontend {
 		echo "\t--bspe-label-size: " . esc_html( (string) $label_size ) . "px;\n";
 		echo "\t--bspe-label-weight: " . esc_html( (string) $label_weight ) . ";\n";
 		echo "\t--bspe-label-transform: " . esc_html( $label_transform ) . ";\n";
-		echo "\t--bspe-button-padding-y: " . esc_html( (string) $button_padding_y ) . "px;\n";
+		echo "\t--bspe-button-padding-top: "    . esc_html( (string) $pad_top )    . "px;\n";
+		echo "\t--bspe-button-padding-right: "  . esc_html( (string) $pad_right )  . "px;\n";
+		echo "\t--bspe-button-padding-bottom: " . esc_html( (string) $pad_bottom ) . "px;\n";
+		echo "\t--bspe-button-padding-left: "   . esc_html( (string) $pad_left )   . "px;\n";
 		echo "\t--bspe-icon-label-gap: " . esc_html( (string) $icon_label_gap ) . "px;\n";
 		if ( '' !== $font_family ) {
 			echo "\t--bspe-font-family: " . wp_kses_post( $font_family ) . ";\n";

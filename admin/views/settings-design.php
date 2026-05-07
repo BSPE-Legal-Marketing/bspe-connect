@@ -117,19 +117,76 @@ Components::row(
 		'description' => __( 'Default 12 px. Adjusts the text under each icon.', 'bspe-connect' ),
 	]
 );
+// Per-side button padding. Each input controls one edge so the user can
+// fine-tune top / right / bottom / left independently. Legacy
+// button_padding_y (pre-v2.2.0) populates top + bottom on first read so
+// upgrading installs don't snap back to defaults.
+$legacy_pad_y = (int) ( $design['button_padding_y'] ?? -1 );
+$pad_defaults = [
+	'top'    => $legacy_pad_y >= 0 ? $legacy_pad_y : 6,
+	'right'  => 4,
+	'bottom' => $legacy_pad_y >= 0 ? $legacy_pad_y : 6,
+	'left'   => 4,
+];
+
 Components::row(
-	__( 'Button vertical padding', 'bspe-connect' ),
-	static function () use ( $design ): void {
-		Components::number( 'bspe[design][button_padding_y]', (int) ( $design['button_padding_y'] ?? 6 ), [
-			'min'    => 2,
-			'max'    => 24,
+	__( 'Button padding — top', 'bspe-connect' ),
+	static function () use ( $design, $pad_defaults ): void {
+		Components::number( 'bspe[design][button_padding_top]', (int) ( $design['button_padding_top'] ?? $pad_defaults['top'] ), [
+			'min'    => 0,
+			'max'    => 32,
 			'step'   => 1,
 			'suffix' => __( 'px', 'bspe-connect' ),
 		] );
 	},
 	[
-		'id'          => 'bspe-design-button_padding_y',
-		'description' => __( 'Default 6 px. Space above and below the icon + label inside each bar button — controls overall bar height.', 'bspe-connect' ),
+		'id'          => 'bspe-design-button_padding_top',
+		'description' => __( 'Default 6 px. Space above the icon inside each bar button.', 'bspe-connect' ),
+	]
+);
+Components::row(
+	__( 'Button padding — right', 'bspe-connect' ),
+	static function () use ( $design, $pad_defaults ): void {
+		Components::number( 'bspe[design][button_padding_right]', (int) ( $design['button_padding_right'] ?? $pad_defaults['right'] ), [
+			'min'    => 0,
+			'max'    => 32,
+			'step'   => 1,
+			'suffix' => __( 'px', 'bspe-connect' ),
+		] );
+	},
+	[
+		'id'          => 'bspe-design-button_padding_right',
+		'description' => __( 'Default 4 px. Space to the right of the icon + label.', 'bspe-connect' ),
+	]
+);
+Components::row(
+	__( 'Button padding — bottom', 'bspe-connect' ),
+	static function () use ( $design, $pad_defaults ): void {
+		Components::number( 'bspe[design][button_padding_bottom]', (int) ( $design['button_padding_bottom'] ?? $pad_defaults['bottom'] ), [
+			'min'    => 0,
+			'max'    => 32,
+			'step'   => 1,
+			'suffix' => __( 'px', 'bspe-connect' ),
+		] );
+	},
+	[
+		'id'          => 'bspe-design-button_padding_bottom',
+		'description' => __( 'Default 6 px. Space below the label.', 'bspe-connect' ),
+	]
+);
+Components::row(
+	__( 'Button padding — left', 'bspe-connect' ),
+	static function () use ( $design, $pad_defaults ): void {
+		Components::number( 'bspe[design][button_padding_left]', (int) ( $design['button_padding_left'] ?? $pad_defaults['left'] ), [
+			'min'    => 0,
+			'max'    => 32,
+			'step'   => 1,
+			'suffix' => __( 'px', 'bspe-connect' ),
+		] );
+	},
+	[
+		'id'          => 'bspe-design-button_padding_left',
+		'description' => __( 'Default 4 px. Space to the left of the icon + label.', 'bspe-connect' ),
 	]
 );
 Components::row(

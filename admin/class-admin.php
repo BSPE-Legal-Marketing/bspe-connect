@@ -73,6 +73,13 @@ final class Admin {
 			'icon'  => 'analytics',
 			'hint'  => 'Conversion funnel, top pages, per-event counts',
 		],
+		'logs'        => [
+			'label' => 'Logs',
+			'view'  => 'logs.php',
+			'phase' => 6,
+			'icon'  => 'logs',
+			'hint'  => 'Diagnostics — toggle on to capture form errors, mail dispatch results, anti-spam events',
+		],
 	];
 
 	/**
@@ -89,6 +96,7 @@ final class Admin {
 		'display'   => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 10s2.8-5 8-5 8 5 8 5-2.8 5-8 5-8-5-8-5z"/><circle cx="10" cy="10" r="2"/></svg>',
 		'analytics' => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17h14"/><rect x="5" y="11" width="2.5" height="5" rx=".4"/><rect x="9" y="7" width="2.5" height="9" rx=".4"/><rect x="13" y="3.5" width="2.5" height="12.5" rx=".4"/></svg>',
 		'inbox'     => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 11.5h4l1 2h5l1-2h4"/><path d="M3 11.5l1.7-6a1.5 1.5 0 0 1 1.45-1.1h7.7a1.5 1.5 0 0 1 1.45 1.1L17 11.5"/><rect x="2.5" y="11.5" width="15" height="5" rx="1.4"/></svg>',
+		'logs'      => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h7l3 3v11a1.5 1.5 0 0 1-1.5 1.5h-8.5A1.5 1.5 0 0 1 3.5 17V4.5A1.5 1.5 0 0 1 5 3z"/><path d="M12 3v3.5h3"/><path d="M6.5 11.5h7M6.5 14h5"/></svg>',
 	];
 
 	public static function init(): void {

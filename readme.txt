@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.1.7
+Stable tag: 2.2.0
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,29 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.2.0 =
+* Per-side button padding: replaced the single "Button vertical padding"
+  control with four independent inputs — top / right / bottom / left —
+  in Design -> Sizing & layout. Defaults: top 6, right 4, bottom 6,
+  left 4 px. Existing installs running 2.1.x with a saved
+  button_padding_y value carry that value into the new top + bottom
+  fields automatically.
+* New "Logs" tab in the sidebar — diagnostic ring buffer for
+  troubleshooting. Off by default. Toggle "Enable logging" on, submit
+  a test form, then read back what happened: which anti-spam stage
+  ran, whether mail dispatched, what validation errors fired, etc.
+  Caps at 200 entries, oldest-out, never autoloaded. "Clear logs"
+  button wipes the buffer in one click.
+* Form_Handler now logs every checkpoint at info / warn / error levels:
+  nonce check, honeypot trigger, time trap, rate-limit hit, Turnstile
+  result, validation errors, DB insert, mail send result. Secret
+  values (token / secret / password / api_key / nonce) are auto-redacted
+  before storage.
+* Frontend JS now writes diagnostic console output on form submit
+  failures so DevTools captures non-JSON responses, network errors,
+  and the exact endpoint URL being hit. Useful even when server-side
+  logging is off.
 
 = 2.1.7 =
 * Per-button label overrides: each of Connect / Call / Text / Email now

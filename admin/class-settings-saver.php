@@ -24,7 +24,7 @@ final class Settings_Saver {
 	public const NONCE_ACTION = 'bspe_connect_save';
 	public const NOTICE_KEY   = 'bspe_connect_admin_notice';
 
-	private const ALLOWED_TABS = [ 'general', 'buttons', 'form', 'design', 'display' ];
+	private const ALLOWED_TABS = [ 'general', 'buttons', 'form', 'design', 'display', 'logs' ];
 
 	private const ALLOWED_ICON_LIBRARIES = [ 'none', 'fa-solid', 'fa-regular' ];
 
@@ -96,6 +96,9 @@ final class Settings_Saver {
 				break;
 			case 'display':
 				$existing['display_rules']  = self::sanitize_display_rules( $payload['display_rules'] ?? [], $existing['display_rules'] ?? [] );
+				break;
+			case 'logs':
+				$existing['diagnostics']    = self::sanitize_diagnostics( $payload['diagnostics'] ?? [] );
 				break;
 		}
 
@@ -244,6 +247,17 @@ final class Settings_Saver {
 		];
 
 		return $out;
+	}
+
+	/**
+	 * @param array<string,mixed> $input
+	 *
+	 * @return array<string,mixed>
+	 */
+	private static function sanitize_diagnostics( array $input ): array {
+		return [
+			'logging_enabled' => ! empty( $input['logging_enabled'] ),
+		];
 	}
 
 	/**
@@ -424,16 +438,19 @@ final class Settings_Saver {
 		}
 
 		return [
-			'firm_name'        => sanitize_text_field( (string) ( $input['firm_name'] ?? '' ) ),
-			'colors'           => $out_colors,
-			'icon_size'        => max( 12, min( 48, (int) ( $input['icon_size']  ?? 16 ) ) ),
-			'label_size'       => max( 8,  min( 20, (int) ( $input['label_size'] ?? 12 ) ) ),
-			'label_weight'     => $weight,
-			'label_uppercase'  => ! empty( $input['label_uppercase'] ),
-			'button_padding_y' => max( 2,  min( 24, (int) ( $input['button_padding_y'] ?? 6 ) ) ),
-			'icon_label_gap'   => max( 0,  min( 16, (int) ( $input['icon_label_gap']   ?? 2 ) ) ),
-			'font_mode'        => $font_mode,
-			'google_font'      => $google_font,
+			'firm_name'             => sanitize_text_field( (string) ( $input['firm_name'] ?? '' ) ),
+			'colors'                => $out_colors,
+			'icon_size'             => max( 12, min( 48, (int) ( $input['icon_size']  ?? 16 ) ) ),
+			'label_size'            => max( 8,  min( 20, (int) ( $input['label_size'] ?? 12 ) ) ),
+			'label_weight'          => $weight,
+			'label_uppercase'       => ! empty( $input['label_uppercase'] ),
+			'button_padding_top'    => max( 0, min( 32, (int) ( $input['button_padding_top']    ?? 6 ) ) ),
+			'button_padding_right'  => max( 0, min( 32, (int) ( $input['button_padding_right']  ?? 4 ) ) ),
+			'button_padding_bottom' => max( 0, min( 32, (int) ( $input['button_padding_bottom'] ?? 6 ) ) ),
+			'button_padding_left'   => max( 0, min( 32, (int) ( $input['button_padding_left']   ?? 4 ) ) ),
+			'icon_label_gap'        => max( 0, min( 16, (int) ( $input['icon_label_gap']        ?? 2 ) ) ),
+			'font_mode'             => $font_mode,
+			'google_font'           => $google_font,
 		];
 	}
 

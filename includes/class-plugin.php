@@ -40,6 +40,11 @@ final class Plugin {
 
 		Updater::init();
 
+		// Diagnostics logger — needs the admin-post hook for "Clear logs"
+		// even when logging is disabled (the button stays available so old
+		// entries can be wiped).
+		Logger::init();
+
 		// Form submission handler — registered regardless of context because
 		// admin-ajax.php is reached from the frontend bar but reports is_admin() true.
 		Form_Handler::init();

@@ -36,14 +36,23 @@ final class Form_Handler {
 	}
 
 	public static function handle(): void {
+		Logger::log( 'info', 'Form submit received', [
+			'source'    => isset( $_POST['bspe_source'] ) ? sanitize_key( wp_unslash( (string) $_POST['bspe_source'] ) ) : 'unknown',
+			'has_nonce' => isset( $_POST['bspe_connect_nonce'] ),
+			'has_ts'    => isset( $_POST['bspe_connect_form_ts'] ),
+			'ua'        => isset( $_SERVER['HTTP_USER_AGENT'] ) ? substr( sanitize_text_field( wp_unslash( (string) $_SERVER['HTTP_USER_AGENT'] ) ), 0, 200 ) : '', // phpcs:ignore WordPressVIPMinimum.Variables.ServerVariables.UserControlledHeaders
+		] );
+
 		// 1. Nonce.
 		if ( ! check_ajax_referer( self::NONCE_ACTION, 'bspe_connect_nonce', false ) ) {
+			Logger::log( 'error', 'Nonce check failed (likely page cache serving stale tokens)' );
 			self::error_response( [ '_form' => __( 'Your session expired. Please refresh the page and try again.', 'bspe-connect' ) ] );
 		}
 
 		// 2. Honeypot — silently accept then drop.
 		$honeypot = isset( $_POST['bspe_website'] ) ? trim( wp_unslash( (string) $_POST['bspe_website'] ) ) : '';
 		if ( '' !== $honeypot ) {
+			Logger::log( 'warn', 'Honeypot triggered — silently dropping submission', [ 'value_len' => strlen( $honeypot ) ] );
 			wp_send_json_success( [ 'message' => self::success_message() ] );
 		}
 
@@ -52,6 +61,7 @@ final class Form_Handler {
 		$ts_raw      = isset( $_POST['bspe_connect_form_ts'] ) ? (string) wp_unslash( $_POST['bspe_connect_form_ts'] ) : '';
 		$form_ts     = (int) $ts_raw;
 		if ( $min_seconds > 0 && $form_ts > 0 && ( time() - $form_ts ) < $min_seconds ) {
+			Logger::log( 'warn', 'Time-trap triggered — silently dropping submission', [ 'delta_seconds' => time() - $form_ts, 'min_seconds' => $min_seconds ] );
 			wp_send_json_success( [ 'message' => self::success_message() ] );
 		}
 
@@ -63,6 +73,7 @@ final class Form_Handler {
 			$rate_count = (int) get_transient( $rate_key );
 			$rate_limit = (int) Settings::get( 'form.antispam.rate_limit', 5 );
 			if ( $rate_limit > 0 && $rate_count >= $rate_limit ) {
+				Logger::log( 'warn', 'Rate limit hit', [ 'count' => $rate_count, 'limit' => $rate_limit ] );
 				self::error_response( [ '_form' => __( 'Too many submissions from your address. Please try again later.', 'bspe-connect' ) ], 429 );
 			}
 		}
@@ -75,6 +86,7 @@ final class Form_Handler {
 		if ( $turnstile_enabled && '' !== $secret_key ) {
 			$token = isset( $_POST['cf-turnstile-response'] ) ? trim( wp_unslash( (string) $_POST['cf-turnstile-response'] ) ) : '';
 			if ( '' === $token || ! self::verify_turnstile( $token, $secret_key, $ip_raw ) ) {
+				Logger::log( 'error', 'Turnstile verification failed', [ 'token_present' => '' !== $token ] );
 				self::error_response( [ '_form' => __( 'Captcha verification failed. Please try again.', 'bspe-connect' ) ] );
 			}
 		}
@@ -84,6 +96,7 @@ final class Form_Handler {
 		$fields = self::collect_fields();
 		$errors = self::validate_fields( $fields );
 		if ( ! empty( $errors ) ) {
+			Logger::log( 'warn', 'Validation failed', [ 'errors' => $errors, 'source' => $source ] );
 			self::error_response( $errors );
 		}
 
@@ -122,6 +135,19 @@ final class Form_Handler {
 		if ( $row_id ) {
 			Submissions::update_mail_status( $row_id, $mail_ok ? 'sent' : 'failed' );
 		}
+
+		Logger::log(
+			$mail_ok ? 'info' : 'error',
+			$mail_ok ? 'Submission saved + email dispatched' : 'Submission saved but mail send failed',
+			[
+				'submission_id' => $row_id,
+				'source'        => $source,
+				'mail_to'       => (string) Settings::get( 'form.mail_to', '' ),
+				'mail_from'     => (string) Settings::get( 'form.mail_from', '' ),
+				'mail_status'   => $mail_ok ? 'sent' : 'failed',
+				'page_url'      => $page_url,
+			]
+		);
 
 		// 9. Increment rate-limit transient (1-hour window).
 		if ( '' !== $ip_hash ) {

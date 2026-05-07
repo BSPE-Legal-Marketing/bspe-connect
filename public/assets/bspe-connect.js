@@ -404,15 +404,26 @@
 			// and fetch coerces it to "[object HTMLInputElement]" → 404.
 			var endpoint = form.getAttribute('action') || (data && data.ajaxUrl) || '';
 
+			console.log('[BSPE Connect] Submitting form to', endpoint);
+
 			fetch(endpoint, {
 				method: 'POST',
 				credentials: 'same-origin',
 				body: fd
 			}).then(function (response) {
-				return response.json().catch(function () { return { success: false, data: { errors: { _form: '' } } }; })
-					.then(function (payload) {
-						return { ok: response.ok, status: response.status, payload: payload };
-					});
+				if (!response.ok) {
+					console.warn('[BSPE Connect] Non-OK response', response.status, response.statusText, response.url);
+				}
+				return response.text().then(function (text) {
+					var payload;
+					try {
+						payload = JSON.parse(text);
+					} catch (e) {
+						console.error('[BSPE Connect] Server returned non-JSON. URL:', response.url, ' Status:', response.status, ' Body (first 500):', text.slice(0, 500));
+						payload = { success: false, data: { errors: { _form: '' } } };
+					}
+					return { ok: response.ok, status: response.status, payload: payload };
+				});
 			}).then(function (result) {
 				submitBtn.removeAttribute('aria-busy');
 				submitBtn.disabled = false;
@@ -422,6 +433,8 @@
 					showSuccess(msg);
 					return;
 				}
+
+				console.warn('[BSPE Connect] Submission rejected. Status:', result.status, ' Payload:', result.payload);
 
 				var errors = (result.payload && result.payload.data && result.payload.data.errors) || {};
 				var hadFieldError = false;
@@ -437,9 +450,10 @@
 					setFormError('Something went wrong. Please try again.');
 				}
 				fire('form_error');
-			}).catch(function () {
+			}).catch(function (err) {
 				submitBtn.removeAttribute('aria-busy');
 				submitBtn.disabled = false;
+				console.error('[BSPE Connect] Network error during form submit. Endpoint:', endpoint, ' Error:', err);
 				setFormError('Network error. Please try again.');
 				fire('form_error');
 			});

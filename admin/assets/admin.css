@@ -1386,6 +1386,10 @@
 .bspe-tag--status-failed  { background: rgba(192, 57, 43, 0.08); color: #c0392b; border: 1px solid rgba(192, 57, 43, 0.28); }
 .bspe-tag--status-pending { background: rgba(212, 175, 55, 0.12); color: #8a7320; border: 1px solid rgba(212, 175, 55, 0.32); }
 
+.bspe-tag--log-info  { background: rgba(58, 175, 185, 0.1);  color: var(--bspe-teal-deep); border: 1px solid rgba(58, 175, 185, 0.28); }
+.bspe-tag--log-warn  { background: rgba(212, 175, 55, 0.12); color: #8a7320;               border: 1px solid rgba(212, 175, 55, 0.32); }
+.bspe-tag--log-error { background: rgba(192, 57, 43, 0.08);  color: #c0392b;               border: 1px solid rgba(192, 57, 43, 0.28); }
+
 /* ---------------------------------------------------------------------- */
 /*  Pagination + empty                                                     */
 /* ---------------------------------------------------------------------- */
