@@ -248,6 +248,7 @@ final class Frontend {
 	 * return the CDN family key ("fa", "ion", "drip", "brand").
 	 */
 	private static function library_family( string $library ): string {
+		if ( 'none' === $library )                             return 'none';
 		if ( 'brand' === $library )                            return 'brand';
 		if ( 0 === strpos( $library, 'fa-' ) )                 return 'fa';
 		if ( 0 === strpos( $library, 'ion-' ) )                return 'ion';

@@ -38,12 +38,13 @@ final class Updater {
 		}
 		require_once $puc_path;
 
-		if ( ! defined( self::TOKEN_CONSTANT ) || empty( constant( self::TOKEN_CONSTANT ) ) ) {
-			add_action( 'admin_notices', [ self::class, 'render_missing_token_notice' ] );
-			return;
-		}
-
-		$token   = constant( self::TOKEN_CONSTANT );
+		// Token is OPTIONAL. The repo is public, so PUC works without auth.
+		// A token still helps when configured — it raises GitHub's API rate
+		// limit from 60/hour (anonymous) to 5,000/hour and is required if
+		// the repo is ever flipped back to private.
+		$token   = ( defined( self::TOKEN_CONSTANT ) && '' !== trim( (string) constant( self::TOKEN_CONSTANT ) ) )
+			? (string) constant( self::TOKEN_CONSTANT )
+			: '';
 		$channel = defined( self::CHANNEL_CONSTANT ) ? constant( self::CHANNEL_CONSTANT ) : 'stable';
 		if ( ! in_array( $channel, [ 'stable', 'beta' ], true ) ) {
 			$channel = 'stable';
@@ -62,7 +63,9 @@ final class Updater {
 				$checker->setBranch( 'beta' );
 			}
 
-			$checker->setAuthentication( $token );
+			if ( '' !== $token ) {
+				$checker->setAuthentication( $token );
+			}
 
 			$vcs_api = $checker->getVcsApi();
 			if ( $vcs_api && method_exists( $vcs_api, 'enableReleaseAssets' ) ) {
@@ -79,23 +82,6 @@ final class Updater {
 		} catch ( \Throwable $e ) {
 			error_log( '[BSPE Connect] Updater init failed: ' . $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 		}
-	}
-
-	/**
-	 * Renders a dismissible admin notice when the GitHub token isn't
-	 * configured. Shown only on plugin pages so we don't nag site admins.
-	 */
-	public static function render_missing_token_notice(): void {
-		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( $screen && false === strpos( (string) $screen->id, 'bspe-connect' ) && 'plugins' !== $screen->id ) {
-			return;
-		}
-		$message = sprintf(
-			/* translators: %s: name of the PHP constant to define */
-			esc_html__( 'BSPE Connect: GitHub token not configured — auto-updates disabled. Add %s to wp-config.php to enable updates.', 'bspe-connect' ),
-			'<code>' . esc_html( self::TOKEN_CONSTANT ) . '</code>'
-		);
-		echo '<div class="notice notice-warning is-dismissible"><p>' . wp_kses_post( $message ) . '</p></div>';
 	}
 
 	/**

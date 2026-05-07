@@ -55,39 +55,41 @@ if ( empty( $buttons ) ) {
 			}
 			?>
 			<<?php echo $is_link ? 'a' : 'button'; ?> <?php echo $tag_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- attrs were escaped above ?>>
-				<span class="bspe-connect__icon" aria-hidden="true">
-					<?php
-					if ( $show_image ) :
-						?>
-						<img class="bspe-connect__icon-img" src="<?php echo esc_url( $image_src ); ?>" alt="" />
+				<?php if ( 'none' !== $icon_library ) : ?>
+					<span class="bspe-connect__icon" aria-hidden="true">
 						<?php
-					elseif ( 'brand' === $icon_library && '' !== $icon_url ) :
+						if ( $show_image ) :
+							?>
+							<img class="bspe-connect__icon-img" src="<?php echo esc_url( $image_src ); ?>" alt="" />
+							<?php
+						elseif ( 'brand' === $icon_library && '' !== $icon_url ) :
+							?>
+							<span class="bspe-connect__icon-svg" style="--bspe-icon-url: url(<?php echo esc_url( $icon_url ); ?>);"></span>
+							<?php
+						elseif ( 0 === strpos( $icon_library, 'fa-' ) && '' !== $icon_name ) :
+							$fa_style = substr( $icon_library, 3 );
+							$fa_class = 'fa-' . preg_replace( '/[^a-z0-9-]/i', '', $fa_style ) . ' fa-' . preg_replace( '/[^a-z0-9-]/i', '', $icon_name );
+							?>
+							<i class="bspe-connect__icon-fa <?php echo esc_attr( $fa_class ); ?>" aria-hidden="true"></i>
+							<?php
+						elseif ( 0 === strpos( $icon_library, 'ion-' ) && '' !== $icon_name ) :
+							$ion_variant = substr( $icon_library, 4 );
+							$ion_clean   = preg_replace( '/[^a-z0-9-]/i', '', $icon_name );
+							$ion_full    = ( 'outline' === $ion_variant && substr( $ion_clean, -8 ) !== '-outline' )
+								? $ion_clean . '-outline'
+								: $ion_clean;
+							?>
+							<ion-icon class="bspe-connect__icon-ion" name="<?php echo esc_attr( $ion_full ); ?>" aria-hidden="true"></ion-icon>
+							<?php
+						elseif ( 'dripicons' === $icon_library && '' !== $icon_name ) :
+							$drip_class = preg_replace( '/[^a-z0-9-]/i', '', $icon_name );
+							?>
+							<i class="bspe-connect__icon-drip <?php echo esc_attr( $drip_class ); ?>" aria-hidden="true"></i>
+							<?php
+						endif;
 						?>
-						<span class="bspe-connect__icon-svg" style="--bspe-icon-url: url(<?php echo esc_url( $icon_url ); ?>);"></span>
-						<?php
-					elseif ( 0 === strpos( $icon_library, 'fa-' ) && '' !== $icon_name ) :
-						$fa_style = substr( $icon_library, 3 );
-						$fa_class = 'fa-' . preg_replace( '/[^a-z0-9-]/i', '', $fa_style ) . ' fa-' . preg_replace( '/[^a-z0-9-]/i', '', $icon_name );
-						?>
-						<i class="bspe-connect__icon-fa <?php echo esc_attr( $fa_class ); ?>" aria-hidden="true"></i>
-						<?php
-					elseif ( 0 === strpos( $icon_library, 'ion-' ) && '' !== $icon_name ) :
-						$ion_variant = substr( $icon_library, 4 );
-						$ion_clean   = preg_replace( '/[^a-z0-9-]/i', '', $icon_name );
-						$ion_full    = ( 'outline' === $ion_variant && substr( $ion_clean, -8 ) !== '-outline' )
-							? $ion_clean . '-outline'
-							: $ion_clean;
-						?>
-						<ion-icon class="bspe-connect__icon-ion" name="<?php echo esc_attr( $ion_full ); ?>" aria-hidden="true"></ion-icon>
-						<?php
-					elseif ( 'dripicons' === $icon_library && '' !== $icon_name ) :
-						$drip_class = preg_replace( '/[^a-z0-9-]/i', '', $icon_name );
-						?>
-						<i class="bspe-connect__icon-drip <?php echo esc_attr( $drip_class ); ?>" aria-hidden="true"></i>
-						<?php
-					endif;
-					?>
-				</span>
+					</span>
+				<?php endif; ?>
 				<span class="bspe-connect__label"><?php echo esc_html( $label ); ?></span>
 			</<?php echo $is_link ? 'a' : 'button'; ?>>
 		<?php endforeach; ?>

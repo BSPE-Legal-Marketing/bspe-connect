@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.1.0
+Stable tag: 2.1.1
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -34,11 +34,11 @@ All three are optional. Constants always win over settings stored in the
 database — define them when you want secrets out of options exports and
 out of admin UIs.
 
-* `BSPE_CONNECT_GITHUB_TOKEN` (string)
-  GitHub Personal Access Token with `repo` scope on
-  `BSPE-Legal-Marketing/bspe-connect`. Required for self-update polling.
-  Without it the plugin still runs; only the update check is skipped and
-  the plugins screen shows a dismissible notice.
+* `BSPE_CONNECT_GITHUB_TOKEN` (string, OPTIONAL since v2.1.1)
+  GitHub Personal Access Token. The repo is public, so updates work
+  without this token — every install is zero-touch. Set it only if you
+  want to raise the GitHub API rate limit from 60/hour (anonymous) to
+  5,000/hour, or if the repo is ever flipped back to private.
 
   define('BSPE_CONNECT_GITHUB_TOKEN', 'ghp_...');
 
@@ -124,6 +124,29 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.1.1 =
+* Fix: bar button labels disappeared on mobile because the form's
+  visually-hidden label rule (added in 2.1.0) wasn't scoped to the
+  form container — it matched every `.bspe-connect__label` on the
+  page, including the ones under each bar button. Re-scoped to
+  `.bspe-connect__form .bspe-connect__label` so the form fields
+  stay screen-reader-accessible while the bar labels render.
+* Feature: live-swap icon picker. Changing the Icon library select
+  now hides / shows the matching picker (brand 4-radio vs custom
+  icon-name text input) without requiring a save and reload. Powered
+  by data-bspe-icon-pane attributes on each row + a small JS handler.
+* Feature: "No icon (label only)" option in the Icon library select.
+  Pick this on any button to skip the icon entirely and let the label
+  carry the meaning — useful for "Reserve" or "Quote" style CTAs.
+  Label-only buttons get bumped font-size, weight, and uppercase
+  treatment so they don't look stranded.
+* Updater: GitHub PAT is now OPTIONAL. The repo is public, so updates
+  poll without authentication. Existing installs that have a token
+  defined keep using it (which raises the GitHub API rate limit from
+  60/hr anonymous to 5,000/hr). Sites without a token now also get
+  one-click updates with no setup. Removed the "GitHub token not
+  configured" admin notice — no longer accurate or needed.
 
 = 2.1.0 =
 * Icon libraries: each button can now render its icon from Font Awesome

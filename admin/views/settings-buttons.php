@@ -35,36 +35,25 @@ $library_options = [
 	'ion-filled'  => __( 'Ionicons — Filled', 'bspe-connect' ),
 	'ion-outline' => __( 'Ionicons — Outline', 'bspe-connect' ),
 	'dripicons'   => __( 'Dripicons (outline only)', 'bspe-connect' ),
+	'none'        => __( 'No icon (label only)', 'bspe-connect' ),
 ];
 
-$library_help = static function ( string $library, string $type ): string {
-	switch ( $library ) {
-		case 'fa-solid':
-		case 'fa-regular':
-			return sprintf(
-				/* translators: 1: library URL, 2: example token */
-				__( 'Browse names at <a href="%1$s" target="_blank" rel="noopener">fontawesome.com/icons</a> — type the slug (e.g. <code>%2$s</code>), without the <code>fa-</code> prefix.', 'bspe-connect' ),
-				'https://fontawesome.com/icons?ic=free',
-				[ 'connect' => 'comments', 'call' => 'phone', 'text' => 'message', 'email' => 'envelope' ][ $type ] ?? 'phone'
-			);
-		case 'ion-filled':
-		case 'ion-outline':
-			return sprintf(
-				/* translators: 1: library URL, 2: example token */
-				__( 'Browse names at <a href="%1$s" target="_blank" rel="noopener">ionic.io/ionicons</a> — type the base name (e.g. <code>%2$s</code>), without the <code>-outline</code> suffix.', 'bspe-connect' ),
-				'https://ionic.io/ionicons',
-				[ 'connect' => 'chatbubbles', 'call' => 'call', 'text' => 'chatbox', 'email' => 'mail' ][ $type ] ?? 'call'
-			);
-		case 'dripicons':
-			return sprintf(
-				/* translators: 1: library URL, 2: example token */
-				__( 'Browse names at <a href="%1$s" target="_blank" rel="noopener">demo.amitjakhu.com/dripicons</a> — paste the full class (e.g. <code>%2$s</code>).', 'bspe-connect' ),
-				'http://demo.amitjakhu.com/dripicons/',
-				[ 'connect' => 'dripicons-message', 'call' => 'dripicons-phone', 'text' => 'dripicons-message-reply', 'email' => 'dripicons-mail' ][ $type ] ?? 'dripicons-phone'
-			);
-		default:
-			return __( 'Pick one of the four bundled brand icons below.', 'bspe-connect' );
-	}
+$library_help = static function ( string $type ): string {
+	$examples = [
+		'connect' => [ 'fa' => 'comments',     'ion' => 'chatbubbles', 'drip' => 'dripicons-message' ],
+		'call'    => [ 'fa' => 'phone',        'ion' => 'call',        'drip' => 'dripicons-phone' ],
+		'text'    => [ 'fa' => 'message',      'ion' => 'chatbox',     'drip' => 'dripicons-message-reply' ],
+		'email'   => [ 'fa' => 'envelope',     'ion' => 'mail',        'drip' => 'dripicons-mail' ],
+	];
+	$ex = $examples[ $type ] ?? $examples['call'];
+
+	return sprintf(
+		/* translators: 1-3: example slugs per library */
+		__( 'Type the icon slug from your selected library:<br>• <strong>Font Awesome</strong> (<a href="https://fontawesome.com/icons?ic=free" target="_blank" rel="noopener">browse</a>) — e.g. <code>%1$s</code> (no <code>fa-</code> prefix)<br>• <strong>Ionicons</strong> (<a href="https://ionic.io/ionicons" target="_blank" rel="noopener">browse</a>) — e.g. <code>%2$s</code> (no <code>-outline</code> suffix)<br>• <strong>Dripicons</strong> (<a href="http://demo.amitjakhu.com/dripicons/" target="_blank" rel="noopener">browse</a>) — full class, e.g. <code>%3$s</code>', 'bspe-connect' ),
+		esc_html( $ex['fa'] ),
+		esc_html( $ex['ion'] ),
+		esc_html( $ex['drip'] )
+	);
 };
 
 Components::open_form( 'buttons', $action_url );
@@ -110,41 +99,43 @@ Components::row(
 	},
 	[ 'description' => __( 'Used when Mode is set to Custom image. A square image works best.', 'bspe-connect' ) ]
 );
+$connect_lib = (string) ( $connect['icon_library'] ?? 'brand' );
 Components::row(
 	__( 'Icon library', 'bspe-connect' ),
-	static function () use ( $connect, $library_options ): void {
+	static function () use ( $connect_lib, $library_options ): void {
 		Components::select(
 			'bspe[buttons][connect][icon_library]',
-			(string) ( $connect['icon_library'] ?? 'brand' ),
-			$library_options
+			$connect_lib,
+			$library_options,
+			[ 'data' => [ 'bspe-icon-library-select' => 'connect' ] ]
 		);
 	},
-	[ 'description' => __( 'Switch to Font Awesome, Ionicons, or Dripicons for filled / outline variants. Save changes to update the icon picker below.', 'bspe-connect' ) ]
+	[ 'description' => __( 'Switch live between bundled brand SVGs, Font Awesome, Ionicons, Dripicons, or no icon at all.', 'bspe-connect' ) ]
 );
-$connect_lib = (string) ( $connect['icon_library'] ?? 'brand' );
-if ( 'brand' === $connect_lib ) {
-	Components::row(
-		__( 'Icon', 'bspe-connect' ),
-		static function () use ( $connect ): void {
-			Components::icon_radio( 'bspe[buttons][connect][icon]', (string) ( $connect['icon'] ?? 'connect-1' ), 'connect' );
-		},
-		[ 'description' => __( 'Used when Mode is Text label.', 'bspe-connect' ) ]
-	);
-} else {
-	Components::row(
-		__( 'Icon name', 'bspe-connect' ),
-		static function () use ( $connect ): void {
-			Components::text( 'bspe[buttons][connect][icon]', (string) ( $connect['icon'] ?? '' ), [
-				'placeholder' => 'comments',
-				'maxlength'   => 60,
-			] );
-		},
-		[
-			'id'          => 'bspe-buttons-connect-icon-name',
-			'description' => $library_help( $connect_lib, 'connect' ),
-		]
-	);
-}
+Components::row(
+	__( 'Icon', 'bspe-connect' ),
+	static function () use ( $connect ): void {
+		Components::icon_radio( 'bspe[buttons][connect][icon]', (string) ( $connect['icon'] ?? 'connect-1' ), 'connect' );
+	},
+	[
+		'description' => __( 'Used when Icon library is Brand SVGs.', 'bspe-connect' ),
+		'data'        => [ 'bspe-icon-pane' => 'brand', 'bspe-button' => 'connect' ],
+	]
+);
+Components::row(
+	__( 'Icon name', 'bspe-connect' ),
+	static function () use ( $connect ): void {
+		Components::text( 'bspe[buttons][connect][icon]', (string) ( $connect['icon'] ?? '' ), [
+			'placeholder' => 'comments',
+			'maxlength'   => 60,
+		] );
+	},
+	[
+		'id'          => 'bspe-buttons-connect-icon-name',
+		'description' => $library_help( 'connect' ),
+		'data'        => [ 'bspe-icon-pane' => 'custom', 'bspe-button' => 'connect' ],
+	]
+);
 Components::close_card();
 
 /* ----------------- Call ----------------- */
@@ -184,39 +175,39 @@ Components::row(
 	},
 	[ 'id' => 'bspe-buttons-call-label' ]
 );
+$call_lib = (string) ( $call['icon_library'] ?? 'brand' );
 Components::row(
 	__( 'Icon library', 'bspe-connect' ),
-	static function () use ( $call, $library_options ): void {
+	static function () use ( $call_lib, $library_options ): void {
 		Components::select(
 			'bspe[buttons][call][icon_library]',
-			(string) ( $call['icon_library'] ?? 'brand' ),
-			$library_options
+			$call_lib,
+			$library_options,
+			[ 'data' => [ 'bspe-icon-library-select' => 'call' ] ]
 		);
 	}
 );
-$call_lib = (string) ( $call['icon_library'] ?? 'brand' );
-if ( 'brand' === $call_lib ) {
-	Components::row(
-		__( 'Icon', 'bspe-connect' ),
-		static function () use ( $call ): void {
-			Components::icon_radio( 'bspe[buttons][call][icon]', (string) ( $call['icon'] ?? 'call-1' ), 'call' );
-		}
-	);
-} else {
-	Components::row(
-		__( 'Icon name', 'bspe-connect' ),
-		static function () use ( $call ): void {
-			Components::text( 'bspe[buttons][call][icon]', (string) ( $call['icon'] ?? '' ), [
-				'placeholder' => 'phone',
-				'maxlength'   => 60,
-			] );
-		},
-		[
-			'id'          => 'bspe-buttons-call-icon-name',
-			'description' => $library_help( $call_lib, 'call' ),
-		]
-	);
-}
+Components::row(
+	__( 'Icon', 'bspe-connect' ),
+	static function () use ( $call ): void {
+		Components::icon_radio( 'bspe[buttons][call][icon]', (string) ( $call['icon'] ?? 'call-1' ), 'call' );
+	},
+	[ 'data' => [ 'bspe-icon-pane' => 'brand', 'bspe-button' => 'call' ] ]
+);
+Components::row(
+	__( 'Icon name', 'bspe-connect' ),
+	static function () use ( $call ): void {
+		Components::text( 'bspe[buttons][call][icon]', (string) ( $call['icon'] ?? '' ), [
+			'placeholder' => 'phone',
+			'maxlength'   => 60,
+		] );
+	},
+	[
+		'id'          => 'bspe-buttons-call-icon-name',
+		'description' => $library_help( 'call' ),
+		'data'        => [ 'bspe-icon-pane' => 'custom', 'bspe-button' => 'call' ],
+	]
+);
 Components::close_card();
 
 /* ----------------- Text ----------------- */
@@ -265,39 +256,39 @@ Components::row(
 	},
 	[ 'id' => 'bspe-buttons-text-label' ]
 );
+$text_lib = (string) ( $text['icon_library'] ?? 'brand' );
 Components::row(
 	__( 'Icon library', 'bspe-connect' ),
-	static function () use ( $text, $library_options ): void {
+	static function () use ( $text_lib, $library_options ): void {
 		Components::select(
 			'bspe[buttons][text][icon_library]',
-			(string) ( $text['icon_library'] ?? 'brand' ),
-			$library_options
+			$text_lib,
+			$library_options,
+			[ 'data' => [ 'bspe-icon-library-select' => 'text' ] ]
 		);
 	}
 );
-$text_lib = (string) ( $text['icon_library'] ?? 'brand' );
-if ( 'brand' === $text_lib ) {
-	Components::row(
-		__( 'Icon', 'bspe-connect' ),
-		static function () use ( $text ): void {
-			Components::icon_radio( 'bspe[buttons][text][icon]', (string) ( $text['icon'] ?? 'text-1' ), 'text' );
-		}
-	);
-} else {
-	Components::row(
-		__( 'Icon name', 'bspe-connect' ),
-		static function () use ( $text ): void {
-			Components::text( 'bspe[buttons][text][icon]', (string) ( $text['icon'] ?? '' ), [
-				'placeholder' => 'message',
-				'maxlength'   => 60,
-			] );
-		},
-		[
-			'id'          => 'bspe-buttons-text-icon-name',
-			'description' => $library_help( $text_lib, 'text' ),
-		]
-	);
-}
+Components::row(
+	__( 'Icon', 'bspe-connect' ),
+	static function () use ( $text ): void {
+		Components::icon_radio( 'bspe[buttons][text][icon]', (string) ( $text['icon'] ?? 'text-1' ), 'text' );
+	},
+	[ 'data' => [ 'bspe-icon-pane' => 'brand', 'bspe-button' => 'text' ] ]
+);
+Components::row(
+	__( 'Icon name', 'bspe-connect' ),
+	static function () use ( $text ): void {
+		Components::text( 'bspe[buttons][text][icon]', (string) ( $text['icon'] ?? '' ), [
+			'placeholder' => 'message',
+			'maxlength'   => 60,
+		] );
+	},
+	[
+		'id'          => 'bspe-buttons-text-icon-name',
+		'description' => $library_help( 'text' ),
+		'data'        => [ 'bspe-icon-pane' => 'custom', 'bspe-button' => 'text' ],
+	]
+);
 Components::close_card();
 
 /* ----------------- Email ----------------- */
@@ -322,39 +313,39 @@ Components::row(
 	},
 	[ 'id' => 'bspe-buttons-email-label' ]
 );
+$email_lib = (string) ( $email['icon_library'] ?? 'brand' );
 Components::row(
 	__( 'Icon library', 'bspe-connect' ),
-	static function () use ( $email, $library_options ): void {
+	static function () use ( $email_lib, $library_options ): void {
 		Components::select(
 			'bspe[buttons][email][icon_library]',
-			(string) ( $email['icon_library'] ?? 'brand' ),
-			$library_options
+			$email_lib,
+			$library_options,
+			[ 'data' => [ 'bspe-icon-library-select' => 'email' ] ]
 		);
 	}
 );
-$email_lib = (string) ( $email['icon_library'] ?? 'brand' );
-if ( 'brand' === $email_lib ) {
-	Components::row(
-		__( 'Icon', 'bspe-connect' ),
-		static function () use ( $email ): void {
-			Components::icon_radio( 'bspe[buttons][email][icon]', (string) ( $email['icon'] ?? 'email-1' ), 'email' );
-		}
-	);
-} else {
-	Components::row(
-		__( 'Icon name', 'bspe-connect' ),
-		static function () use ( $email ): void {
-			Components::text( 'bspe[buttons][email][icon]', (string) ( $email['icon'] ?? '' ), [
-				'placeholder' => 'envelope',
-				'maxlength'   => 60,
-			] );
-		},
-		[
-			'id'          => 'bspe-buttons-email-icon-name',
-			'description' => $library_help( $email_lib, 'email' ),
-		]
-	);
-}
+Components::row(
+	__( 'Icon', 'bspe-connect' ),
+	static function () use ( $email ): void {
+		Components::icon_radio( 'bspe[buttons][email][icon]', (string) ( $email['icon'] ?? 'email-1' ), 'email' );
+	},
+	[ 'data' => [ 'bspe-icon-pane' => 'brand', 'bspe-button' => 'email' ] ]
+);
+Components::row(
+	__( 'Icon name', 'bspe-connect' ),
+	static function () use ( $email ): void {
+		Components::text( 'bspe[buttons][email][icon]', (string) ( $email['icon'] ?? '' ), [
+			'placeholder' => 'envelope',
+			'maxlength'   => 60,
+		] );
+	},
+	[
+		'id'          => 'bspe-buttons-email-icon-name',
+		'description' => $library_help( 'email' ),
+		'data'        => [ 'bspe-icon-pane' => 'custom', 'bspe-button' => 'email' ],
+	]
+);
 Components::close_card();
 
 Components::close_form();

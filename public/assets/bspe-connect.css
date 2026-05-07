@@ -240,13 +240,22 @@
 	display: block;
 }
 
-#bspe-connect .bspe-connect__label {
+#bspe-connect .bspe-connect__btn .bspe-connect__label {
 	color: inherit;
 	font-size: var(--bspe-label-size, 11px);
 	max-width: 100%;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+/* Label-only buttons (icon_library = none) — give the label more
+   weight so it doesn't look like a tiny stranded word in a tall row. */
+#bspe-connect .bspe-connect__btn:not(:has(.bspe-connect__icon)) .bspe-connect__label {
+	font-size: calc(var(--bspe-label-size, 11px) + 2px);
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -537,9 +546,11 @@
 	gap: 4px;
 }
 
-/* Field labels are visually hidden but still announced to screen readers
-   for accessibility. Placeholders carry the visible label. */
-.bspe-connect__label {
+/* Form-field labels are visually hidden but still announced to screen
+   readers for accessibility — placeholders carry the visible label.
+   Scoped to .bspe-connect__form so this DOES NOT clobber the bar
+   button labels (which share the same .bspe-connect__label class). */
+.bspe-connect__form .bspe-connect__label {
 	position: absolute;
 	width: 1px;
 	height: 1px;

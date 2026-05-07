@@ -28,7 +28,7 @@ final class Settings_Saver {
 
 	private const ALLOWED_ICONS = [ 'connect-1', 'connect-2', 'connect-3', 'connect-4', 'call-1', 'call-2', 'call-3', 'call-4', 'text-1', 'text-2', 'text-3', 'text-4', 'email-1', 'email-2', 'email-3', 'email-4' ];
 
-	private const ALLOWED_ICON_LIBRARIES = [ 'brand', 'fa-solid', 'fa-regular', 'ion-filled', 'ion-outline', 'dripicons' ];
+	private const ALLOWED_ICON_LIBRARIES = [ 'none', 'brand', 'fa-solid', 'fa-regular', 'ion-filled', 'ion-outline', 'dripicons' ];
 
 	private const ALLOWED_GOOGLE_FONTS = [ 'DM Sans', 'Inter', 'Lato', 'Roboto', 'Open Sans', 'Source Sans 3', 'Poppins', 'Manrope', 'Nunito', 'Work Sans', 'Plus Jakarta Sans', 'IBM Plex Sans', 'Figtree', 'Montserrat', 'Public Sans' ];
 

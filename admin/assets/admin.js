@@ -235,6 +235,38 @@
 	}
 
 	/* ---------------------------------------------------------------- */
+	/*  Per-button icon-library live swap                               */
+	/*                                                                  */
+	/*  When the Icon library <select> changes for a button, hide /     */
+	/*  show the matching picker pane (brand 4-radio vs custom text     */
+	/*  input vs none) without requiring a full save+reload.            */
+	/* ---------------------------------------------------------------- */
+	function initIconLibrarySwap() {
+		var selects = document.querySelectorAll('[data-bspe-icon-library-select]');
+		selects.forEach(function (select) {
+			var btnKey = select.getAttribute('data-bspe-icon-library-select');
+			if (!btnKey) { return; }
+
+			var brandPane  = document.querySelector('[data-bspe-icon-pane="brand"][data-bspe-button="' + btnKey + '"]');
+			var customPane = document.querySelector('[data-bspe-icon-pane="custom"][data-bspe-button="' + btnKey + '"]');
+
+			function sync() {
+				var v = select.value;
+				if (brandPane) {
+					brandPane.style.display = (v === 'brand') ? '' : 'none';
+				}
+				if (customPane) {
+					var showCustom = (v !== 'brand' && v !== 'none');
+					customPane.style.display = showCustom ? '' : 'none';
+				}
+			}
+
+			sync();
+			select.addEventListener('change', sync);
+		});
+	}
+
+	/* ---------------------------------------------------------------- */
 	/*  WP color picker (jQuery)                                        */
 	/* ---------------------------------------------------------------- */
 	function initColorPickers() {
@@ -256,6 +288,7 @@
 		initPhoneMask();
 		initMediaPickers();
 		initSubmissionRows();
+		initIconLibrarySwap();
 		initColorPickers();
 	});
 })();

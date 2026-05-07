@@ -74,9 +74,17 @@ final class Components {
 		$id          = $opts['id']          ?? '';
 		$description = $opts['description'] ?? '';
 		$inline      = $opts['inline']      ?? false;
+		$data        = $opts['data']        ?? [];
 		$class       = 'bspe-row' . ( $inline ? ' bspe-row--inline' : '' );
+
+		$data_attrs = '';
+		if ( is_array( $data ) ) {
+			foreach ( $data as $key => $value ) {
+				$data_attrs .= ' data-' . esc_attr( (string) $key ) . '="' . esc_attr( (string) $value ) . '"';
+			}
+		}
 		?>
-		<div class="<?php echo esc_attr( $class ); ?>">
+		<div class="<?php echo esc_attr( $class ); ?>"<?php echo $data_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- attrs escaped above ?>>
 			<div class="bspe-row__label-col">
 				<?php if ( '' !== $id ) : ?>
 					<label for="<?php echo esc_attr( $id ); ?>" class="bspe-row__label"><?php echo esc_html( $label ); ?></label>
