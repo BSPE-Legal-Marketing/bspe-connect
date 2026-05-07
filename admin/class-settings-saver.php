@@ -195,21 +195,25 @@ final class Settings_Saver {
 			? 'none'
 			: self::sanitize_icon_library( $connect_lib_raw );
 		$out['connect']   = [
-			'enabled'      => ! empty( $connect['enabled'] ),
-			'label'        => sanitize_text_field( (string) ( $connect['label'] ?? 'Connect' ) ),
-			'icon_library' => $connect_lib,
-			'icon'         => self::sanitize_icon_name( (string) ( $connect['icon'] ?? '' ), $connect_lib, 'connect' ),
+			'enabled'         => ! empty( $connect['enabled'] ),
+			'label'           => sanitize_text_field( (string) ( $connect['label'] ?? 'Connect' ) ),
+			'icon_library'    => $connect_lib,
+			'icon'            => self::sanitize_icon_name( (string) ( $connect['icon'] ?? '' ), $connect_lib, 'connect' ),
+			'label_weight'    => self::sanitize_label_weight( (string) ( $connect['label_weight']    ?? '' ) ),
+			'label_uppercase' => self::sanitize_label_uppercase( (string) ( $connect['label_uppercase'] ?? '' ) ),
 		];
 
 		// Call.
 		$call           = is_array( $input['call'] ?? null ) ? $input['call'] : [];
 		$call_lib       = self::sanitize_icon_library( (string) ( $call['icon_library'] ?? 'fa-solid' ) );
 		$out['call']    = [
-			'enabled'      => ! empty( $call['enabled'] ),
-			'phone'        => self::sanitize_phone( (string) ( $call['phone'] ?? '' ) ),
-			'label'        => sanitize_text_field( (string) ( $call['label'] ?? 'Call' ) ),
-			'icon_library' => $call_lib,
-			'icon'         => self::sanitize_icon_name( (string) ( $call['icon'] ?? 'call-1' ), $call_lib, 'call' ),
+			'enabled'         => ! empty( $call['enabled'] ),
+			'phone'           => self::sanitize_phone( (string) ( $call['phone'] ?? '' ) ),
+			'label'           => sanitize_text_field( (string) ( $call['label'] ?? 'Call' ) ),
+			'icon_library'    => $call_lib,
+			'icon'            => self::sanitize_icon_name( (string) ( $call['icon'] ?? 'call-1' ), $call_lib, 'call' ),
+			'label_weight'    => self::sanitize_label_weight( (string) ( $call['label_weight']    ?? '' ) ),
+			'label_uppercase' => self::sanitize_label_uppercase( (string) ( $call['label_uppercase'] ?? '' ) ),
 		];
 
 		// Text.
@@ -217,25 +221,48 @@ final class Settings_Saver {
 		$text_mode      = (string) ( $text['mode'] ?? 'sms' );
 		$text_lib       = self::sanitize_icon_library( (string) ( $text['icon_library'] ?? 'fa-solid' ) );
 		$out['text']    = [
-			'enabled'      => ! empty( $text['enabled'] ),
-			'mode'         => in_array( $text_mode, [ 'sms', 'inline' ], true ) ? $text_mode : 'sms',
-			'phone'        => self::sanitize_phone( (string) ( $text['phone'] ?? '' ) ),
-			'label'        => sanitize_text_field( (string) ( $text['label'] ?? 'Text' ) ),
-			'icon_library' => $text_lib,
-			'icon'         => self::sanitize_icon_name( (string) ( $text['icon'] ?? 'text-1' ), $text_lib, 'text' ),
+			'enabled'         => ! empty( $text['enabled'] ),
+			'mode'            => in_array( $text_mode, [ 'sms', 'inline' ], true ) ? $text_mode : 'sms',
+			'phone'           => self::sanitize_phone( (string) ( $text['phone'] ?? '' ) ),
+			'label'           => sanitize_text_field( (string) ( $text['label'] ?? 'Text' ) ),
+			'icon_library'    => $text_lib,
+			'icon'            => self::sanitize_icon_name( (string) ( $text['icon'] ?? 'text-1' ), $text_lib, 'text' ),
+			'label_weight'    => self::sanitize_label_weight( (string) ( $text['label_weight']    ?? '' ) ),
+			'label_uppercase' => self::sanitize_label_uppercase( (string) ( $text['label_uppercase'] ?? '' ) ),
 		];
 
 		// Email.
 		$email          = is_array( $input['email'] ?? null ) ? $input['email'] : [];
 		$email_lib      = self::sanitize_icon_library( (string) ( $email['icon_library'] ?? 'fa-solid' ) );
 		$out['email']   = [
-			'enabled'      => ! empty( $email['enabled'] ),
-			'label'        => sanitize_text_field( (string) ( $email['label'] ?? 'Email' ) ),
-			'icon_library' => $email_lib,
-			'icon'         => self::sanitize_icon_name( (string) ( $email['icon'] ?? 'email-1' ), $email_lib, 'email' ),
+			'enabled'         => ! empty( $email['enabled'] ),
+			'label'           => sanitize_text_field( (string) ( $email['label'] ?? 'Email' ) ),
+			'icon_library'    => $email_lib,
+			'icon'            => self::sanitize_icon_name( (string) ( $email['icon'] ?? 'email-1' ), $email_lib, 'email' ),
+			'label_weight'    => self::sanitize_label_weight( (string) ( $email['label_weight']    ?? '' ) ),
+			'label_uppercase' => self::sanitize_label_uppercase( (string) ( $email['label_uppercase'] ?? '' ) ),
 		];
 
 		return $out;
+	}
+
+	/**
+	 * Per-button label weight override. Empty string = inherit from the
+	 * Design tab default. Otherwise must be one of the four allowed
+	 * weights so we don't end up loading half-weight Google fonts.
+	 */
+	private static function sanitize_label_weight( string $raw ): string {
+		$raw = trim( $raw );
+		return in_array( $raw, [ '', '400', '500', '600', '700' ], true ) ? $raw : '';
+	}
+
+	/**
+	 * Per-button uppercase override. '' = inherit, 'yes' = uppercase,
+	 * 'no' = render in saved case.
+	 */
+	private static function sanitize_label_uppercase( string $raw ): string {
+		$raw = strtolower( trim( $raw ) );
+		return in_array( $raw, [ '', 'yes', 'no' ], true ) ? $raw : '';
 	}
 
 	private static function sanitize_phone( string $raw ): string {

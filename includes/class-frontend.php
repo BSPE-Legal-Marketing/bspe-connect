@@ -281,6 +281,34 @@ final class Frontend {
 			echo "\t--bspe-font-family: " . wp_kses_post( $font_family ) . ";\n";
 		}
 		echo "}\n";
+
+		// Per-button label overrides — only emit a rule if the user has
+		// set a non-empty value on that button. Each rule scopes the
+		// CSS variables to a specific button class so the existing
+		// .bspe-connect__btn rule reads the per-button value.
+		foreach ( [ 'connect', 'call', 'text', 'email' ] as $btn_key ) {
+			$btn_weight    = (string) Settings::get( "buttons.{$btn_key}.label_weight",    '' );
+			$btn_uppercase = (string) Settings::get( "buttons.{$btn_key}.label_uppercase", '' );
+
+			$declarations = [];
+			if ( in_array( $btn_weight, [ '400', '500', '600', '700' ], true ) ) {
+				$declarations[] = '--bspe-label-weight: ' . esc_html( $btn_weight );
+			}
+			if ( 'yes' === $btn_uppercase ) {
+				$declarations[] = '--bspe-label-transform: uppercase';
+			} elseif ( 'no' === $btn_uppercase ) {
+				$declarations[] = '--bspe-label-transform: none';
+			}
+
+			if ( ! empty( $declarations ) ) {
+				echo "#bspe-connect .bspe-connect__btn--" . esc_html( $btn_key ) . " {\n";
+				foreach ( $declarations as $decl ) {
+					echo "\t" . $decl . ";\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- decl values are escaped above
+				}
+				echo "}\n";
+			}
+		}
+
 		// Hide AT or above the configured breakpoint. Setting "768" means
 		// "viewports 768px and wider don't see the bar" — matching common
 		// Bootstrap-style breakpoint conventions where the value is the

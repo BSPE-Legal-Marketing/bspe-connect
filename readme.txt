@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.1.6
+Stable tag: 2.1.7
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,18 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.1.7 =
+* Per-button label overrides: each of Connect / Call / Text / Email now
+  has its own "Label weight" and "Label case" select on the Buttons
+  tab. Both default to "Use Design tab default" so the global Design
+  controls still rule unless you explicitly override per button. Useful
+  when you want, e.g., Connect bold + UPPERCASE while Call / Text /
+  Email render in regular weight + saved case.
+* Frontend emits per-button CSS variable overrides scoped to
+  `.bspe-connect__btn--<key>` so the existing `.bspe-connect__btn`
+  rule picks up the right value via cascade. Buttons with no override
+  emit no CSS — zero added bytes for the common case.
 
 = 2.1.6 =
 * CRITICAL FIX: form submissions on iOS Safari were 404'ing because

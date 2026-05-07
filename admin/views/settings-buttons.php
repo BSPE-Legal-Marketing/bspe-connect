@@ -34,15 +34,32 @@ $library_options = [
 	'fa-regular' => __( 'Font Awesome — Regular (outline)', 'bspe-connect' ),
 ];
 
+$weight_options = [
+	''    => __( 'Use Design tab default', 'bspe-connect' ),
+	'400' => __( 'Regular (400)',          'bspe-connect' ),
+	'500' => __( 'Medium (500)',           'bspe-connect' ),
+	'600' => __( 'Semibold (600)',         'bspe-connect' ),
+	'700' => __( 'Bold (700)',             'bspe-connect' ),
+];
+
+$uppercase_options = [
+	''    => __( 'Use Design tab default', 'bspe-connect' ),
+	'yes' => __( 'Force UPPERCASE',        'bspe-connect' ),
+	'no'  => __( 'Use saved label case',   'bspe-connect' ),
+];
+
 /**
  * Render the icon-library select + visual fa-solid / fa-regular pickers
- * for one button, all wired up for the live-swap JS.
+ * for one button, plus the per-button label weight + uppercase
+ * overrides — all wired up for the live-swap JS.
  *
- * @param string $key       Button key (connect / call / text / email).
- * @param array  $cfg       Saved button settings.
- * @param array  $options   Library options map.
+ * @param string $key             Button key (connect / call / text / email).
+ * @param array  $cfg             Saved button settings.
+ * @param array  $options         Library options map.
+ * @param array  $weight_options  Label-weight select options.
+ * @param array  $upper_options   Uppercase-mode select options.
  */
-$render_icon_picker = static function ( string $key, array $cfg, array $options ): void {
+$render_icon_picker = static function ( string $key, array $cfg, array $options, array $weight_options, array $upper_options ): void {
 	$current_lib = (string) ( $cfg['icon_library'] ?? 'fa-solid' );
 	if ( ! in_array( $current_lib, [ 'none', 'fa-solid', 'fa-regular' ], true ) ) {
 		$current_lib = 'fa-solid';
@@ -70,6 +87,35 @@ $render_icon_picker = static function ( string $key, array $cfg, array $options 
 			[ 'data' => [ 'bspe-icon-pane' => $lib, 'bspe-button' => $key ] ]
 		);
 	endforeach;
+
+	Components::row(
+		__( 'Label weight', 'bspe-connect' ),
+		static function () use ( $key, $cfg, $weight_options ): void {
+			Components::select(
+				'bspe[buttons][' . $key . '][label_weight]',
+				(string) ( $cfg['label_weight'] ?? '' ),
+				$weight_options
+			);
+		},
+		[
+			'id'          => 'bspe-buttons-' . $key . '-label_weight',
+			'description' => __( 'Override just this button\'s weight, or leave on default to inherit from the Design tab.', 'bspe-connect' ),
+		]
+	);
+	Components::row(
+		__( 'Label case', 'bspe-connect' ),
+		static function () use ( $key, $cfg, $upper_options ): void {
+			Components::select(
+				'bspe[buttons][' . $key . '][label_uppercase]',
+				(string) ( $cfg['label_uppercase'] ?? '' ),
+				$upper_options
+			);
+		},
+		[
+			'id'          => 'bspe-buttons-' . $key . '-label_uppercase',
+			'description' => __( '"Force UPPERCASE" overrides the Design default for just this button — handy when you want Connect uppercase but the others lowercase, or vice versa.', 'bspe-connect' ),
+		]
+	);
 };
 
 Components::open_form( 'buttons', $action_url );
@@ -96,7 +142,7 @@ Components::row(
 	},
 	[ 'id' => 'bspe-buttons-connect-label' ]
 );
-$render_icon_picker( 'connect', $connect, $library_options );
+$render_icon_picker( 'connect', $connect, $library_options, $weight_options, $uppercase_options );
 Components::close_card();
 
 /* ----------------- Call ----------------- */
@@ -136,7 +182,7 @@ Components::row(
 	},
 	[ 'id' => 'bspe-buttons-call-label' ]
 );
-$render_icon_picker( 'call', $call, $library_options );
+$render_icon_picker( 'call', $call, $library_options, $weight_options, $uppercase_options );
 Components::close_card();
 
 /* ----------------- Text ----------------- */
@@ -185,7 +231,7 @@ Components::row(
 	},
 	[ 'id' => 'bspe-buttons-text-label' ]
 );
-$render_icon_picker( 'text', $text, $library_options );
+$render_icon_picker( 'text', $text, $library_options, $weight_options, $uppercase_options );
 Components::close_card();
 
 /* ----------------- Email ----------------- */
@@ -210,7 +256,7 @@ Components::row(
 	},
 	[ 'id' => 'bspe-buttons-email-label' ]
 );
-$render_icon_picker( 'email', $email, $library_options );
+$render_icon_picker( 'email', $email, $library_options, $weight_options, $uppercase_options );
 Components::close_card();
 
 Components::close_form();
