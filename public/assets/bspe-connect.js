@@ -35,10 +35,10 @@
 	var bubble = root.querySelector('[data-bspe-bubble]');
 	var bubbleClose = bubble ? bubble.querySelector('[data-bspe-bubble-close]') : null;
 
-	var threshold = parseInt(data.scrollThreshold, 10);
-	if (!isFinite(threshold) || threshold < 0) { threshold = 200; }
+	var showDelay = parseInt(data.showDelay, 10);
+	if (!isFinite(showDelay) || showDelay < 0) { showDelay = 3; }
+	showDelay *= 1000;
 
-	var hideOnUp = data.hideOnScrollUp !== false;
 	var bubbleEnabled = bubbleData.enabled !== false;
 	var bubbleTrigger = bubbleData.trigger || 'auto';
 	var bubbleRepeat = bubbleData.repeat || 'session';
@@ -46,8 +46,6 @@
 	if (!isFinite(bubbleDelay) || bubbleDelay < 0) { bubbleDelay = 3; }
 	bubbleDelay *= 1000;
 
-	var lastY = window.pageYOffset || 0;
-	var ticking = false;
 	var barVisible = false;
 	var barEverShown = false;
 	var bubbleTimer = null;
@@ -67,28 +65,10 @@
 		}
 	}
 
-	function handleScroll() {
-		var y = window.pageYOffset || 0;
-		var delta = y - lastY;
-		var direction = delta > 0 ? 'down' : 'up';
-
-		if (y > threshold && direction === 'down') {
-			setBarState(true);
-		} else if (hideOnUp && direction === 'up' && Math.abs(delta) > 4 && y > 0) {
-			setBarState(false);
-		}
-
-		lastY = y;
-	}
-
-	window.addEventListener('scroll', function () {
-		if (ticking) { return; }
-		window.requestAnimationFrame(function () {
-			handleScroll();
-			ticking = false;
-		});
-		ticking = true;
-	}, { passive: true });
+	// Show the bar after the configured delay. No scroll trigger anymore —
+	// the user always sees the bar as long as they stay on the page past
+	// the delay window.
+	setTimeout(function () { setBarState(true); }, showDelay);
 
 	// ----- Welcome bubble -----
 	function scheduleBubble() {
@@ -477,9 +457,6 @@
 		var src = (event && event.detail && event.detail.source) || 'email';
 		openModal(src);
 	});
-
-	// Initial check — page may already be scrolled past the threshold.
-	handleScroll();
 
 	} // end boot()
 })();

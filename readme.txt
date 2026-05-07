@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.1.1
+Stable tag: 2.1.2
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,34 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.1.2 =
+* Connect button simplified: removed the "Custom image" mode and the
+  Media Library picker (it wasn't working reliably). Connect is now
+  label + optional library icon only. Default Icon library for the
+  Connect button changed from "Brand SVGs" to "No icon (label only)"
+  so the prominent first button defaults to a clean text-only CTA.
+* Visual icon picker for every library. Choosing Font Awesome,
+  Ionicons, or Dripicons in the Icon library select now shows the
+  curated icons rendered live (using the library's actual CSS / web
+  component) — no more typing slugs blind. Each button has its own
+  curated set:
+    Connect / Text — comments / chatbubbles / message variants
+    Call           — phone / mobile / call variants
+    Email          — envelope / mail / paper-plane / at variants
+* Brand SVG library trimmed from 4 to 3 variants per button. The 4th
+  variant (connect-4 / call-4 / etc.) was the noisiest of the set;
+  3 keeps the picker visually balanced. Existing settings pointing
+  to *-4 fall back to *-1 on the next save.
+* Bar trigger switched from scroll-based to time-delay-based. Old
+  behavior: bar appeared after the visitor scrolled past 200px and
+  hid on scroll-up. New behavior: bar shows after a configurable
+  delay (default 3 seconds) and stays visible. Removed the scroll
+  threshold and "hide on scroll up" settings; added "Show after
+  delay (seconds)" in General -> Display behavior.
+* Admin Buttons tab: enqueues Font Awesome / Ionicons / Dripicons
+  CDNs only when active so the visual picker previews render
+  real glyphs.
 
 = 2.1.1 =
 * Fix: bar button labels disappeared on mobile because the form's

@@ -61,22 +61,13 @@ Components::open_form( 'buttons', $action_url );
 /* ----------------- Connect ----------------- */
 Components::open_card(
 	__( 'Connect', 'bspe-connect' ),
-	__( 'The first button. Optionally toggles the welcome bubble.', 'bspe-connect' )
+	__( 'The first button. Toggles the welcome bubble. Defaults to label-only — pick a library below to add an icon.', 'bspe-connect' )
 );
 Components::row(
 	__( 'Enabled', 'bspe-connect' ),
 	static function () use ( $connect ): void {
 		Components::toggle( 'bspe[buttons][connect][enabled]', ! empty( $connect['enabled'] ), [
 			'label' => __( 'Show this button on the bar', 'bspe-connect' ),
-		] );
-	}
-);
-Components::row(
-	__( 'Mode', 'bspe-connect' ),
-	static function () use ( $connect ): void {
-		Components::radio_pills( 'bspe[buttons][connect][mode]', (string) ( $connect['mode'] ?? 'text' ), [
-			'text'  => __( 'Text label', 'bspe-connect' ),
-			'image' => __( 'Custom image', 'bspe-connect' ),
 		] );
 	}
 );
@@ -89,17 +80,7 @@ Components::row(
 	},
 	[ 'id' => 'bspe-buttons-connect-label' ]
 );
-Components::row(
-	__( 'Custom image', 'bspe-connect' ),
-	static function () use ( $connect ): void {
-		Components::media( 'bspe[buttons][connect][image_id]', (int) ( $connect['image_id'] ?? 0 ), [
-			'button_text' => __( 'Choose image', 'bspe-connect' ),
-			'modal_title' => __( 'Select Connect image', 'bspe-connect' ),
-		] );
-	},
-	[ 'description' => __( 'Used when Mode is set to Custom image. A square image works best.', 'bspe-connect' ) ]
-);
-$connect_lib = (string) ( $connect['icon_library'] ?? 'brand' );
+$connect_lib = (string) ( $connect['icon_library'] ?? 'none' );
 Components::row(
 	__( 'Icon library', 'bspe-connect' ),
 	static function () use ( $connect_lib, $library_options ): void {
@@ -117,25 +98,17 @@ Components::row(
 	static function () use ( $connect ): void {
 		Components::icon_radio( 'bspe[buttons][connect][icon]', (string) ( $connect['icon'] ?? 'connect-1' ), 'connect' );
 	},
-	[
-		'description' => __( 'Used when Icon library is Brand SVGs.', 'bspe-connect' ),
-		'data'        => [ 'bspe-icon-pane' => 'brand', 'bspe-button' => 'connect' ],
-	]
+	[ 'data' => [ 'bspe-icon-pane' => 'brand', 'bspe-button' => 'connect' ] ]
 );
-Components::row(
-	__( 'Icon name', 'bspe-connect' ),
-	static function () use ( $connect ): void {
-		Components::text( 'bspe[buttons][connect][icon]', (string) ( $connect['icon'] ?? '' ), [
-			'placeholder' => 'comments',
-			'maxlength'   => 60,
-		] );
-	},
-	[
-		'id'          => 'bspe-buttons-connect-icon-name',
-		'description' => $library_help( 'connect' ),
-		'data'        => [ 'bspe-icon-pane' => 'custom', 'bspe-button' => 'connect' ],
-	]
-);
+foreach ( [ 'fa-solid', 'fa-regular', 'ion-filled', 'ion-outline', 'dripicons' ] as $lib ) :
+	Components::row(
+		__( 'Icon', 'bspe-connect' ),
+		static function () use ( $connect, $lib ): void {
+			Components::library_icon_picker( 'bspe[buttons][connect][icon]', (string) ( $connect['icon'] ?? '' ), 'connect', $lib );
+		},
+		[ 'data' => [ 'bspe-icon-pane' => $lib, 'bspe-button' => 'connect' ] ]
+	);
+endforeach;
 Components::close_card();
 
 /* ----------------- Call ----------------- */
@@ -194,20 +167,15 @@ Components::row(
 	},
 	[ 'data' => [ 'bspe-icon-pane' => 'brand', 'bspe-button' => 'call' ] ]
 );
-Components::row(
-	__( 'Icon name', 'bspe-connect' ),
-	static function () use ( $call ): void {
-		Components::text( 'bspe[buttons][call][icon]', (string) ( $call['icon'] ?? '' ), [
-			'placeholder' => 'phone',
-			'maxlength'   => 60,
-		] );
-	},
-	[
-		'id'          => 'bspe-buttons-call-icon-name',
-		'description' => $library_help( 'call' ),
-		'data'        => [ 'bspe-icon-pane' => 'custom', 'bspe-button' => 'call' ],
-	]
-);
+foreach ( [ 'fa-solid', 'fa-regular', 'ion-filled', 'ion-outline', 'dripicons' ] as $lib ) :
+	Components::row(
+		__( 'Icon', 'bspe-connect' ),
+		static function () use ( $call, $lib ): void {
+			Components::library_icon_picker( 'bspe[buttons][call][icon]', (string) ( $call['icon'] ?? '' ), 'call', $lib );
+		},
+		[ 'data' => [ 'bspe-icon-pane' => $lib, 'bspe-button' => 'call' ] ]
+	);
+endforeach;
 Components::close_card();
 
 /* ----------------- Text ----------------- */
@@ -275,20 +243,15 @@ Components::row(
 	},
 	[ 'data' => [ 'bspe-icon-pane' => 'brand', 'bspe-button' => 'text' ] ]
 );
-Components::row(
-	__( 'Icon name', 'bspe-connect' ),
-	static function () use ( $text ): void {
-		Components::text( 'bspe[buttons][text][icon]', (string) ( $text['icon'] ?? '' ), [
-			'placeholder' => 'message',
-			'maxlength'   => 60,
-		] );
-	},
-	[
-		'id'          => 'bspe-buttons-text-icon-name',
-		'description' => $library_help( 'text' ),
-		'data'        => [ 'bspe-icon-pane' => 'custom', 'bspe-button' => 'text' ],
-	]
-);
+foreach ( [ 'fa-solid', 'fa-regular', 'ion-filled', 'ion-outline', 'dripicons' ] as $lib ) :
+	Components::row(
+		__( 'Icon', 'bspe-connect' ),
+		static function () use ( $text, $lib ): void {
+			Components::library_icon_picker( 'bspe[buttons][text][icon]', (string) ( $text['icon'] ?? '' ), 'text', $lib );
+		},
+		[ 'data' => [ 'bspe-icon-pane' => $lib, 'bspe-button' => 'text' ] ]
+	);
+endforeach;
 Components::close_card();
 
 /* ----------------- Email ----------------- */
@@ -332,20 +295,15 @@ Components::row(
 	},
 	[ 'data' => [ 'bspe-icon-pane' => 'brand', 'bspe-button' => 'email' ] ]
 );
-Components::row(
-	__( 'Icon name', 'bspe-connect' ),
-	static function () use ( $email ): void {
-		Components::text( 'bspe[buttons][email][icon]', (string) ( $email['icon'] ?? '' ), [
-			'placeholder' => 'envelope',
-			'maxlength'   => 60,
-		] );
-	},
-	[
-		'id'          => 'bspe-buttons-email-icon-name',
-		'description' => $library_help( 'email' ),
-		'data'        => [ 'bspe-icon-pane' => 'custom', 'bspe-button' => 'email' ],
-	]
-);
+foreach ( [ 'fa-solid', 'fa-regular', 'ion-filled', 'ion-outline', 'dripicons' ] as $lib ) :
+	Components::row(
+		__( 'Icon', 'bspe-connect' ),
+		static function () use ( $email, $lib ): void {
+			Components::library_icon_picker( 'bspe[buttons][email][icon]', (string) ( $email['icon'] ?? '' ), 'email', $lib );
+		},
+		[ 'data' => [ 'bspe-icon-pane' => $lib, 'bspe-button' => 'email' ] ]
+	);
+endforeach;
 Components::close_card();
 
 Components::close_form();

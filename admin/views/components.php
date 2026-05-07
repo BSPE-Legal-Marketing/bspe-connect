@@ -354,7 +354,7 @@ final class Components {
 		$base_id = $opts['id'] ?? self::auto_id( $name );
 		?>
 		<div class="bspe-icon-radio" role="radiogroup">
-			<?php for ( $i = 1; $i <= 4; $i++ ) :
+			<?php for ( $i = 1; $i <= 3; $i++ ) :
 				$icon_key = $type . '-' . $i;
 				$icon_url = BSPE_CONNECT_URL . 'public/assets/icons/' . $icon_key . '.svg';
 				$option_id = $base_id . '-' . $i;
@@ -373,6 +373,122 @@ final class Components {
 			<?php endfor; ?>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Visual icon picker for non-brand libraries (Font Awesome, Ionicons,
+	 * Dripicons). Renders a curated set of icons for the given button type
+	 * + library, showing the live icon glyph from the library's CSS / web
+	 * component so the user can see what they'll get on the bar.
+	 *
+	 * @param string $name    Form input name (e.g. bspe[buttons][call][icon]).
+	 * @param string $value   Currently selected icon name.
+	 * @param string $type    Button key — 'connect' / 'call' / 'text' / 'email'.
+	 * @param string $library Library slug — 'fa-solid' / 'fa-regular' / 'ion-filled' / 'ion-outline' / 'dripicons'.
+	 */
+	public static function library_icon_picker( string $name, string $value, string $type, string $library ): void {
+		$catalog = self::icon_catalog();
+		$items   = $catalog[ $type ][ $library ] ?? [];
+		if ( empty( $items ) ) {
+			echo '<p class="bspe-row__description">' . esc_html__( 'No curated icons for this combination yet — pick a different library.', 'bspe-connect' ) . '</p>';
+			return;
+		}
+
+		$base_id = self::auto_id( $name );
+		?>
+		<div class="bspe-icon-radio bspe-icon-radio--library" role="radiogroup">
+			<?php foreach ( $items as $i => $icon_name ) :
+				$option_id  = $base_id . '-' . sanitize_html_class( $icon_name );
+				$is_checked = $value === $icon_name;
+				?>
+				<label class="bspe-icon-radio__item<?php echo $is_checked ? ' is-active' : ''; ?>" for="<?php echo esc_attr( $option_id ); ?>" title="<?php echo esc_attr( $icon_name ); ?>">
+					<input type="radio"
+						id="<?php echo esc_attr( $option_id ); ?>"
+						name="<?php echo esc_attr( $name ); ?>"
+						value="<?php echo esc_attr( $icon_name ); ?>"
+						<?php checked( $is_checked ); ?>
+					/>
+					<span class="bspe-icon-radio__preview-lib" aria-hidden="true">
+						<?php self::render_library_glyph( $library, $icon_name ); ?>
+					</span>
+					<span class="bspe-icon-radio__label"><?php echo esc_html( self::short_label( $library, $icon_name, $i ) ); ?></span>
+				</label>
+			<?php endforeach; ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Curated icon catalog keyed by [button type][library]. Surfaces ~3-5
+	 * icons per cell that fit the button's purpose. Adding more is a
+	 * one-line append; the saver allowlist accepts any kebab-case slug
+	 * for the third-party libraries so users can also save custom names
+	 * by editing settings in code if they need to.
+	 *
+	 * @return array<string, array<string, string[]>>
+	 */
+	public static function icon_catalog(): array {
+		return [
+			'connect' => [
+				'brand'       => [ 'connect-1', 'connect-2', 'connect-3' ],
+				'fa-solid'    => [ 'comment', 'comment-dots', 'comments', 'message', 'paper-plane' ],
+				'fa-regular'  => [ 'comment', 'comment-dots', 'comments', 'message', 'paper-plane' ],
+				'ion-filled'  => [ 'chatbox', 'chatbubble', 'chatbubbles' ],
+				'ion-outline' => [ 'chatbox', 'chatbubble', 'chatbubbles' ],
+				'dripicons'   => [ 'dripicons-message', 'dripicons-message-reply', 'dripicons-conversation' ],
+			],
+			'call'    => [
+				'brand'       => [ 'call-1', 'call-2', 'call-3' ],
+				'fa-solid'    => [ 'phone', 'mobile-screen-button', 'mobile', 'phone-flip', 'phone-volume' ],
+				'fa-regular'  => [ 'phone', 'mobile-screen-button', 'mobile', 'phone-flip', 'phone-volume' ],
+				'ion-filled'  => [ 'call' ],
+				'ion-outline' => [ 'call' ],
+				'dripicons'   => [ 'dripicons-phone' ],
+			],
+			'text'    => [
+				'brand'       => [ 'text-1', 'text-2', 'text-3' ],
+				'fa-solid'    => [ 'comment', 'comment-dots', 'comments', 'message', 'paper-plane' ],
+				'fa-regular'  => [ 'comment', 'comment-dots', 'comments', 'message', 'paper-plane' ],
+				'ion-filled'  => [ 'chatbox', 'chatbubble', 'chatbubbles' ],
+				'ion-outline' => [ 'chatbox', 'chatbubble', 'chatbubbles' ],
+				'dripicons'   => [ 'dripicons-message', 'dripicons-message-reply' ],
+			],
+			'email'   => [
+				'brand'       => [ 'email-1', 'email-2', 'email-3' ],
+				'fa-solid'    => [ 'envelope', 'envelope-open', 'paper-plane', 'at' ],
+				'fa-regular'  => [ 'envelope', 'envelope-open', 'paper-plane', 'at' ],
+				'ion-filled'  => [ 'mail' ],
+				'ion-outline' => [ 'mail' ],
+				'dripicons'   => [ 'dripicons-mail' ],
+			],
+		];
+	}
+
+	private static function render_library_glyph( string $library, string $icon_name ): void {
+		switch ( $library ) {
+			case 'fa-solid':
+			case 'fa-regular':
+				$style = substr( $library, 3 );
+				echo '<i class="fa-' . esc_attr( $style ) . ' fa-' . esc_attr( $icon_name ) . '" aria-hidden="true"></i>';
+				return;
+			case 'ion-filled':
+				echo '<ion-icon name="' . esc_attr( $icon_name ) . '" aria-hidden="true"></ion-icon>';
+				return;
+			case 'ion-outline':
+				$ion_full = ( substr( $icon_name, -8 ) !== '-outline' ) ? $icon_name . '-outline' : $icon_name;
+				echo '<ion-icon name="' . esc_attr( $ion_full ) . '" aria-hidden="true"></ion-icon>';
+				return;
+			case 'dripicons':
+				echo '<i class="' . esc_attr( $icon_name ) . '" aria-hidden="true"></i>';
+				return;
+		}
+	}
+
+	private static function short_label( string $library, string $icon_name, int $index ): string {
+		// Use the icon's last word as a quick label, capped to 9 chars.
+		$bits = explode( '-', $icon_name );
+		$last = end( $bits );
+		return strlen( $last ) > 0 ? substr( $last, 0, 12 ) : '0' . ( $index + 1 );
 	}
 
 	/* -----------------------------------------------------------------

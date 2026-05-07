@@ -34,12 +34,10 @@ if ( empty( $buttons ) ) {
 			$is_link      = 'a' === ( $btn['tag'] ?? 'button' );
 			$key          = (string) $btn['key'];
 			$label        = (string) $btn['label'];
-			$image_src    = isset( $btn['image_src'] ) ? (string) $btn['image_src'] : '';
 			$mode         = (string) ( $btn['mode'] ?? '' );
 			$icon_library = (string) ( $btn['icon_library'] ?? 'brand' );
 			$icon_name    = (string) ( $btn['icon'] ?? '' );
 			$icon_url     = (string) ( $btn['icon_url'] ?? '' );
-			$show_image   = 'connect' === $key && 'image' === $mode && '' !== $image_src;
 
 			$tag_attrs = sprintf(
 				'class="bspe-connect__btn bspe-connect__btn--%1$s" data-action="%1$s"',
@@ -58,11 +56,7 @@ if ( empty( $buttons ) ) {
 				<?php if ( 'none' !== $icon_library ) : ?>
 					<span class="bspe-connect__icon" aria-hidden="true">
 						<?php
-						if ( $show_image ) :
-							?>
-							<img class="bspe-connect__icon-img" src="<?php echo esc_url( $image_src ); ?>" alt="" />
-							<?php
-						elseif ( 'brand' === $icon_library && '' !== $icon_url ) :
+						if ( 'brand' === $icon_library && '' !== $icon_url ) :
 							?>
 							<span class="bspe-connect__icon-svg" style="--bspe-icon-url: url(<?php echo esc_url( $icon_url ); ?>);"></span>
 							<?php

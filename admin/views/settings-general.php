@@ -122,30 +122,22 @@ Components::close_card();
 
 Components::open_card(
 	__( 'Display behavior', 'bspe-connect' ),
-	__( 'How the bar reacts to scroll, and where the mobile breakpoint sits.', 'bspe-connect' )
+	__( 'When the bar appears, and where the mobile breakpoint sits.', 'bspe-connect' )
 );
 Components::row(
-	__( 'Scroll threshold', 'bspe-connect' ),
+	__( 'Show after delay', 'bspe-connect' ),
 	static function () use ( $display ): void {
-		Components::number( 'bspe[display][scroll_threshold]', (int) ( $display['scroll_threshold'] ?? 200 ), [
+		Components::number( 'bspe[display][show_delay]', (int) ( $display['show_delay'] ?? 3 ), [
 			'min'    => 0,
-			'max'    => 5000,
-			'step'   => 10,
-			'suffix' => __( 'px', 'bspe-connect' ),
+			'max'    => 60,
+			'step'   => 1,
+			'suffix' => __( 'seconds', 'bspe-connect' ),
 		] );
 	},
 	[
-		'id'          => 'bspe-display-scroll_threshold',
-		'description' => __( 'How far the visitor scrolls before the bar slides into view.', 'bspe-connect' ),
+		'id'          => 'bspe-display-show_delay',
+		'description' => __( 'Wait this many seconds after the page loads, then slide the bar in. Set to 0 to show the bar immediately.', 'bspe-connect' ),
 	]
-);
-Components::row(
-	__( 'Hide on scroll up', 'bspe-connect' ),
-	static function () use ( $display ): void {
-		Components::toggle( 'bspe[display][hide_on_scroll_up]', ! empty( $display['hide_on_scroll_up'] ), [
-			'label' => __( 'Slide the bar away when the visitor scrolls up', 'bspe-connect' ),
-		] );
-	}
 );
 Components::row(
 	__( 'Mobile breakpoint', 'bspe-connect' ),

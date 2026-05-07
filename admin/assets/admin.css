@@ -882,6 +882,42 @@
 	background: var(--bspe-teal);
 }
 
+/* Library glyphs (FA, Ionicons, Dripicons) — render the live icon directly. */
+.bspe-icon-radio__preview-lib {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
+	font-size: 22px;
+	color: var(--bspe-plum);
+	transition: color 0.18s var(--bspe-ease);
+}
+
+.bspe-icon-radio__preview-lib ion-icon {
+	font-size: 22px;
+	color: inherit;
+}
+
+.bspe-icon-radio__item.is-active .bspe-icon-radio__preview-lib {
+	color: var(--bspe-teal);
+}
+
+.bspe-icon-radio--library {
+	grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+	max-width: 540px;
+}
+
+.bspe-icon-radio--library .bspe-icon-radio__label {
+	font-size: 9.5px;
+	letter-spacing: 0.04em;
+	max-width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	text-align: center;
+}
+
 .bspe-icon-radio__label {
 	font-size: 10px;
 	color: var(--bspe-muted);

@@ -44,18 +44,15 @@ final class Settings {
 				'repeat'      => 'session',
 			],
 			'display'        => [
-				'scroll_threshold'  => 200,
-				'hide_on_scroll_up' => true,
+				'show_delay'        => 3,
 				'mobile_breakpoint' => 768,
 			],
 			'buttons'        => [
 				'connect' => [
 					'enabled'      => true,
-					'mode'         => 'text',
 					'label'        => 'Connect',
-					'image_id'     => 0,
-					'icon_library' => 'brand',
-					'icon'         => 'connect-1',
+					'icon_library' => 'none',
+					'icon'         => '',
 				],
 				'call'    => [
 					'enabled'      => true,

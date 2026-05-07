@@ -153,8 +153,7 @@ final class Frontend {
 			self::HANDLE,
 			'BSPE_CONNECT_DATA',
 			[
-				'scrollThreshold'  => (int) Settings::get( 'display.scroll_threshold', 200 ),
-				'hideOnScrollUp'   => (bool) Settings::get( 'display.hide_on_scroll_up', true ),
+				'showDelay'        => (int) Settings::get( 'display.show_delay', 3 ),
 				'mobileBreakpoint' => (int) Settings::get( 'display.mobile_breakpoint', 768 ),
 				'bubble'           => [
 					'enabled' => (bool) Settings::get( 'welcome_bubble.enabled', true ),
@@ -370,11 +369,7 @@ final class Frontend {
 
 			switch ( $key ) {
 				case 'connect':
-					$entry['mode']     = (string) ( $cfg['mode'] ?? 'text' );
-					$entry['image_id'] = (int) ( $cfg['image_id'] ?? 0 );
-					if ( 'image' === $entry['mode'] && $entry['image_id'] ) {
-						$entry['image_src'] = wp_get_attachment_image_url( $entry['image_id'], 'thumbnail' );
-					}
+					// Image mode removed in v2.1.2 — Connect is label + optional library icon only.
 					break;
 				case 'call':
 					$phone = self::digits( (string) ( $cfg['phone'] ?? '' ) );

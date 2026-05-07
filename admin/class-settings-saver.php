@@ -26,7 +26,7 @@ final class Settings_Saver {
 
 	private const ALLOWED_TABS = [ 'general', 'buttons', 'form', 'design', 'display' ];
 
-	private const ALLOWED_ICONS = [ 'connect-1', 'connect-2', 'connect-3', 'connect-4', 'call-1', 'call-2', 'call-3', 'call-4', 'text-1', 'text-2', 'text-3', 'text-4', 'email-1', 'email-2', 'email-3', 'email-4' ];
+	private const ALLOWED_ICONS = [ 'connect-1', 'connect-2', 'connect-3', 'call-1', 'call-2', 'call-3', 'text-1', 'text-2', 'text-3', 'email-1', 'email-2', 'email-3' ];
 
 	private const ALLOWED_ICON_LIBRARIES = [ 'none', 'brand', 'fa-solid', 'fa-regular', 'ion-filled', 'ion-outline', 'dripicons' ];
 
@@ -141,8 +141,7 @@ final class Settings_Saver {
 	 */
 	private static function sanitize_display( array $input, array $current ): array {
 		return [
-			'scroll_threshold'  => max( 0, min( 5000, (int) ( $input['scroll_threshold'] ?? 200 ) ) ),
-			'hide_on_scroll_up' => ! empty( $input['hide_on_scroll_up'] ),
+			'show_delay'        => max( 0, min( 60, (int) ( $input['show_delay'] ?? 3 ) ) ),
 			'mobile_breakpoint' => max( 320, min( 2000, (int) ( $input['mobile_breakpoint'] ?? 768 ) ) ),
 		];
 	}
@@ -162,15 +161,12 @@ final class Settings_Saver {
 
 		// Connect.
 		$connect          = is_array( $input['connect'] ?? null ) ? $input['connect'] : [];
-		$connect_mode     = (string) ( $connect['mode'] ?? 'text' );
-		$connect_lib      = self::sanitize_icon_library( (string) ( $connect['icon_library'] ?? 'brand' ) );
+		$connect_lib      = self::sanitize_icon_library( (string) ( $connect['icon_library'] ?? 'none' ) );
 		$out['connect']   = [
 			'enabled'      => ! empty( $connect['enabled'] ),
-			'mode'         => in_array( $connect_mode, [ 'text', 'image' ], true ) ? $connect_mode : 'text',
 			'label'        => sanitize_text_field( (string) ( $connect['label'] ?? 'Connect' ) ),
-			'image_id'     => max( 0, (int) ( $connect['image_id'] ?? 0 ) ),
 			'icon_library' => $connect_lib,
-			'icon'         => self::sanitize_icon_name( (string) ( $connect['icon'] ?? 'connect-1' ), $connect_lib, 'connect' ),
+			'icon'         => self::sanitize_icon_name( (string) ( $connect['icon'] ?? '' ), $connect_lib, 'connect' ),
 		];
 
 		// Call.

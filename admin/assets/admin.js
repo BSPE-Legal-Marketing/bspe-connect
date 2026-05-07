@@ -247,18 +247,14 @@
 			var btnKey = select.getAttribute('data-bspe-icon-library-select');
 			if (!btnKey) { return; }
 
-			var brandPane  = document.querySelector('[data-bspe-icon-pane="brand"][data-bspe-button="' + btnKey + '"]');
-			var customPane = document.querySelector('[data-bspe-icon-pane="custom"][data-bspe-button="' + btnKey + '"]');
+			var panes = document.querySelectorAll('[data-bspe-icon-pane][data-bspe-button="' + btnKey + '"]');
 
 			function sync() {
 				var v = select.value;
-				if (brandPane) {
-					brandPane.style.display = (v === 'brand') ? '' : 'none';
-				}
-				if (customPane) {
-					var showCustom = (v !== 'brand' && v !== 'none');
-					customPane.style.display = showCustom ? '' : 'none';
-				}
+				panes.forEach(function (pane) {
+					var paneKey = pane.getAttribute('data-bspe-icon-pane');
+					pane.style.display = (paneKey === v) ? '' : 'none';
+				});
 			}
 
 			sync();
