@@ -254,8 +254,16 @@ final class Frontend {
 			$font_family = sprintf( '"%s", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', esc_attr( $font ) );
 		}
 
-		$icon_size  = max( 12, min( 48, (int) Settings::get( 'design.icon_size', 18 ) ) );
-		$label_size = max( 8,  min( 20, (int) Settings::get( 'design.label_size', 11 ) ) );
+		$icon_size  = max( 12, min( 48, (int) Settings::get( 'design.icon_size', 16 ) ) );
+		$label_size = max( 8,  min( 20, (int) Settings::get( 'design.label_size', 12 ) ) );
+
+		$label_weight = (int) Settings::get( 'design.label_weight', 500 );
+		if ( ! in_array( $label_weight, [ 400, 500, 600, 700 ], true ) ) {
+			$label_weight = 500;
+		}
+		$label_transform   = Settings::get( 'design.label_uppercase', true ) ? 'uppercase' : 'none';
+		$button_padding_y  = max( 2, min( 24, (int) Settings::get( 'design.button_padding_y', 6 ) ) );
+		$icon_label_gap    = max( 0, min( 16, (int) Settings::get( 'design.icon_label_gap', 2 ) ) );
 
 		echo "<style id=\"bspe-connect-vars\">\n";
 		echo ":root, .bspe-connect, #bspe-connect {\n";
@@ -264,12 +272,19 @@ final class Frontend {
 		}
 		echo "\t--bspe-icon-size: " . esc_html( (string) $icon_size ) . "px;\n";
 		echo "\t--bspe-label-size: " . esc_html( (string) $label_size ) . "px;\n";
+		echo "\t--bspe-label-weight: " . esc_html( (string) $label_weight ) . ";\n";
+		echo "\t--bspe-label-transform: " . esc_html( $label_transform ) . ";\n";
+		echo "\t--bspe-button-padding-y: " . esc_html( (string) $button_padding_y ) . "px;\n";
+		echo "\t--bspe-icon-label-gap: " . esc_html( (string) $icon_label_gap ) . "px;\n";
 		if ( '' !== $font_family ) {
 			echo "\t--bspe-font-family: " . wp_kses_post( $font_family ) . ";\n";
 		}
 		echo "}\n";
-		// Hide above the configured breakpoint.
-		echo '@media (min-width: ' . esc_html( (string) ( $breakpoint + 1 ) ) . "px) {\n";
+		// Hide AT or above the configured breakpoint. Setting "768" means
+		// "viewports 768px and wider don't see the bar" — matching common
+		// Bootstrap-style breakpoint conventions where the value is the
+		// first non-mobile width.
+		echo '@media (min-width: ' . esc_html( (string) $breakpoint ) . "px) {\n";
 		echo "\t.bspe-connect { display: none !important; }\n";
 		echo "}\n";
 		echo "</style>\n";

@@ -388,13 +388,25 @@ final class Settings_Saver {
 			$google_font = 'DM Sans';
 		}
 
+		// Label weight — only the standard 400 / 500 / 600 / 700 values are
+		// accepted; everything else collapses to 500. Keeps the design
+		// system tight and avoids loading extra font files for one-off weights.
+		$weight = (int) ( $input['label_weight'] ?? 500 );
+		if ( ! in_array( $weight, [ 400, 500, 600, 700 ], true ) ) {
+			$weight = 500;
+		}
+
 		return [
-			'firm_name'   => sanitize_text_field( (string) ( $input['firm_name'] ?? '' ) ),
-			'colors'      => $out_colors,
-			'icon_size'   => max( 12, min( 48, (int) ( $input['icon_size']  ?? 18 ) ) ),
-			'label_size'  => max( 8,  min( 20, (int) ( $input['label_size'] ?? 11 ) ) ),
-			'font_mode'   => $font_mode,
-			'google_font' => $google_font,
+			'firm_name'        => sanitize_text_field( (string) ( $input['firm_name'] ?? '' ) ),
+			'colors'           => $out_colors,
+			'icon_size'        => max( 12, min( 48, (int) ( $input['icon_size']  ?? 16 ) ) ),
+			'label_size'       => max( 8,  min( 20, (int) ( $input['label_size'] ?? 12 ) ) ),
+			'label_weight'     => $weight,
+			'label_uppercase'  => ! empty( $input['label_uppercase'] ),
+			'button_padding_y' => max( 2,  min( 24, (int) ( $input['button_padding_y'] ?? 6 ) ) ),
+			'icon_label_gap'   => max( 0,  min( 16, (int) ( $input['icon_label_gap']   ?? 2 ) ) ),
+			'font_mode'        => $font_mode,
+			'google_font'      => $google_font,
 		];
 	}
 

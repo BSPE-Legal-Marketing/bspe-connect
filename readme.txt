@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.1.4
+Stable tag: 2.1.5
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,27 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.1.5 =
+* Fix: mobile breakpoint setting was off by one — entering 768 actually
+  hid the bar at 769 and above, so a 768 px iPad-portrait viewport saw
+  the bar instead of staying mobile-only-up-to-767. Dropped the +1 in
+  the inline media-query emitter so the setting now matches Bootstrap-
+  style breakpoint convention: "the value is the FIRST non-mobile
+  width." Setting 768 hides the bar at viewports 768+ inclusive.
+* Default labels are now UPPERCASE with weight 500. Matches the look
+  in the original mockups and gives the bar a stronger CTA feel.
+  Existing settings keep their saved value; the default just changes
+  for fresh installs.
+* New Design tab controls (4 added):
+    - **Button vertical padding** (2-24 px, default 6) — controls
+      total bar height
+    - **Icon ↔ label gap** (0-16 px, default 2)
+    - **Label weight** — Regular (400) / Medium (500) / Semibold (600)
+      / Bold (700); default 500
+    - **Uppercase labels** toggle (default ON)
+  All four wire to CSS custom properties emitted in <head> so they
+  apply on the bar without any frontend JS.
 
 = 2.1.4 =
 * Icon libraries: removed Brand SVGs, Ionicons, and Dripicons. Only

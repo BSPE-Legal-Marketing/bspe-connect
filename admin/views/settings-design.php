@@ -82,15 +82,15 @@ foreach ( $color_rows as $row ) {
 }
 Components::close_card();
 
-/* ----------------- Sizing ----------------- */
+/* ----------------- Sizing & layout ----------------- */
 Components::open_card(
-	__( 'Sizing', 'bspe-connect' ),
-	__( 'Fine-tune how big the icons and text appear inside each bar button.', 'bspe-connect' )
+	__( 'Sizing & layout', 'bspe-connect' ),
+	__( 'Fine-tune the bar button icon size, label size, padding, and the gap between icon and label.', 'bspe-connect' )
 );
 Components::row(
 	__( 'Icon size', 'bspe-connect' ),
 	static function () use ( $design ): void {
-		Components::number( 'bspe[design][icon_size]', (int) ( $design['icon_size'] ?? 18 ), [
+		Components::number( 'bspe[design][icon_size]', (int) ( $design['icon_size'] ?? 16 ), [
 			'min'    => 12,
 			'max'    => 48,
 			'step'   => 1,
@@ -99,13 +99,13 @@ Components::row(
 	},
 	[
 		'id'          => 'bspe-design-icon_size',
-		'description' => __( 'Default 18 px. Applies to all four bar buttons.', 'bspe-connect' ),
+		'description' => __( 'Default 16 px. Applies to every bar button icon.', 'bspe-connect' ),
 	]
 );
 Components::row(
 	__( 'Label size', 'bspe-connect' ),
 	static function () use ( $design ): void {
-		Components::number( 'bspe[design][label_size]', (int) ( $design['label_size'] ?? 11 ), [
+		Components::number( 'bspe[design][label_size]', (int) ( $design['label_size'] ?? 12 ), [
 			'min'    => 8,
 			'max'    => 20,
 			'step'   => 1,
@@ -114,8 +114,73 @@ Components::row(
 	},
 	[
 		'id'          => 'bspe-design-label_size',
-		'description' => __( 'Default 11 px. Adjusts the text below each icon.', 'bspe-connect' ),
+		'description' => __( 'Default 12 px. Adjusts the text under each icon.', 'bspe-connect' ),
 	]
+);
+Components::row(
+	__( 'Button vertical padding', 'bspe-connect' ),
+	static function () use ( $design ): void {
+		Components::number( 'bspe[design][button_padding_y]', (int) ( $design['button_padding_y'] ?? 6 ), [
+			'min'    => 2,
+			'max'    => 24,
+			'step'   => 1,
+			'suffix' => __( 'px', 'bspe-connect' ),
+		] );
+	},
+	[
+		'id'          => 'bspe-design-button_padding_y',
+		'description' => __( 'Default 6 px. Space above and below the icon + label inside each bar button — controls overall bar height.', 'bspe-connect' ),
+	]
+);
+Components::row(
+	__( 'Icon ↔ label gap', 'bspe-connect' ),
+	static function () use ( $design ): void {
+		Components::number( 'bspe[design][icon_label_gap]', (int) ( $design['icon_label_gap'] ?? 2 ), [
+			'min'    => 0,
+			'max'    => 16,
+			'step'   => 1,
+			'suffix' => __( 'px', 'bspe-connect' ),
+		] );
+	},
+	[
+		'id'          => 'bspe-design-icon_label_gap',
+		'description' => __( 'Default 2 px. Vertical space between the icon and the label below it.', 'bspe-connect' ),
+	]
+);
+Components::close_card();
+
+/* ----------------- Label style ----------------- */
+Components::open_card(
+	__( 'Label style', 'bspe-connect' ),
+	__( 'Weight and casing for the label under each bar button.', 'bspe-connect' )
+);
+Components::row(
+	__( 'Label weight', 'bspe-connect' ),
+	static function () use ( $design ): void {
+		Components::select(
+			'bspe[design][label_weight]',
+			(string) (int) ( $design['label_weight'] ?? 500 ),
+			[
+				'400' => __( 'Regular (400)',  'bspe-connect' ),
+				'500' => __( 'Medium (500) — default', 'bspe-connect' ),
+				'600' => __( 'Semibold (600)', 'bspe-connect' ),
+				'700' => __( 'Bold (700)',     'bspe-connect' ),
+			]
+		);
+	},
+	[
+		'id'          => 'bspe-design-label_weight',
+		'description' => __( 'Heavier labels feel more like calls-to-action; lighter labels feel quieter.', 'bspe-connect' ),
+	]
+);
+Components::row(
+	__( 'Uppercase labels', 'bspe-connect' ),
+	static function () use ( $design ): void {
+		Components::toggle( 'bspe[design][label_uppercase]', ! empty( $design['label_uppercase'] ?? true ), [
+			'label' => __( 'Render labels in UPPERCASE on the bar', 'bspe-connect' ),
+		] );
+	},
+	[ 'description' => __( 'On by default for the brand look. Turn off to render labels in their saved case.', 'bspe-connect' ) ]
 );
 Components::close_card();
 
