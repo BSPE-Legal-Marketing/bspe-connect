@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,23 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.0.1 =
+* Fix: iOS Safari rendered Connect and Email buttons (and the bubble's
+  close button) with the native UA stylesheet because -webkit-appearance
+  was never reset. Added explicit appearance:none and a no-radius/no-pad
+  reset to all <button>-rendered controls so they pick up the brand
+  Plum / Teal styling consistently. The X icon inside the bubble close
+  button now renders.
+* Design: Connect button now uses the brand "Pop / CTA" color (Logo Teal)
+  instead of a near-imperceptible 90/10 plum-teal mix, so it visually
+  separates from Call/Text/Email as the primary action.
+* Sizing: shrank icons from 22px to 20px, reduced gap between icon and
+  label from 4px to 2px, tightened button padding (8/6/10 -> 6/4/7),
+  and dropped the bar min-height from 60px to 52px so the bar takes
+  less of the mobile viewport.
+* Compat: added a @supports fallback so the hover/focus tints don't
+  blank out on Safari < 16.2 (which lacks color-mix()).
 
 = 2.0.0 =
 * Phase 6: first stable release. Adds GitHub Actions workflow that builds
