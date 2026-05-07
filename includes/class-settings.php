@@ -19,7 +19,7 @@ final class Settings {
 
 	public const DB_VERSION_KEY = 'bspe_connect_db_version';
 
-	public const DB_VERSION = '1.0.0';
+	public const DB_VERSION = '1.1.0';
 
 	/**
 	 * Returns the canonical default settings array (spec §9).

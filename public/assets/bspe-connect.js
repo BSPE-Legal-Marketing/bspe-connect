@@ -394,6 +394,36 @@
 		});
 	}
 
+	// ----- Mobile keyboard scroll-into-view -----
+	// On iOS the soft keyboard slides up over the bottom sheet and can hide
+	// the field the user just tapped. Without this, the user has to scroll
+	// the modal manually to see what they're typing. We listen for focusin
+	// on the form, wait for the keyboard to actually appear (~280ms feels
+	// right), then scroll the field to the centre of the visible area.
+	// visualViewport is preferred when available because it accounts for
+	// the keyboard inset; we fall back to scrollIntoView({block:'center'})
+	// otherwise.
+	if (form) {
+		var scrollTimer = null;
+		form.addEventListener('focusin', function (event) {
+			var target = event.target;
+			if (!target || typeof target.scrollIntoView !== 'function') { return; }
+			// Only scroll real form fields — don't disturb the close button.
+			if (!target.matches('input, textarea, select')) { return; }
+			if (target.type === 'hidden') { return; }
+
+			clearTimeout(scrollTimer);
+			scrollTimer = setTimeout(function () {
+				try {
+					target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+				} catch (err) {
+					// Older Safari throws on the options bag — fall back.
+					target.scrollIntoView();
+				}
+			}, 280);
+		});
+	}
+
 	// ----- Form submit -----
 	if (form) {
 		form.addEventListener('submit', function (event) {

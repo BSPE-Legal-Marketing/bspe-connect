@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.2.2
+Stable tag: 2.2.3
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,26 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.2.3 =
+* Fix: analytics events were silently dropped on installs whose schema
+  was created before the events table was added (or where the events
+  table was lost in a backup/restore). Symptom — Logs showed
+  "Analytics event INSERT returned 0 — DB write failed" for every event.
+  Root cause — WordPress only runs the activation hook on first
+  activation, never on PUC-driven updates, so installs that came up on
+  an early version never got the table created. Fix is twofold:
+  Plugin::boot now compares the stored bspe_connect_db_version against
+  the constant on every page load and runs dbDelta when they differ
+  (bumped DB_VERSION to 1.1.0 to force one migration on this upgrade);
+  and Events::insert now logs the actual $wpdb->last_error so any
+  remaining INSERT failures surface the underlying MySQL error.
+* Design tab: the four button-padding controls (top / right / bottom /
+  left) collapsed into a single row with mini T R B L inputs instead
+  of taking four full settings rows. Same data, much tighter UI.
+* Form modal: focusing a field now scrolls it into the visible area
+  after the iOS soft keyboard appears (~280 ms delay), so the user no
+  longer has to hand-scroll the modal to see what they're typing.
 
 = 2.2.2 =
 * Analytics pipeline instrumented end-to-end. Every Rest::handle_event

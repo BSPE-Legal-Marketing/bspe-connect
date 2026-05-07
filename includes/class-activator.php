@@ -22,7 +22,12 @@ final class Activator {
 		update_option( Settings::DB_VERSION_KEY, Settings::DB_VERSION );
 	}
 
-	private static function create_tables(): void {
+	/**
+	 * Idempotent — safe to call from a plugin upgrade migration as well as
+	 * the activation hook. dbDelta inspects existing columns and only ALTERs
+	 * what changed.
+	 */
+	public static function create_tables(): void {
 		global $wpdb;
 
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';

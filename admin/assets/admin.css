@@ -665,6 +665,54 @@
 	letter-spacing: 0.02em;
 }
 
+/* Per-side button padding — single row of four mini inputs (T R B L). */
+.bspe-pad-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 14px 18px;
+	align-items: center;
+}
+
+.bspe-pad-grid__cell {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.bspe-pad-grid__label {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	border-radius: 6px;
+	background: rgba(53, 30, 40, 0.06);
+	color: var(--bspe-plum);
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	cursor: help;
+}
+
+.bspe-pad-grid__short {
+	display: block;
+	line-height: 1;
+}
+
+.bspe-pad-grid__input.bspe-input {
+	width: 64px;
+	min-width: 64px;
+	padding: 6px 8px;
+	font-variant-numeric: tabular-nums;
+	text-align: center;
+}
+
+.bspe-pad-grid__suffix {
+	color: var(--bspe-muted);
+	font-size: 12px;
+	letter-spacing: 0.02em;
+}
+
 .bspe-select-wrap {
 	position: relative;
 	display: inline-block;

@@ -64,7 +64,16 @@ final class Events {
 			[ '%s', '%s', '%s', '%s' ]
 		);
 
-		return $ok ? (int) $wpdb->insert_id : 0;
+		if ( ! $ok ) {
+			Logger::log( 'error', 'Events::insert — $wpdb->insert returned false', [
+				'event_type' => $row['event_type'],
+				'table'      => self::table(),
+				'last_error' => (string) $wpdb->last_error,
+			] );
+			return 0;
+		}
+
+		return (int) $wpdb->insert_id;
 	}
 
 	/**
