@@ -191,6 +191,68 @@ final class Frontend {
 				[ 'in_footer' => true, 'strategy' => 'defer' ]
 			);
 		}
+
+		// Icon library CDNs — only enqueue what the configured buttons actually need.
+		self::enqueue_icon_libraries();
+	}
+
+	/**
+	 * Walk the configured buttons and enqueue the CDN style/script for each
+	 * unique third-party icon library in use. Brand icons are bundled —
+	 * nothing to load for those.
+	 */
+	private static function enqueue_icon_libraries(): void {
+		$libraries = [];
+		foreach ( [ 'connect', 'call', 'text', 'email' ] as $key ) {
+			if ( ! Settings::get( "buttons.{$key}.enabled", false ) ) {
+				continue;
+			}
+			$lib = (string) Settings::get( "buttons.{$key}.icon_library", 'brand' );
+			if ( '' !== $lib && 'brand' !== $lib ) {
+				$libraries[ self::library_family( $lib ) ] = true;
+			}
+		}
+
+		if ( isset( $libraries['fa'] ) ) {
+			wp_enqueue_style(
+				'bspe-connect-fa',
+				'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',
+				[],
+				'6.5.0'
+			);
+		}
+
+		if ( isset( $libraries['ion'] ) ) {
+			// Ionicons web components — single-script CDN bundle works in modern browsers.
+			wp_enqueue_script(
+				'bspe-connect-ionicons',
+				'https://unpkg.com/ionicons@7.1.0/dist/ionicons.js',
+				[],
+				'7.1.0',
+				[ 'in_footer' => true, 'strategy' => 'defer' ]
+			);
+		}
+
+		if ( isset( $libraries['drip'] ) ) {
+			wp_enqueue_style(
+				'bspe-connect-dripicons',
+				'https://cdn.jsdelivr.net/npm/dripicons-v2@2.0.0/webfont/webfont.css',
+				[],
+				'2.0.0'
+			);
+		}
+	}
+
+	/**
+	 * Given an icon-library setting value (e.g. "fa-solid", "ion-outline"),
+	 * return the CDN family key ("fa", "ion", "drip", "brand").
+	 */
+	private static function library_family( string $library ): string {
+		if ( 'brand' === $library )                            return 'brand';
+		if ( 0 === strpos( $library, 'fa-' ) )                 return 'fa';
+		if ( 0 === strpos( $library, 'ion-' ) )                return 'ion';
+		if ( 'dripicons' === $library )                        return 'drip';
+		return 'brand';
 	}
 
 	/**
@@ -222,11 +284,16 @@ final class Frontend {
 			$font_family = sprintf( '"%s", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif', esc_attr( $font ) );
 		}
 
+		$icon_size  = max( 12, min( 48, (int) Settings::get( 'design.icon_size', 18 ) ) );
+		$label_size = max( 8,  min( 20, (int) Settings::get( 'design.label_size', 11 ) ) );
+
 		echo "<style id=\"bspe-connect-vars\">\n";
-		echo ":root, .bspe-connect {\n";
+		echo ":root, .bspe-connect, #bspe-connect {\n";
 		foreach ( $pairs as $name => $value ) {
 			echo "\t" . esc_html( $name ) . ': ' . esc_html( $value ) . ";\n"; // phpcs:ignore Squiz.PHP.EmbeddedPhp.SpacingBeforeOpen
 		}
+		echo "\t--bspe-icon-size: " . esc_html( (string) $icon_size ) . "px;\n";
+		echo "\t--bspe-label-size: " . esc_html( (string) $label_size ) . "px;\n";
 		if ( '' !== $font_family ) {
 			echo "\t--bspe-font-family: " . wp_kses_post( $font_family ) . ";\n";
 		}
@@ -285,17 +352,19 @@ final class Frontend {
 				continue;
 			}
 
-			$icon_key = (string) ( $cfg['icon'] ?? "{$key}-1" );
-			$icon_url = self::icon_url( $icon_key, $key );
+			$icon_library = (string) ( $cfg['icon_library'] ?? 'brand' );
+			$icon_key     = (string) ( $cfg['icon'] ?? "{$key}-1" );
 
 			$entry = [
-				'key'      => $key,
-				'label'    => (string) ( $cfg['label'] ?? ucfirst( $key ) ),
-				'icon_url' => $icon_url,
-				'href'     => '#',
-				'tag'      => 'button',
-				'attrs'    => [],
-				'mode'     => '',
+				'key'          => $key,
+				'label'        => (string) ( $cfg['label'] ?? ucfirst( $key ) ),
+				'icon_library' => $icon_library,
+				'icon'         => $icon_key,
+				'icon_url'     => 'brand' === $icon_library ? self::icon_url( $icon_key, $key ) : '',
+				'href'         => '#',
+				'tag'          => 'button',
+				'attrs'        => [],
+				'mode'         => '',
 			];
 
 			switch ( $key ) {

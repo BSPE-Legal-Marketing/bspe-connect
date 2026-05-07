@@ -109,6 +109,43 @@ foreach ( $color_rows as $row ) {
 }
 Components::close_card();
 
+/* ----------------- Sizing ----------------- */
+Components::open_card(
+	__( 'Sizing', 'bspe-connect' ),
+	__( 'Fine-tune how big the icons and text appear inside each bar button.', 'bspe-connect' )
+);
+Components::row(
+	__( 'Icon size', 'bspe-connect' ),
+	static function () use ( $design ): void {
+		Components::number( 'bspe[design][icon_size]', (int) ( $design['icon_size'] ?? 18 ), [
+			'min'    => 12,
+			'max'    => 48,
+			'step'   => 1,
+			'suffix' => __( 'px', 'bspe-connect' ),
+		] );
+	},
+	[
+		'id'          => 'bspe-design-icon_size',
+		'description' => __( 'Default 18 px. Applies to all four bar buttons.', 'bspe-connect' ),
+	]
+);
+Components::row(
+	__( 'Label size', 'bspe-connect' ),
+	static function () use ( $design ): void {
+		Components::number( 'bspe[design][label_size]', (int) ( $design['label_size'] ?? 11 ), [
+			'min'    => 8,
+			'max'    => 20,
+			'step'   => 1,
+			'suffix' => __( 'px', 'bspe-connect' ),
+		] );
+	},
+	[
+		'id'          => 'bspe-design-label_size',
+		'description' => __( 'Default 11 px. Adjusts the text below each icon.', 'bspe-connect' ),
+	]
+);
+Components::close_card();
+
 /* ----------------- Typography ----------------- */
 Components::open_card(
 	__( 'Typography', 'bspe-connect' ),

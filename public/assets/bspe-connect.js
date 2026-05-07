@@ -249,6 +249,7 @@
 	var modalBackdrop = modal ? modal.querySelector('[data-bspe-modal-backdrop]') : null;
 	var modalClose = modal ? modal.querySelector('[data-bspe-modal-close]') : null;
 	var modalHeading = modal ? modal.querySelector('[data-bspe-modal-heading]') : null;
+	var modalSubheading = modal ? modal.querySelector('[data-bspe-modal-subheading]') : null;
 	var modalSuccess = modal ? modal.querySelector('[data-bspe-modal-success]') : null;
 	var successMessage = modal ? modal.querySelector('[data-bspe-success-message]') : null;
 	var successWrapper = modal ? modal.querySelector('.bspe-connect__success') : null;
@@ -274,6 +275,11 @@
 			var attr = (src === 'text') ? 'data-text-heading' : 'data-email-heading';
 			var heading = modal.getAttribute(attr);
 			if (heading) { modalHeading.textContent = heading; }
+		}
+		if (modalSubheading) {
+			var subAttr = (src === 'text') ? 'data-text-subheading' : 'data-email-subheading';
+			var sub = modal.getAttribute(subAttr);
+			if (sub) { modalSubheading.textContent = sub; }
 		}
 
 		clearTimeout(modalAutoCloseTimer);

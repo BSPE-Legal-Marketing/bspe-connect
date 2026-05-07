@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.0.2
+Stable tag: 2.1.0
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,35 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.1.0 =
+* Icon libraries: each button can now render its icon from Font Awesome
+  6 Free (Solid + Regular variants), Ionicons 7 (Filled + Outline), or
+  Dripicons in addition to the bundled brand SVG set. CDN scripts /
+  styles are only enqueued when at least one button uses that library.
+  Per-button library is set under Buttons -> {button} -> Icon library;
+  the icon name field accepts the kebab-case identifier from each
+  library's docs (e.g. "comments" for Font Awesome, "chatbubbles" for
+  Ionicons, "dripicons-message" for Dripicons).
+* Connect button now uses the brand Logo Teal directly with a small
+  right-pointing chevron extension that hints at the rest of the bar.
+* Bubble close X moved to the absolute top-right corner so the avatar +
+  message can use the full width of the bubble.
+* Form modal: optional subheading line under the heading, configurable
+  per source (text vs email). Default heading is now "Send us an email"
+  / "Send us a text" and default subheading is "Please enter your name
+  and contact info." for both.
+* Form fields: visible labels replaced with screen-reader-only labels
+  + placeholders for visible cue. Required fields show a "*" suffix in
+  the placeholder.
+* Cloudflare Turnstile widget now stretches to fill the form column
+  instead of being centered awkwardly.
+* New Design controls: Icon size (12-48 px, default 18) and Label size
+  (8-20 px, default 11). Outputs as CSS custom properties so any future
+  per-page override can hook into them.
+* Connect button label color is now under the #bspe-connect specificity
+  prefix so themes setting span color via class selectors (e.g.
+  Elementor) don't bleed into the bar's label color.
 
 = 2.0.2 =
 * Fix: Elementor's per-kit inline CSS uses descendant selectors like

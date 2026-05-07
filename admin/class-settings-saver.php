@@ -28,6 +28,8 @@ final class Settings_Saver {
 
 	private const ALLOWED_ICONS = [ 'connect-1', 'connect-2', 'connect-3', 'connect-4', 'call-1', 'call-2', 'call-3', 'call-4', 'text-1', 'text-2', 'text-3', 'text-4', 'email-1', 'email-2', 'email-3', 'email-4' ];
 
+	private const ALLOWED_ICON_LIBRARIES = [ 'brand', 'fa-solid', 'fa-regular', 'ion-filled', 'ion-outline', 'dripicons' ];
+
 	private const ALLOWED_GOOGLE_FONTS = [ 'DM Sans', 'Inter', 'Lato', 'Roboto', 'Open Sans', 'Source Sans 3', 'Poppins', 'Manrope', 'Nunito', 'Work Sans', 'Plus Jakarta Sans', 'IBM Plex Sans', 'Figtree', 'Montserrat', 'Public Sans' ];
 
 	private const ALLOWED_DISPLAY_MODES = [ 'sitewide', 'pages_only', 'posts_only', 'pages_except', 'posts_except', 'sitewide_except_pages', 'sitewide_except_posts' ];
@@ -161,40 +163,48 @@ final class Settings_Saver {
 		// Connect.
 		$connect          = is_array( $input['connect'] ?? null ) ? $input['connect'] : [];
 		$connect_mode     = (string) ( $connect['mode'] ?? 'text' );
+		$connect_lib      = self::sanitize_icon_library( (string) ( $connect['icon_library'] ?? 'brand' ) );
 		$out['connect']   = [
-			'enabled'  => ! empty( $connect['enabled'] ),
-			'mode'     => in_array( $connect_mode, [ 'text', 'image' ], true ) ? $connect_mode : 'text',
-			'label'    => sanitize_text_field( (string) ( $connect['label'] ?? 'Connect' ) ),
-			'image_id' => max( 0, (int) ( $connect['image_id'] ?? 0 ) ),
-			'icon'     => self::sanitize_icon( (string) ( $connect['icon'] ?? 'connect-1' ), 'connect' ),
+			'enabled'      => ! empty( $connect['enabled'] ),
+			'mode'         => in_array( $connect_mode, [ 'text', 'image' ], true ) ? $connect_mode : 'text',
+			'label'        => sanitize_text_field( (string) ( $connect['label'] ?? 'Connect' ) ),
+			'image_id'     => max( 0, (int) ( $connect['image_id'] ?? 0 ) ),
+			'icon_library' => $connect_lib,
+			'icon'         => self::sanitize_icon_name( (string) ( $connect['icon'] ?? 'connect-1' ), $connect_lib, 'connect' ),
 		];
 
 		// Call.
 		$call           = is_array( $input['call'] ?? null ) ? $input['call'] : [];
+		$call_lib       = self::sanitize_icon_library( (string) ( $call['icon_library'] ?? 'brand' ) );
 		$out['call']    = [
-			'enabled' => ! empty( $call['enabled'] ),
-			'phone'   => self::sanitize_phone( (string) ( $call['phone'] ?? '' ) ),
-			'label'   => sanitize_text_field( (string) ( $call['label'] ?? 'Call' ) ),
-			'icon'    => self::sanitize_icon( (string) ( $call['icon'] ?? 'call-1' ), 'call' ),
+			'enabled'      => ! empty( $call['enabled'] ),
+			'phone'        => self::sanitize_phone( (string) ( $call['phone'] ?? '' ) ),
+			'label'        => sanitize_text_field( (string) ( $call['label'] ?? 'Call' ) ),
+			'icon_library' => $call_lib,
+			'icon'         => self::sanitize_icon_name( (string) ( $call['icon'] ?? 'call-1' ), $call_lib, 'call' ),
 		];
 
 		// Text.
 		$text           = is_array( $input['text'] ?? null ) ? $input['text'] : [];
 		$text_mode      = (string) ( $text['mode'] ?? 'sms' );
+		$text_lib       = self::sanitize_icon_library( (string) ( $text['icon_library'] ?? 'brand' ) );
 		$out['text']    = [
-			'enabled' => ! empty( $text['enabled'] ),
-			'mode'    => in_array( $text_mode, [ 'sms', 'inline' ], true ) ? $text_mode : 'sms',
-			'phone'   => self::sanitize_phone( (string) ( $text['phone'] ?? '' ) ),
-			'label'   => sanitize_text_field( (string) ( $text['label'] ?? 'Text' ) ),
-			'icon'    => self::sanitize_icon( (string) ( $text['icon'] ?? 'text-1' ), 'text' ),
+			'enabled'      => ! empty( $text['enabled'] ),
+			'mode'         => in_array( $text_mode, [ 'sms', 'inline' ], true ) ? $text_mode : 'sms',
+			'phone'        => self::sanitize_phone( (string) ( $text['phone'] ?? '' ) ),
+			'label'        => sanitize_text_field( (string) ( $text['label'] ?? 'Text' ) ),
+			'icon_library' => $text_lib,
+			'icon'         => self::sanitize_icon_name( (string) ( $text['icon'] ?? 'text-1' ), $text_lib, 'text' ),
 		];
 
 		// Email.
 		$email          = is_array( $input['email'] ?? null ) ? $input['email'] : [];
+		$email_lib      = self::sanitize_icon_library( (string) ( $email['icon_library'] ?? 'brand' ) );
 		$out['email']   = [
-			'enabled' => ! empty( $email['enabled'] ),
-			'label'   => sanitize_text_field( (string) ( $email['label'] ?? 'Email' ) ),
-			'icon'    => self::sanitize_icon( (string) ( $email['icon'] ?? 'email-1' ), 'email' ),
+			'enabled'      => ! empty( $email['enabled'] ),
+			'label'        => sanitize_text_field( (string) ( $email['label'] ?? 'Email' ) ),
+			'icon_library' => $email_lib,
+			'icon'         => self::sanitize_icon_name( (string) ( $email['icon'] ?? 'email-1' ), $email_lib, 'email' ),
 		];
 
 		return $out;
@@ -206,12 +216,33 @@ final class Settings_Saver {
 		return strlen( $digits ) === 10 ? $digits : ( '' === $digits ? '' : substr( $digits, 0, 10 ) );
 	}
 
-	private static function sanitize_icon( string $raw, string $type ): string {
+	private static function sanitize_icon_library( string $raw ): string {
 		$raw = strtolower( trim( $raw ) );
-		if ( in_array( $raw, self::ALLOWED_ICONS, true ) && str_starts_with( $raw, $type . '-' ) ) {
-			return $raw;
+		return in_array( $raw, self::ALLOWED_ICON_LIBRARIES, true ) ? $raw : 'brand';
+	}
+
+	/**
+	 * Sanitize the per-button icon name relative to its selected library.
+	 * Brand library uses the bundled SVG list; third-party libs accept any
+	 * value matching their naming pattern.
+	 */
+	private static function sanitize_icon_name( string $raw, string $library, string $type ): string {
+		$raw = trim( $raw );
+		if ( '' === $raw ) {
+			return 'brand' === $library ? $type . '-1' : '';
 		}
-		return $type . '-1';
+
+		if ( 'brand' === $library ) {
+			$raw = strtolower( $raw );
+			if ( in_array( $raw, self::ALLOWED_ICONS, true ) && str_starts_with( $raw, $type . '-' ) ) {
+				return $raw;
+			}
+			return $type . '-1';
+		}
+
+		// FA / Ionicons / Dripicons — accept any kebab-case-ish identifier.
+		$cleaned = strtolower( preg_replace( '/[^a-z0-9-]/i', '', $raw ) ?? '' );
+		return substr( $cleaned, 0, 60 );
 	}
 
 	/* -----------------------------------------------------------------
@@ -250,9 +281,11 @@ final class Settings_Saver {
 		];
 
 		return [
-			'fields'         => $out_field,
-			'text_heading'   => sanitize_text_field( (string) ( $input['text_heading']  ?? 'Send a text' ) ),
-			'email_heading'  => sanitize_text_field( (string) ( $input['email_heading'] ?? 'Send an email' ) ),
+			'fields'           => $out_field,
+			'text_heading'     => sanitize_text_field( (string) ( $input['text_heading']     ?? 'Send us a text' ) ),
+			'email_heading'    => sanitize_text_field( (string) ( $input['email_heading']    ?? 'Send us an email' ) ),
+			'text_subheading'  => sanitize_text_field( (string) ( $input['text_subheading']  ?? 'Please enter your name and contact info.' ) ),
+			'email_subheading' => sanitize_text_field( (string) ( $input['email_subheading'] ?? 'Please enter your name and contact info.' ) ),
 			'submit_label'   => sanitize_text_field( (string) ( $input['submit_label']  ?? 'Send' ) ),
 			'success_msg'    => sanitize_text_field( (string) ( $input['success_msg']   ?? "Thanks. We'll be in touch shortly." ) ),
 			'mail_to'        => self::sanitize_email_list( (string) ( $input['mail_to'] ?? '' ) ),
@@ -310,6 +343,8 @@ final class Settings_Saver {
 		return [
 			'firm_name'   => sanitize_text_field( (string) ( $input['firm_name'] ?? '' ) ),
 			'colors'      => $out_colors,
+			'icon_size'   => max( 12, min( 48, (int) ( $input['icon_size']  ?? 18 ) ) ),
+			'label_size'  => max( 8,  min( 20, (int) ( $input['label_size'] ?? 11 ) ) ),
 			'font_mode'   => $font_mode,
 			'google_font' => $google_font,
 		];

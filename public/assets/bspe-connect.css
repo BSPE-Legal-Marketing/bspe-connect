@@ -16,6 +16,8 @@
 	--bspe-bubble-fg: #351E28;
 	--bspe-accent: #3AAFB9;
 	--bspe-bar-h: 52px;
+	--bspe-icon-size: 18px;
+	--bspe-label-size: 11px;
 	--bspe-ease: cubic-bezier(0.16, 1, 0.3, 1);
 	--bspe-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 
@@ -80,7 +82,7 @@
 	border-right: 1px solid rgba(250, 247, 242, 0.06);
 	border-radius: 0;
 	font: inherit;
-	font-size: 10.5px;
+	font-size: var(--bspe-label-size, 11px);
 	font-weight: 500;
 	letter-spacing: 0.02em;
 	line-height: 1.2;
@@ -94,7 +96,7 @@
 	        appearance: none;
 	transition: background 0.18s var(--bspe-ease), transform 0.12s var(--bspe-ease);
 	position: relative;
-	overflow: hidden;
+	overflow: visible;
 	width: auto;
 	height: auto;
 }
@@ -129,10 +131,40 @@
 	background: color-mix(in srgb, var(--bspe-button-bg) 80%, white);
 }
 
-/* Connect = primary CTA. Brand-defined Pop / CTA color. */
+/* Connect = primary CTA. Brand-defined Pop / CTA color, with a small
+   right-pointing chevron that extends slightly past the right edge to
+   suggest "tap me, then tap one of the next ones" hierarchy. */
 #bspe-connect .bspe-connect__btn--connect {
 	background: var(--bspe-accent);
 	color: var(--bspe-button-fg);
+	border-right: 0;
+	z-index: 2;
+}
+
+#bspe-connect .bspe-connect__btn--connect::after {
+	content: "";
+	position: absolute;
+	left: 100%;
+	top: 0;
+	bottom: 0;
+	width: 12px;
+	background: var(--bspe-accent);
+	clip-path: polygon(0 0, 100% 50%, 0 100%);
+	pointer-events: none;
+	transition: background 0.18s var(--bspe-ease);
+}
+
+#bspe-connect .bspe-connect__btn--connect:hover::after,
+#bspe-connect .bspe-connect__btn--connect:focus-visible::after {
+	background: color-mix(in srgb, var(--bspe-accent) 90%, black);
+}
+
+@supports not (background: color-mix(in srgb, red, blue)) {
+	#bspe-connect .bspe-connect__btn--connect:hover::after,
+	#bspe-connect .bspe-connect__btn--connect:focus-visible::after {
+		background: var(--bspe-accent);
+		opacity: 0.92;
+	}
 }
 
 #bspe-connect .bspe-connect__btn--connect:hover,
@@ -154,20 +186,20 @@
 	background: var(--bspe-accent);
 }
 
-.bspe-connect__icon {
+#bspe-connect .bspe-connect__icon {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 22px;
-	height: 22px;
-	color: var(--bspe-button-fg);
+	width: calc(var(--bspe-icon-size, 18px) + 4px);
+	height: calc(var(--bspe-icon-size, 18px) + 4px);
+	color: inherit;
 }
 
-/* SVG icon rendered via mask-image so the active button_fg color themes it. */
-.bspe-connect__icon-svg {
+/* Brand SVG via mask-image so the active button_fg color themes it. */
+#bspe-connect .bspe-connect__icon-svg {
 	display: block;
-	width: 20px;
-	height: 20px;
+	width: var(--bspe-icon-size, 18px);
+	height: var(--bspe-icon-size, 18px);
 	background: currentColor;
 	-webkit-mask-image: var(--bspe-icon-url);
 	        mask-image: var(--bspe-icon-url);
@@ -179,17 +211,38 @@
 	        mask-repeat: no-repeat;
 }
 
+/* Font Awesome / Dripicons render as <i class="fa-..."> / <i class="dripicons-..."> */
+#bspe-connect .bspe-connect__icon-fa,
+#bspe-connect .bspe-connect__icon-drip {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: var(--bspe-icon-size, 18px);
+	line-height: 1;
+	color: inherit;
+}
+
+/* Ionicons web component */
+#bspe-connect .bspe-connect__icon-ion {
+	display: inline-flex;
+	font-size: var(--bspe-icon-size, 18px);
+	width: var(--bspe-icon-size, 18px);
+	height: var(--bspe-icon-size, 18px);
+	color: inherit;
+}
+
 /* User-uploaded Connect avatar: keep full color, circular crop. */
-.bspe-connect__icon-img {
-	width: 24px;
-	height: 24px;
+#bspe-connect .bspe-connect__icon-img {
+	width: calc(var(--bspe-icon-size, 18px) + 6px);
+	height: calc(var(--bspe-icon-size, 18px) + 6px);
 	border-radius: 50%;
 	object-fit: cover;
 	display: block;
 }
 
-.bspe-connect__label {
-	color: var(--bspe-button-fg);
+#bspe-connect .bspe-connect__label {
+	color: inherit;
+	font-size: var(--bspe-label-size, 11px);
 	max-width: 100%;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -214,6 +267,7 @@
 	transform: translateY(8px);
 	transition: opacity 220ms var(--bspe-ease), transform 220ms var(--bspe-ease);
 	will-change: opacity, transform;
+	overflow: visible;
 }
 
 .bspe-connect__bubble[data-bspe-state="visible"] {
@@ -237,10 +291,10 @@
 
 .bspe-connect__bubble-inner {
 	display: grid;
-	grid-template-columns: auto 1fr auto;
+	grid-template-columns: auto 1fr;
 	align-items: center;
 	gap: 12px;
-	padding: 14px 14px 14px 16px;
+	padding: 14px 40px 14px 16px;
 }
 
 .bspe-connect__bubble-inner > .bspe-connect__bubble-body {
@@ -282,10 +336,14 @@
 }
 
 #bspe-connect .bspe-connect__bubble-close {
+	position: absolute;
+	top: 6px;
+	right: 6px;
 	flex-shrink: 0;
-	width: 32px;
-	height: 32px;
+	width: 30px;
+	height: 30px;
 	padding: 0;
+	margin: 0;
 	border-radius: 50%;
 	border: 0;
 	background: transparent;
@@ -300,8 +358,8 @@
 	font: inherit;
 	text-transform: none;
 	transition: background 0.18s var(--bspe-ease), transform 0.12s var(--bspe-ease);
-	margin: -6px -4px -6px 0;
-	opacity: 0.7;
+	opacity: 0.65;
+	z-index: 2;
 }
 
 #bspe-connect .bspe-connect__bubble-close svg {
@@ -398,11 +456,20 @@
 
 .bspe-connect__modal-heading {
 	margin: 0;
-	font-size: 17px;
+	font-size: 18px;
 	font-weight: 700;
 	color: var(--bspe-bubble-fg);
-	letter-spacing: -0.005em;
-	line-height: 1.3;
+	letter-spacing: -0.01em;
+	line-height: 1.25;
+}
+
+.bspe-connect__modal-subheading {
+	margin: 4px 0 0;
+	font-size: 13px;
+	font-weight: 400;
+	color: var(--bspe-bubble-fg);
+	opacity: 0.7;
+	line-height: 1.45;
 }
 
 #bspe-connect .bspe-connect__modal-close {
@@ -461,26 +528,31 @@
 .bspe-connect__form {
 	display: flex;
 	flex-direction: column;
-	gap: 14px;
+	gap: 12px;
 }
 
 .bspe-connect__field {
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
+	gap: 4px;
 }
 
+/* Field labels are visually hidden but still announced to screen readers
+   for accessibility. Placeholders carry the visible label. */
 .bspe-connect__label {
-	font-size: 12.5px;
-	font-weight: 600;
-	color: var(--bspe-bubble-fg);
-	letter-spacing: 0.02em;
-	text-transform: uppercase;
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
 }
 
 .bspe-connect__required {
 	color: var(--bspe-accent);
-	font-weight: 700;
 }
 
 #bspe-connect .bspe-connect__input {
@@ -513,6 +585,21 @@
 #bspe-connect .bspe-connect__input[aria-invalid="true"] {
 	border-color: #c0392b;
 	box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.18);
+}
+
+#bspe-connect .bspe-connect__input::placeholder {
+	color: rgba(53, 30, 40, 0.42);
+	opacity: 1;
+	font-size: 15px;
+}
+
+#bspe-connect .bspe-connect__input::-webkit-input-placeholder {
+	color: rgba(53, 30, 40, 0.42);
+}
+
+#bspe-connect .bspe-connect__input::-moz-placeholder {
+	color: rgba(53, 30, 40, 0.42);
+	opacity: 1;
 }
 
 #bspe-connect .bspe-connect__textarea {
@@ -635,8 +722,19 @@
 
 .bspe-connect__turnstile {
 	display: flex;
-	justify-content: center;
+	justify-content: flex-start;
 	margin-top: 4px;
+	overflow-x: auto;
+}
+
+/* Make Cloudflare's iframe widget align to the form's left edge and grow
+   to fill the container instead of sitting awkwardly centered. */
+.bspe-connect__turnstile .cf-turnstile {
+	width: 100%;
+}
+
+.bspe-connect__turnstile iframe {
+	max-width: 100%;
 }
 
 /* ---------------------------------------------------------------------- */

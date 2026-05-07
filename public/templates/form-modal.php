@@ -3,9 +3,12 @@
  * BSPE Connect — bottom-sheet form modal.
  *
  * Renders a single form whose source (`text` / `email`) is set by JS based
- * on which button opened the modal. Heading text is also swapped client-side
- * from the data-* attributes on the modal root so a single DOM tree serves
- * both flows.
+ * on which button opened the modal. Heading + subheading text are also
+ * swapped client-side from the data-* attributes on the modal root so a
+ * single DOM tree serves both flows.
+ *
+ * Field labels are visually-hidden for screen readers; visible label text
+ * comes from the placeholder.
  *
  * @package BSPE\Connect
  */
@@ -17,10 +20,12 @@ use BSPE\Connect\Settings;
 $form_settings = Settings::get( 'form', [] );
 $form_settings = is_array( $form_settings ) ? $form_settings : [];
 
-$fields_cfg    = is_array( $form_settings['fields'] ?? null ) ? $form_settings['fields'] : [];
-$text_heading  = (string) ( $form_settings['text_heading']  ?? __( 'Send a text', 'bspe-connect' ) );
-$email_heading = (string) ( $form_settings['email_heading'] ?? __( 'Send an email', 'bspe-connect' ) );
-$submit_label  = (string) ( $form_settings['submit_label']  ?? __( 'Send', 'bspe-connect' ) );
+$fields_cfg       = is_array( $form_settings['fields'] ?? null ) ? $form_settings['fields'] : [];
+$text_heading     = (string) ( $form_settings['text_heading']     ?? __( 'Send us a text', 'bspe-connect' ) );
+$email_heading    = (string) ( $form_settings['email_heading']    ?? __( 'Send us an email', 'bspe-connect' ) );
+$text_subheading  = (string) ( $form_settings['text_subheading']  ?? __( 'Please enter your name and contact info.', 'bspe-connect' ) );
+$email_subheading = (string) ( $form_settings['email_subheading'] ?? __( 'Please enter your name and contact info.', 'bspe-connect' ) );
+$submit_label     = (string) ( $form_settings['submit_label']     ?? __( 'Send', 'bspe-connect' ) );
 
 $turnstile_enabled  = (bool) ( $form_settings['antispam']['turnstile_enabled']  ?? false );
 $turnstile_site_key = (string) ( $form_settings['antispam']['turnstile_site_key'] ?? '' );
@@ -38,12 +43,21 @@ $is_required = static function ( string $name ) use ( $fields_cfg ): bool {
 	return ! empty( $fields_cfg[ $name ]['required'] );
 };
 
-$render_label = static function ( string $for_id, string $label, bool $required ): void {
+/**
+ * Builds an "Email *" placeholder string with a hairspace + asterisk on
+ * required fields (matches the visual cue we used to put on the label).
+ */
+$placeholder_for = static function ( string $base, bool $required ): string {
+	return $required ? $base . ' *' : $base;
+};
+
+$render_label = static function ( string $for_id, string $label ): void {
+	// Visually hidden — kept for screen readers (.bspe-connect__label
+	// has clip:rect(0 0 0 0)).
 	printf(
-		'<label for="%1$s" class="bspe-connect__label">%2$s%3$s</label>',
+		'<label for="%1$s" class="bspe-connect__label">%2$s</label>',
 		esc_attr( $for_id ),
-		esc_html( $label ),
-		$required ? ' <span class="bspe-connect__required" aria-hidden="true">*</span>' : ''
+		esc_html( $label )
 	);
 };
 
@@ -56,7 +70,9 @@ $render_error = static function ( string $field ): void {
 ?>
 <div class="bspe-connect__modal" data-bspe-modal data-bspe-state="hidden" hidden
 	data-text-heading="<?php echo esc_attr( $text_heading ); ?>"
-	data-email-heading="<?php echo esc_attr( $email_heading ); ?>">
+	data-email-heading="<?php echo esc_attr( $email_heading ); ?>"
+	data-text-subheading="<?php echo esc_attr( $text_subheading ); ?>"
+	data-email-subheading="<?php echo esc_attr( $email_subheading ); ?>">
 
 	<div class="bspe-connect__modal-backdrop" data-bspe-modal-backdrop aria-hidden="true"></div>
 
@@ -69,9 +85,14 @@ $render_error = static function ( string $field ): void {
 		<div class="bspe-connect__modal-handle" aria-hidden="true"></div>
 
 		<header class="bspe-connect__modal-header">
-			<h2 id="bspe-connect-modal-heading" class="bspe-connect__modal-heading" data-bspe-modal-heading>
-				<?php echo esc_html( $email_heading ); ?>
-			</h2>
+			<div class="bspe-connect__modal-header-text">
+				<h2 id="bspe-connect-modal-heading" class="bspe-connect__modal-heading" data-bspe-modal-heading>
+					<?php echo esc_html( $email_heading ); ?>
+				</h2>
+				<p class="bspe-connect__modal-subheading" data-bspe-modal-subheading>
+					<?php echo esc_html( $email_subheading ); ?>
+				</p>
+			</div>
 			<button
 				type="button"
 				class="bspe-connect__modal-close"
@@ -110,7 +131,7 @@ $render_error = static function ( string $field ): void {
 
 				<?php if ( $is_visible( 'name' ) ) : ?>
 					<div class="bspe-connect__field" data-field="name">
-						<?php $render_label( 'bspe-connect-name', __( 'Name', 'bspe-connect' ), $is_required( 'name' ) ); ?>
+						<?php $render_label( 'bspe-connect-name', __( 'Name', 'bspe-connect' ) ); ?>
 						<input
 							id="bspe-connect-name"
 							class="bspe-connect__input"
@@ -119,6 +140,7 @@ $render_error = static function ( string $field ): void {
 							autocomplete="name"
 							inputmode="text"
 							maxlength="255"
+							placeholder="<?php echo esc_attr( $placeholder_for( __( 'Name', 'bspe-connect' ), $is_required( 'name' ) ) ); ?>"
 							<?php echo $is_required( 'name' ) ? 'required aria-required="true"' : ''; ?>
 						/>
 						<?php $render_error( 'name' ); ?>
@@ -127,7 +149,7 @@ $render_error = static function ( string $field ): void {
 
 				<?php if ( $is_visible( 'phone' ) ) : ?>
 					<div class="bspe-connect__field" data-field="phone">
-						<?php $render_label( 'bspe-connect-phone', __( 'Phone', 'bspe-connect' ), $is_required( 'phone' ) ); ?>
+						<?php $render_label( 'bspe-connect-phone', __( 'Phone', 'bspe-connect' ) ); ?>
 						<input
 							id="bspe-connect-phone"
 							class="bspe-connect__input"
@@ -135,7 +157,7 @@ $render_error = static function ( string $field ): void {
 							name="phone"
 							autocomplete="tel"
 							inputmode="tel"
-							placeholder="(555) 123-4567"
+							placeholder="<?php echo esc_attr( $placeholder_for( __( 'Phone', 'bspe-connect' ), $is_required( 'phone' ) ) ); ?>"
 							maxlength="20"
 							data-bspe-phone-mask
 							<?php echo $is_required( 'phone' ) ? 'required aria-required="true"' : ''; ?>
@@ -146,7 +168,7 @@ $render_error = static function ( string $field ): void {
 
 				<?php if ( $is_visible( 'email' ) ) : ?>
 					<div class="bspe-connect__field" data-field="email">
-						<?php $render_label( 'bspe-connect-email', __( 'Email', 'bspe-connect' ), $is_required( 'email' ) ); ?>
+						<?php $render_label( 'bspe-connect-email', __( 'Email', 'bspe-connect' ) ); ?>
 						<input
 							id="bspe-connect-email"
 							class="bspe-connect__input"
@@ -155,6 +177,7 @@ $render_error = static function ( string $field ): void {
 							autocomplete="email"
 							inputmode="email"
 							maxlength="255"
+							placeholder="<?php echo esc_attr( $placeholder_for( __( 'Email', 'bspe-connect' ), $is_required( 'email' ) ) ); ?>"
 							<?php echo $is_required( 'email' ) ? 'required aria-required="true"' : ''; ?>
 						/>
 						<?php $render_error( 'email' ); ?>
@@ -163,13 +186,14 @@ $render_error = static function ( string $field ): void {
 
 				<?php if ( $is_visible( 'contact_pref' ) ) : ?>
 					<div class="bspe-connect__field" data-field="contact_pref">
-						<?php $render_label( 'bspe-connect-contact-pref', __( 'Preferred contact', 'bspe-connect' ), $is_required( 'contact_pref' ) ); ?>
+						<?php $render_label( 'bspe-connect-contact-pref', __( 'Preferred contact', 'bspe-connect' ) ); ?>
 						<select
 							id="bspe-connect-contact-pref"
 							class="bspe-connect__input bspe-connect__select"
 							name="contact_pref"
 							<?php echo $is_required( 'contact_pref' ) ? 'required aria-required="true"' : ''; ?>
 						>
+							<option value=""><?php esc_html_e( 'Preferred contact method', 'bspe-connect' ); ?></option>
 							<option value="any"><?php esc_html_e( 'Any', 'bspe-connect' ); ?></option>
 							<option value="phone"><?php esc_html_e( 'Phone', 'bspe-connect' ); ?></option>
 							<option value="text"><?php esc_html_e( 'Text', 'bspe-connect' ); ?></option>
@@ -181,12 +205,13 @@ $render_error = static function ( string $field ): void {
 
 				<?php if ( $is_visible( 'message' ) ) : ?>
 					<div class="bspe-connect__field" data-field="message">
-						<?php $render_label( 'bspe-connect-message', __( 'Message', 'bspe-connect' ), $is_required( 'message' ) ); ?>
+						<?php $render_label( 'bspe-connect-message', __( 'Message', 'bspe-connect' ) ); ?>
 						<textarea
 							id="bspe-connect-message"
 							class="bspe-connect__input bspe-connect__textarea"
 							name="message"
 							rows="4"
+							placeholder="<?php echo esc_attr( $placeholder_for( __( 'Message', 'bspe-connect' ), $is_required( 'message' ) ) ); ?>"
 							<?php echo $is_required( 'message' ) ? 'required aria-required="true"' : ''; ?>
 						></textarea>
 						<?php $render_error( 'message' ); ?>

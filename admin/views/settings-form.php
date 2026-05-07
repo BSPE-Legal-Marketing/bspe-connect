@@ -85,16 +85,41 @@ Components::open_card(
 Components::row(
 	__( 'Text form heading', 'bspe-connect' ),
 	static function () use ( $form ): void {
-		Components::text( 'bspe[form][text_heading]', (string) ( $form['text_heading'] ?? 'Send a text' ), [ 'maxlength' => 80 ] );
+		Components::text( 'bspe[form][text_heading]', (string) ( $form['text_heading'] ?? 'Send us a text' ), [ 'maxlength' => 80 ] );
 	},
 	[ 'id' => 'bspe-form-text_heading' ]
 );
 Components::row(
+	__( 'Text form subheading', 'bspe-connect' ),
+	static function () use ( $form ): void {
+		Components::text(
+			'bspe[form][text_subheading]',
+			(string) ( $form['text_subheading'] ?? 'Please enter your name and contact info.' ),
+			[ 'maxlength' => 200 ]
+		);
+	},
+	[
+		'id'          => 'bspe-form-text_subheading',
+		'description' => __( 'Smaller line shown below the heading. Tell visitors what to expect after they submit.', 'bspe-connect' ),
+	]
+);
+Components::row(
 	__( 'Email form heading', 'bspe-connect' ),
 	static function () use ( $form ): void {
-		Components::text( 'bspe[form][email_heading]', (string) ( $form['email_heading'] ?? 'Send an email' ), [ 'maxlength' => 80 ] );
+		Components::text( 'bspe[form][email_heading]', (string) ( $form['email_heading'] ?? 'Send us an email' ), [ 'maxlength' => 80 ] );
 	},
 	[ 'id' => 'bspe-form-email_heading' ]
+);
+Components::row(
+	__( 'Email form subheading', 'bspe-connect' ),
+	static function () use ( $form ): void {
+		Components::text(
+			'bspe[form][email_subheading]',
+			(string) ( $form['email_subheading'] ?? 'Please enter your name and contact info.' ),
+			[ 'maxlength' => 200 ]
+		);
+	},
+	[ 'id' => 'bspe-form-email_subheading' ]
 );
 Components::row(
 	__( 'Submit button label', 'bspe-connect' ),
