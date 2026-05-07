@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.1.2
+Stable tag: 2.1.3
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,14 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.1.3 =
+* "Save changes" button on every settings form now sits at 50% opacity
+  until you actually change something — as soon as any field's value
+  diverges from the saved snapshot, the form gets `.is-dirty` and the
+  button snaps to full opacity (with a "You have unsaved changes"
+  tooltip). Captures the initial form state via FormData snapshot on
+  page load and re-compares on every `input` / `change` event.
 
 = 2.1.2 =
 * Connect button simplified: removed the "Custom image" mode and the

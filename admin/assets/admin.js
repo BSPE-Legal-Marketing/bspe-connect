@@ -263,6 +263,53 @@
 	}
 
 	/* ---------------------------------------------------------------- */
+	/*  Settings form: dirty-state tracking                             */
+	/*                                                                  */
+	/*  The "Save changes" button starts at 50% opacity. As soon as the */
+	/*  user touches any field, the form gets `.is-dirty` and the CSS   */
+	/*  bumps the button to full opacity. Snapshots the form's          */
+	/*  serialized state at boot and compares on every input/change.    */
+	/* ---------------------------------------------------------------- */
+	function initFormDirtyTracking() {
+		var forms = document.querySelectorAll('form.bspe-form');
+		forms.forEach(function (form) {
+			var snapshot = serializeForm(form);
+			var saveBtn = form.querySelector('[data-bspe-save-button]');
+
+			function setDirty(isDirty) {
+				if (isDirty) {
+					form.classList.add('is-dirty');
+					if (saveBtn) {
+						saveBtn.setAttribute('title', 'You have unsaved changes');
+					}
+				} else {
+					form.classList.remove('is-dirty');
+					if (saveBtn) {
+						saveBtn.setAttribute('title', 'No unsaved changes');
+					}
+				}
+			}
+
+			function check() {
+				setDirty(serializeForm(form) !== snapshot);
+			}
+
+			form.addEventListener('input', check);
+			form.addEventListener('change', check);
+		});
+	}
+
+	function serializeForm(form) {
+		var fd = new FormData(form);
+		var pairs = [];
+		fd.forEach(function (value, key) {
+			pairs.push(key + '=' + (typeof value === 'string' ? value : ''));
+		});
+		pairs.sort();
+		return pairs.join('&');
+	}
+
+	/* ---------------------------------------------------------------- */
 	/*  WP color picker (jQuery)                                        */
 	/* ---------------------------------------------------------------- */
 	function initColorPickers() {
@@ -286,5 +333,6 @@
 		initSubmissionRows();
 		initIconLibrarySwap();
 		initColorPickers();
+		initFormDirtyTracking();
 	});
 })();

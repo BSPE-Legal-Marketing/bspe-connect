@@ -31,7 +31,12 @@ final class Components {
 	public static function close_form( string $submit_label = 'Save changes' ): void {
 		?>
 			<div class="bspe-form__actions">
-				<button type="submit" class="bspe-button bspe-button--primary">
+				<button
+					type="submit"
+					class="bspe-button bspe-button--primary"
+					data-bspe-save-button
+					title="<?php esc_attr_e( 'No unsaved changes', 'bspe-connect' ); ?>"
+				>
 					<?php echo esc_html( $submit_label ); ?>
 				</button>
 			</div>
