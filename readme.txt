@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.2.5
+Stable tag: 2.2.6
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,27 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.2.6 =
+* Email template rewrite. The notification email a firm receives on
+  every form submission is now:
+    - **On-brand** — the header band uses the firm's chosen Design →
+      Colors values (bar_bg + button_fg + accent) instead of the
+      hardcoded BSPE palette. Each install's emails now match its bar.
+    - **Mobile-friendly** — proper viewport / x-apple-disable-message-
+      reformatting metas, 600 px max-width with table-in-table
+      structure, and a 480 px media query that drops paddings + stacks
+      label/value pairs vertically on phones.
+    - **Dark-mode safe** — color-scheme + supported-color-schemes
+      metas plus a prefers-color-scheme:dark CSS block (and the
+      [data-ogsc] mirror for Outlook.com Windows) so Apple Mail / Gmail
+      iOS / Outlook properly swap to a dark page + dark card with light
+      text instead of auto-inverting the design and nuking contrast.
+      Body backgrounds + text stay neutral across modes so brand color
+      choices never affect readability.
+* Hex color values from settings are validated before rendering — any
+  corrupt value falls back to the plugin default rather than leaking
+  into the HTML.
 
 = 2.2.5 =
 * Fix: the "Hide on scroll up" toggle from v2.2.4 saved correctly but
