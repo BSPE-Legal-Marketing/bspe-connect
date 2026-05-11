@@ -64,9 +64,22 @@ jobs:
           zip -rq bspe-connect.zip bspe-connect
           ls -lh bspe-connect.zip
 
+      - name: Compute SHA-256 checksum
+        # Plugin's Updater::verify_and_download_zip fetches this file from
+        # the matching release, computes the SHA-256 of the downloaded zip,
+        # and refuses to install on mismatch. The file format is the
+        # standard `sha256sum` output: "<hex>  <filename>".
+        run: |
+          set -euo pipefail
+          cd build
+          sha256sum bspe-connect.zip > bspe-connect.zip.sha256
+          cat bspe-connect.zip.sha256
+
       - name: Attach to GitHub release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.tag.outputs.name }}
-          files: build/bspe-connect.zip
+          files: |
+            build/bspe-connect.zip
+            build/bspe-connect.zip.sha256
           fail_on_unmatched_files: true

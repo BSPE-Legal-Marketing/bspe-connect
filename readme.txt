@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.2.7
+Stable tag: 2.2.8
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,30 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.2.8 =
+* Supply-chain hardening — removed silent auto-install + added
+  SHA-256 verification of every update zip.
+  - The "Auto-Update: yes" marker that previously silent-installed
+    flagged releases is no longer honored. Every release now surfaces
+    in wp-admin → Plugins as a normal "Update available" notification.
+    The site admin clicks Update and approves the install.
+  - The GitHub Actions release workflow now attaches a
+    bspe-connect.zip.sha256 file alongside each release zip.
+  - Before WP extracts a downloaded update, the plugin fetches the
+    published .sha256 from the matching release, hashes the local zip,
+    and refuses the install on mismatch (returns WP_Error so the
+    admin UI shows the failure). A compromised release can't get past
+    this gate without ALSO compromising the checksum file in the same
+    release — which requires the same level of GitHub access as the
+    zip itself, and so doubles the attack difficulty.
+  - Safety hatch: define BSPE_CONNECT_REQUIRE_CHECKSUM as false in
+    wp-config to skip verification if a checksum somehow fails to
+    upload and updates need to be unblocked manually. Default is true.
+  - First-time effect: this v2.2.8 install itself is NOT verified
+    (the v2.2.7 client doesn't have the hook yet). v2.2.9 and onwards
+    are verified on every install path, including WP's native plugin
+    auto-update toggle if an admin enables it.
 
 = 2.2.7 =
 * Security: defang CSV formula injection in the submissions export.
