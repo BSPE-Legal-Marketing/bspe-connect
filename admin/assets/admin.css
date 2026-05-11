@@ -812,66 +812,101 @@
 }
 
 .bspe-palette-panel__grid {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 12px 24px;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
 	margin-bottom: 14px;
-}
-
-@media (max-width: 720px) {
-	.bspe-palette-panel__grid {
-		grid-template-columns: 1fr;
-	}
 }
 
 .bspe-palette-row {
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
+	gap: 6px;
+	padding: 10px 12px;
+	background: #fff;
+	border: 1px solid rgba(53, 30, 40, 0.06);
+	border-radius: 8px;
+}
+
+.bspe-palette-row__head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
 }
 
 .bspe-palette-row__label {
-	font-size: 12.5px;
-	font-weight: 500;
+	font-size: 13px;
+	font-weight: 600;
 	color: var(--bspe-plum);
 }
 
-.bspe-palette-row__control {
+.bspe-palette-row__caption {
+	font-size: 12px;
+	color: var(--bspe-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+.bspe-palette-row__caption.is-set {
+	color: var(--bspe-plum);
+	font-weight: 500;
+}
+
+.bspe-palette-row__chips {
 	display: flex;
-	align-items: center;
+	flex-wrap: wrap;
 	gap: 8px;
 }
 
-.bspe-palette-swatch {
-	display: inline-block;
-	width: 18px;
-	height: 18px;
-	flex-shrink: 0;
-	border-radius: 5px;
-	border: 1px solid rgba(53, 30, 40, 0.14);
-	background: #fff;
+/* Each chip = a clickable color swatch. We render the actual swatch as
+   an inner span so the outer button can carry the focus ring + selected
+   ring without bleeding into the color itself. */
+.bspe-palette-chip {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border: 0;
+	border-radius: 8px;
+	background: transparent;
+	cursor: pointer;
+	transition: transform 120ms ease;
+	-webkit-tap-highlight-color: transparent;
 }
 
-.bspe-palette-swatch.is-empty {
-	background-color: #fff;
-	background-image:
-		linear-gradient(45deg, rgba(53,30,40,0.08) 25%, transparent 25%),
-		linear-gradient(-45deg, rgba(53,30,40,0.08) 25%, transparent 25%),
-		linear-gradient(45deg, transparent 75%, rgba(53,30,40,0.08) 75%),
-		linear-gradient(-45deg, transparent 75%, rgba(53,30,40,0.08) 75%);
-	background-size: 8px 8px;
-	background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+.bspe-palette-chip:hover {
+	transform: scale(1.08);
 }
 
-.bspe-palette-row__select-wrap {
-	flex: 1 1 auto;
-	min-width: 0;
-	max-width: none;
+.bspe-palette-chip:focus-visible {
+	outline: 2px solid var(--bspe-teal);
+	outline-offset: 2px;
 }
 
-.bspe-palette-row__select.bspe-input {
-	width: 100%;
+.bspe-palette-chip__swatch {
+	display: block;
+	width: 24px;
+	height: 24px;
+	border-radius: 6px;
+	border: 1px solid rgba(53, 30, 40, 0.16);
+	box-shadow: 0 1px 2px rgba(53, 30, 40, 0.08);
+	transition: box-shadow 120ms ease, transform 120ms ease;
 }
+
+/* Selected chip — teal ring around the swatch + tiny checkmark. The
+   ring lives on the inner span so the button's hover-scale still feels
+   nice without warping the ring. */
+.bspe-palette-chip.is-selected .bspe-palette-chip__swatch {
+	width: 26px;
+	height: 26px;
+	border-color: var(--bspe-teal);
+	box-shadow:
+		0 0 0 2px var(--bspe-teal),
+		0 0 0 4px rgba(58, 175, 185, 0.18);
+}
+
 
 .bspe-palette-panel__actions {
 	display: flex;

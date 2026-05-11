@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.3.0
+Stable tag: 2.3.1
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,17 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.3.1 =
+* UX: the v2.3.0 palette-mapping panel showed each color as a row in
+  a native dropdown — admins saw the hex string but not the actual
+  color, which forced a mental hex-to-color translation per pick.
+  Replaced with inline color chips: each row shows every palette
+  color as a clickable swatch in a horizontal strip. Click a chip
+  to assign it to that slot — a teal ring marks the selected one,
+  and the row caption updates to show the picked color's name + hex.
+  Clicking the same chip again clears the row. Tooltip on hover
+  still shows the full "Name — #HEX" for accessibility / discovery.
 
 = 2.3.0 =
 * New: Design → Colors now has two preset shortcuts below the six

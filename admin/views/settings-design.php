@@ -154,34 +154,38 @@ $palette_disabled = 'none' === $palette['source'] || empty( $palette['colors'] )
 		<div class="bspe-palette-panel__grid">
 			<?php foreach ( $color_rows as $row ) :
 				[ $key, $label, $default ] = $row;
-				$select_id = 'bspe-palette-map-' . $key;
 				?>
-				<div class="bspe-palette-row">
-					<label class="bspe-palette-row__label" for="<?php echo esc_attr( $select_id ); ?>">
-						<?php echo esc_html( $label ); ?>
-					</label>
-					<div class="bspe-palette-row__control">
-						<span class="bspe-palette-swatch is-empty"
-							data-bspe-palette-swatch="<?php echo esc_attr( $key ); ?>"
-							aria-hidden="true"
-						></span>
-						<div class="bspe-select-wrap bspe-palette-row__select-wrap">
-							<select id="<?php echo esc_attr( $select_id ); ?>"
-								class="bspe-input bspe-select bspe-palette-row__select"
-								data-bspe-palette-select="<?php echo esc_attr( $key ); ?>"
+				<div class="bspe-palette-row" data-bspe-palette-row="<?php echo esc_attr( $key ); ?>">
+					<div class="bspe-palette-row__head">
+						<span class="bspe-palette-row__label"><?php echo esc_html( $label ); ?></span>
+						<span class="bspe-palette-row__caption" data-bspe-palette-caption="<?php echo esc_attr( $key ); ?>">
+							<?php esc_html_e( '— Pick a color —', 'bspe-connect' ); ?>
+						</span>
+					</div>
+					<input type="hidden"
+						class="bspe-palette-row__value"
+						data-bspe-palette-select="<?php echo esc_attr( $key ); ?>"
+						value=""
+					/>
+					<div class="bspe-palette-row__chips" role="radiogroup" aria-label="<?php echo esc_attr( $label ); ?>">
+						<?php foreach ( $palette['colors'] as $color ) :
+							$value = (string) $color['value'];
+							$name  = (string) $color['label'];
+							$title = sprintf( '%s — %s', $name, strtoupper( $value ) );
+							?>
+							<button type="button"
+								class="bspe-palette-chip"
+								role="radio"
+								aria-checked="false"
+								aria-label="<?php echo esc_attr( $title ); ?>"
+								title="<?php echo esc_attr( $title ); ?>"
+								data-bspe-palette-chip="<?php echo esc_attr( $key ); ?>"
+								data-value="<?php echo esc_attr( $value ); ?>"
+								data-label="<?php echo esc_attr( $name ); ?>"
 							>
-								<option value="" data-color=""><?php esc_html_e( '— Pick a color —', 'bspe-connect' ); ?></option>
-								<?php foreach ( $palette['colors'] as $color ) : ?>
-									<option value="<?php echo esc_attr( $color['value'] ); ?>" data-color="<?php echo esc_attr( $color['value'] ); ?>">
-										<?php
-										echo esc_html(
-											sprintf( '%s — %s', $color['label'], strtoupper( $color['value'] ) )
-										);
-										?>
-									</option>
-								<?php endforeach; ?>
-							</select>
-						</div>
+								<span class="bspe-palette-chip__swatch" style="background:<?php echo esc_attr( $value ); ?>;"></span>
+							</button>
+						<?php endforeach; ?>
 					</div>
 				</div>
 			<?php endforeach; ?>

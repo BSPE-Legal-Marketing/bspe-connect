@@ -351,16 +351,10 @@
 				} else {
 					panel.removeAttribute('hidden');
 					themeBtn.setAttribute('aria-expanded', 'true');
-					// Reset all selects to the "— Pick a color —" empty
-					// option every time the panel opens, so a re-open
-					// always presents a clean explicit-choice state.
-					var selects = panel.querySelectorAll('[data-bspe-palette-select]');
-					selects.forEach(function (sel) {
-						sel.value = '';
-						syncSwatchForSelect(sel);
-					});
-					// Scroll the panel into view so it isn't hidden below
-					// the fold on long settings pages.
+					// Reset every row to the "no chip selected" state each
+					// time the panel opens, so a re-open always forces an
+					// explicit choice (Option A from the spec).
+					resetPaletteRows(panel);
 					if (typeof panel.scrollIntoView === 'function') {
 						try { panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
 						catch (e) { panel.scrollIntoView(); }
@@ -370,21 +364,33 @@
 		}
 
 		if (panel) {
-			// Each mapping select updates its sibling swatch on change.
-			var selects = panel.querySelectorAll('[data-bspe-palette-select]');
-			selects.forEach(function (sel) {
-				sel.addEventListener('change', function () { syncSwatchForSelect(sel); });
+			// Color chip click — mark this chip as the selected one for
+			// its row, deselect its siblings, write the value into the
+			// hidden input that Apply reads from, and update the row's
+			// caption to "Primary — #6EC1E4" (or whatever).
+			panel.addEventListener('click', function (ev) {
+				var chip = ev.target.closest && ev.target.closest('[data-bspe-palette-chip]');
+				if (!chip || !panel.contains(chip)) { return; }
+				ev.preventDefault();
+
+				var key   = chip.getAttribute('data-bspe-palette-chip') || '';
+				var value = chip.getAttribute('data-value') || '';
+				var name  = chip.getAttribute('data-label') || '';
+				if (!key || !value) { return; }
+
+				// Toggle: clicking the already-selected chip clears the row.
+				var wasSelected = chip.getAttribute('aria-checked') === 'true';
+				selectChipForRow(panel, key, wasSelected ? null : chip, value, name, wasSelected);
 			});
 
 			var applyBtn = panel.querySelector('[data-bspe-palette-apply]');
 			if (applyBtn) {
 				applyBtn.addEventListener('click', function (ev) {
 					ev.preventDefault();
-					selects.forEach(function (sel) {
-						var key = sel.getAttribute('data-bspe-palette-select') || '';
-						var val = sel.value || '';
-						// Empty value = "Keep current" — skip without
-						// touching the WP color picker.
+					var hiddens = panel.querySelectorAll('[data-bspe-palette-select]');
+					hiddens.forEach(function (hidden) {
+						var key = hidden.getAttribute('data-bspe-palette-select') || '';
+						var val = hidden.value || '';
 						if (key && val) {
 							setColorPickerByKey(key, val);
 						}
@@ -401,6 +407,43 @@
 					panel.setAttribute('hidden', '');
 					if (themeBtn) { themeBtn.setAttribute('aria-expanded', 'false'); }
 				});
+			}
+		}
+	}
+
+	// Reset every row inside the mapping panel to a fresh unpicked state.
+	function resetPaletteRows(panel) {
+		if (!panel) { return; }
+		var rows = panel.querySelectorAll('[data-bspe-palette-row]');
+		rows.forEach(function (row) {
+			var key = row.getAttribute('data-bspe-palette-row');
+			selectChipForRow(panel, key, null, '', '', true);
+		});
+	}
+
+	// Update one row's selected chip + hidden input + caption.
+	// Pass chip = null with clear=true to deselect everything in that row.
+	function selectChipForRow(panel, key, chip, value, name, clear) {
+		if (!panel || !key) { return; }
+		var chips   = panel.querySelectorAll('[data-bspe-palette-chip="' + key + '"]');
+		var hidden  = panel.querySelector('[data-bspe-palette-select="' + key + '"]');
+		var caption = panel.querySelector('[data-bspe-palette-caption="' + key + '"]');
+
+		chips.forEach(function (c) {
+			var on = !clear && c === chip;
+			c.setAttribute('aria-checked', on ? 'true' : 'false');
+			c.classList.toggle('is-selected', on);
+		});
+
+		if (hidden) { hidden.value = clear ? '' : (value || ''); }
+
+		if (caption) {
+			if (clear || !value) {
+				caption.textContent = '— Pick a color —';
+				caption.classList.remove('is-set');
+			} else {
+				caption.textContent = (name ? name + ' — ' : '') + value.toUpperCase();
+				caption.classList.add('is-set');
 			}
 		}
 	}
@@ -424,23 +467,6 @@
 		input.dispatchEvent(new Event('change', { bubbles: true }));
 	}
 
-	function syncSwatchForSelect(select) {
-		if (!select) { return; }
-		var key   = select.getAttribute('data-bspe-palette-select');
-		if (!key) { return; }
-		var panel = select.closest('[data-bspe-palette-panel]');
-		if (!panel) { return; }
-		var swatch = panel.querySelector('[data-bspe-palette-swatch="' + key + '"]');
-		if (!swatch) { return; }
-		var val = select.value || '';
-		if (val) {
-			swatch.style.background = val;
-			swatch.classList.remove('is-empty');
-		} else {
-			swatch.style.background = '';
-			swatch.classList.add('is-empty');
-		}
-	}
 
 	/* ---------------------------------------------------------------- */
 	/*  Boot                                                            */
