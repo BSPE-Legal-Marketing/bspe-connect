@@ -96,13 +96,23 @@ $svg_kses   = \BSPE\Connect\Admin\Admin::svg_kses();
 	<main class="bspe-content" role="tabpanel" aria-labelledby="<?php echo esc_attr( 'bspe-tab-' . $active ); ?>">
 		<?php
 		$saved_notice = \BSPE\Connect\Admin\Settings_Saver::consume_notice();
-		if ( 'saved' === $saved_notice ) :
-			?>
+		if ( 'saved' === $saved_notice ) : ?>
 			<div class="bspe-notice" role="status">
 				<span class="bspe-notice__icon" aria-hidden="true">
 					<svg viewBox="0 0 14 14" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5l3 3 6-7"/></svg>
 				</span>
 				<?php esc_html_e( 'Settings saved.', 'bspe-connect' ); ?>
+			</div>
+		<?php elseif ( 'reset' === $saved_notice ) : ?>
+			<div class="bspe-notice" role="status">
+				<span class="bspe-notice__icon" aria-hidden="true">
+					<svg viewBox="0 0 14 14" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7.5l3 3 6-7"/></svg>
+				</span>
+				<?php esc_html_e( 'All settings reset to defaults. Submissions, analytics events, and logs were not touched.', 'bspe-connect' ); ?>
+			</div>
+		<?php elseif ( 'reset_rejected' === $saved_notice ) : ?>
+			<div class="bspe-notice bspe-notice--error" role="alert">
+				<?php esc_html_e( 'Reset cancelled — the confirmation phrase did not match.', 'bspe-connect' ); ?>
 			</div>
 		<?php endif; ?>
 

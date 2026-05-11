@@ -24,6 +24,10 @@ final class Settings_Saver {
 	public const NONCE_ACTION = 'bspe_connect_save';
 	public const NOTICE_KEY   = 'bspe_connect_admin_notice';
 
+	public const RESET_ACTION  = 'bspe_connect_reset_settings';
+	public const RESET_NONCE   = 'bspe_connect_reset_settings';
+	public const RESET_PHRASE  = 'RESET';
+
 	private const ALLOWED_TABS = [ 'general', 'buttons', 'form', 'design', 'display', 'logs' ];
 
 	private const ALLOWED_ICON_LIBRARIES = [ 'none', 'fa-solid', 'fa-regular' ];
@@ -63,7 +67,61 @@ final class Settings_Saver {
 	private const ALLOWED_DISPLAY_MODES = [ 'sitewide', 'pages_only', 'posts_only', 'pages_except', 'posts_except', 'sitewide_except_pages', 'sitewide_except_posts' ];
 
 	public static function init(): void {
-		add_action( 'admin_post_' . self::ACTION, [ self::class, 'handle' ] );
+		add_action( 'admin_post_' . self::ACTION,       [ self::class, 'handle' ] );
+		add_action( 'admin_post_' . self::RESET_ACTION, [ self::class, 'handle_reset' ] );
+	}
+
+	/**
+	 * Hard-reset bspe_connect_settings to Settings::defaults(). Submissions,
+	 * analytics events, the diagnostics log, and the DB version are NOT
+	 * touched — only the plugin's settings option.
+	 *
+	 * The reset requires the admin to type the literal phrase "RESET" into
+	 * the confirmation field. We re-validate that server-side so the gate
+	 * still applies even if JS is bypassed (curl / direct POST).
+	 */
+	public static function handle_reset(): void {
+		if ( ! current_user_can( Admin::CAPABILITY ) ) {
+			wp_die( esc_html__( 'You do not have permission to reset settings.', 'bspe-connect' ), 403 );
+		}
+		check_admin_referer( self::RESET_NONCE );
+
+		$confirm = isset( $_POST['bspe_reset_confirm'] )
+			? trim( (string) wp_unslash( (string) $_POST['bspe_reset_confirm'] ) )
+			: '';
+
+		if ( self::RESET_PHRASE !== $confirm ) {
+			\BSPE\Connect\Logger::log( 'warn', 'Settings reset rejected — confirmation phrase mismatch', [
+				'admin_user' => get_current_user_id(),
+			] );
+			set_transient( self::NOTICE_KEY . '_' . get_current_user_id(), 'reset_rejected', 60 );
+			wp_safe_redirect(
+				add_query_arg(
+					[ 'page' => Admin::PAGE_SLUG, 'tab' => 'general' ],
+					admin_url( 'admin.php' )
+				)
+			);
+			exit;
+		}
+
+		// Replace the entire settings option with the canonical defaults.
+		// update_option short-circuits when the value hasn't changed; we
+		// pass autoload = 'yes' to match the original add_option call in
+		// Activator::seed_defaults().
+		update_option( \BSPE\Connect\Settings::OPTION_KEY, \BSPE\Connect\Settings::defaults(), 'yes' );
+
+		\BSPE\Connect\Logger::log( 'warn', 'Settings reset to defaults', [
+			'admin_user' => get_current_user_id(),
+		] );
+
+		set_transient( self::NOTICE_KEY . '_' . get_current_user_id(), 'reset', 60 );
+		wp_safe_redirect(
+			add_query_arg(
+				[ 'page' => Admin::PAGE_SLUG, 'tab' => 'general' ],
+				admin_url( 'admin.php' )
+			)
+		);
+		exit;
 	}
 
 	public static function handle(): void {

@@ -294,6 +294,68 @@
 	}
 
 	/* ---------------------------------------------------------------- */
+	/*  Reset all settings — type-the-phrase confirmation               */
+	/*                                                                  */
+	/*  Click "Reset all settings" → reveals an inline panel with a     */
+	/*  text input. The submit button stays disabled until the typed    */
+	/*  value (trimmed) matches the literal RESET phrase. Server-side   */
+	/*  re-verifies the same phrase so the JS gate isn't the only       */
+	/*  defense.                                                        */
+	/* ---------------------------------------------------------------- */
+	function initResetSettings() {
+		var card    = document.querySelector('[data-bspe-reset-card]');
+		if (!card) { return; }
+		var trigger = card.querySelector('[data-bspe-reset-trigger]');
+		var form    = card.querySelector('[data-bspe-reset-form]');
+		var input   = card.querySelector('[data-bspe-reset-input]');
+		var submit  = card.querySelector('[data-bspe-reset-submit]');
+		var cancel  = card.querySelector('[data-bspe-reset-cancel]');
+
+		if (!trigger || !form || !input || !submit) { return; }
+		var phrase = form.getAttribute('data-bspe-reset-phrase') || 'RESET';
+
+		function showPanel() {
+			form.removeAttribute('hidden');
+			trigger.setAttribute('hidden', '');
+			input.value = '';
+			submit.disabled = true;
+			setTimeout(function () { try { input.focus(); } catch (e) {} }, 30);
+		}
+
+		function hidePanel() {
+			form.setAttribute('hidden', '');
+			trigger.removeAttribute('hidden');
+			input.value = '';
+			submit.disabled = true;
+		}
+
+		trigger.addEventListener('click', function (ev) {
+			ev.preventDefault();
+			showPanel();
+		});
+
+		if (cancel) {
+			cancel.addEventListener('click', function (ev) {
+				ev.preventDefault();
+				hidePanel();
+			});
+		}
+
+		input.addEventListener('input', function () {
+			submit.disabled = (input.value.trim() !== phrase);
+		});
+
+		// Block submit if somehow the value still doesn't match (paranoia
+		// safety net; the disabled state already prevents click-submit).
+		form.addEventListener('submit', function (ev) {
+			if (input.value.trim() !== phrase) {
+				ev.preventDefault();
+				submit.disabled = true;
+			}
+		});
+	}
+
+	/* ---------------------------------------------------------------- */
 	/*  Submissions "Delete all matching filters" — confirm dialog      */
 	/* ---------------------------------------------------------------- */
 	function initSubmissionsDeleteAll() {
@@ -567,5 +629,6 @@
 		initFormDirtyTracking();
 		initSubmissionsBulkDelete();
 		initSubmissionsDeleteAll();
+		initResetSettings();
 	});
 })();

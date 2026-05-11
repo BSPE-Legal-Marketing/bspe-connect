@@ -1388,6 +1388,63 @@
 	border-color: rgba(169, 42, 58, 0.24);
 }
 
+/* Danger-zone card — used by General → "Reset all settings". Subtle
+   red top accent so it's visually distinct from the other settings
+   cards without being aggressive. */
+.bspe-card--danger {
+	border: 1px solid rgba(169, 42, 58, 0.18);
+	background: rgba(169, 42, 58, 0.02);
+	margin-top: 18px;
+}
+
+.bspe-card--danger .bspe-card__head h2 {
+	color: #a92a3a;
+}
+
+.bspe-reset {
+	padding: 0 24px 22px;
+}
+
+.bspe-reset__form {
+	margin-top: 14px;
+	padding: 16px;
+	background: #fff;
+	border: 1px solid rgba(169, 42, 58, 0.18);
+	border-radius: 8px;
+}
+
+.bspe-reset__warning {
+	margin: 0 0 12px;
+	font-size: 13px;
+	color: #6e1e2a;
+	line-height: 1.5;
+}
+
+.bspe-reset__warning code {
+	background: rgba(169, 42, 58, 0.10);
+	color: #a92a3a;
+	padding: 1px 6px;
+	border-radius: 4px;
+	font-family: 'SFMono-Regular', Menlo, Consolas, monospace;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+}
+
+.bspe-reset__row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+}
+
+.bspe-reset__input {
+	width: 200px;
+	font-family: 'SFMono-Regular', Menlo, Consolas, monospace;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
 /* Card header right side now holds Export + Delete-all stacked
    horizontally on wide screens, wrapping to a column on narrow ones. */
 .bspe-card__head-actions {
@@ -1452,6 +1509,12 @@
 	background: rgba(58, 175, 185, 0.10);
 	border: 1px solid rgba(58, 175, 185, 0.30);
 	color: var(--bspe-plum);
+}
+
+.bspe-notice--error {
+	background: rgba(169, 42, 58, 0.08);
+	border: 1px solid rgba(169, 42, 58, 0.30);
+	color: #6e1e2a;
 }
 
 .bspe-form__actions {

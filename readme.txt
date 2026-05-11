@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.4.1
+Stable tag: 2.4.2
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -130,6 +130,23 @@ Run through this list before installing on a new client site:
    and only if the published .sha256 matches the downloaded zip.
 
 == Changelog ==
+
+= 2.4.2 =
+* New: "Reset all settings to defaults" button in the General tab's
+  new danger-zone card.
+  - Restores every plugin setting (welcome bubble copy, button labels,
+    icons, colors, fonts, padding, display rules, anti-spam, mail
+    delivery, retention) to the exact defaults shipped with the plugin.
+  - Submissions, analytics events, and diagnostic logs are NOT
+    touched — only the bspe_connect_settings option is replaced.
+  - Two-layer confirmation gate: clicking the button reveals an inline
+    panel; the admin must type the literal phrase "RESET" into the
+    field before the submit button becomes clickable. JS gates the
+    button, but the server re-verifies the exact phrase on POST so a
+    curl / direct-POST bypass still hits the same wall.
+  - Both the success and the rejected-confirmation paths log to the
+    diagnostics ring buffer at warn level with the admin user ID, so
+    the Logs tab is the audit trail.
 
 = 2.4.1 =
 * New: manual delete actions on the Submissions tab.

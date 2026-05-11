@@ -183,3 +183,77 @@ Components::row(
 Components::close_card();
 
 Components::close_form();
+
+/* ----------------- Danger zone: Reset settings ----------------- */
+/* Lives OUTSIDE the main settings form so the reset submit can't be
+   confused with a normal Save click, and so its own POST stays separate
+   from the regular settings-save flow. */
+$reset_phrase = \BSPE\Connect\Admin\Settings_Saver::RESET_PHRASE;
+?>
+<section class="bspe-card bspe-card--danger" data-bspe-reset-card>
+	<header class="bspe-card__head">
+		<div class="bspe-card__head-text">
+			<h2><?php esc_html_e( 'Reset all settings', 'bspe-connect' ); ?></h2>
+			<p class="bspe-card__lead">
+				<?php esc_html_e( 'Restore every BSPE Connect setting to the same defaults it shipped with. Saved submissions, analytics events, and diagnostic logs are not touched — only the plugin\'s settings are replaced.', 'bspe-connect' ); ?>
+			</p>
+		</div>
+	</header>
+
+	<div class="bspe-reset">
+		<button type="button" class="bspe-button bspe-button--danger" data-bspe-reset-trigger>
+			<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+				<path d="M3 8a5 5 0 1 0 1.5-3.5M3 3v3h3"/>
+			</svg>
+			<?php esc_html_e( 'Reset all settings to defaults', 'bspe-connect' ); ?>
+		</button>
+
+		<form method="post"
+			action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>"
+			class="bspe-reset__form"
+			data-bspe-reset-form
+			data-bspe-reset-phrase="<?php echo esc_attr( $reset_phrase ); ?>"
+			hidden
+		>
+			<?php wp_nonce_field( \BSPE\Connect\Admin\Settings_Saver::RESET_NONCE ); ?>
+			<input type="hidden" name="action" value="<?php echo esc_attr( \BSPE\Connect\Admin\Settings_Saver::RESET_ACTION ); ?>" />
+
+			<p class="bspe-reset__warning">
+				<strong><?php esc_html_e( 'This cannot be undone.', 'bspe-connect' ); ?></strong>
+				<?php
+				printf(
+					/* translators: %s: the literal phrase the user must type to confirm */
+					esc_html__( 'Type %s below to confirm.', 'bspe-connect' ),
+					'<code>' . esc_html( $reset_phrase ) . '</code>'
+				);
+				?>
+			</p>
+
+			<div class="bspe-reset__row">
+				<label for="bspe-reset-confirm" class="screen-reader-text">
+					<?php esc_html_e( 'Type the confirmation phrase', 'bspe-connect' ); ?>
+				</label>
+				<input type="text"
+					id="bspe-reset-confirm"
+					name="bspe_reset_confirm"
+					class="bspe-input bspe-reset__input"
+					autocomplete="off"
+					autocapitalize="characters"
+					spellcheck="false"
+					placeholder="<?php echo esc_attr( $reset_phrase ); ?>"
+					data-bspe-reset-input
+				/>
+				<button type="submit"
+					class="bspe-button bspe-button--danger"
+					data-bspe-reset-submit
+					disabled
+				>
+					<?php esc_html_e( 'Reset everything', 'bspe-connect' ); ?>
+				</button>
+				<button type="button" class="bspe-button bspe-button--ghost" data-bspe-reset-cancel>
+					<?php esc_html_e( 'Cancel', 'bspe-connect' ); ?>
+				</button>
+			</div>
+		</form>
+	</div>
+</section>
