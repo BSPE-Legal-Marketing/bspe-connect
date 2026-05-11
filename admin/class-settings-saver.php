@@ -384,6 +384,7 @@ final class Settings_Saver {
 			'mail_from'      => sanitize_email( (string) ( $input['mail_from'] ?? '' ) ),
 			'mail_from_name' => sanitize_text_field( (string) ( $input['mail_from_name'] ?? '' ) ),
 			'antispam'       => $as_out,
+			'retention_days' => max( 0, min( 3650, (int) ( $input['retention_days'] ?? 0 ) ) ),
 		];
 	}
 

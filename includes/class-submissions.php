@@ -21,6 +21,29 @@ final class Submissions {
 	}
 
 	/**
+	 * Delete submission rows whose submitted_at is older than $days. A
+	 * $days value of 0 (or less) means "keep forever" — the caller skips
+	 * pruning entirely in that case. Returns the number of rows removed.
+	 *
+	 * Sent emails are NOT touched — they live in the recipient's inbox
+	 * after wp_mail handed them to the SMTP server. This only trims the
+	 * historical record kept inside WordPress.
+	 */
+	public static function prune_old( int $days ): int {
+		if ( $days <= 0 ) {
+			return 0;
+		}
+		global $wpdb;
+		$cutoff = gmdate( 'Y-m-d H:i:s', strtotime( '-' . $days . ' days' ) );
+		$table  = self::table();
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$deleted = (int) $wpdb->query(
+			$wpdb->prepare( "DELETE FROM {$table} WHERE submitted_at < %s", $cutoff )
+		);
+		return $deleted;
+	}
+
+	/**
 	 * Insert a sanitized submission row. Returns the new row ID or 0 on failure.
 	 *
 	 * @param array<string,mixed> $data Already-sanitized fields.

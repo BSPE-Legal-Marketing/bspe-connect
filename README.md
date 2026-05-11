@@ -35,10 +35,16 @@ For maintainers:
 2. Bump `Stable tag:` in `readme.txt` and add a `= X.Y.Z =` changelog block
 3. `git commit && git push origin main`
 4. `git tag -a vX.Y.Z -m "..." && git push origin vX.Y.Z`
-5. The GitHub Actions workflow at `.github/workflows/release.yml` automatically builds `bspe-connect.zip` and attaches it to the release
+5. The GitHub Actions workflow at `.github/workflows/release.yml` automatically builds `bspe-connect.zip`, computes `bspe-connect.zip.sha256`, and attaches both to the release
 6. Optional: `gh release edit vX.Y.Z --notes "..."` for the release notes body
 
-To roll out a release **silently** to every client site (use sparingly — emergency fixes only), include the literal string `Auto-Update: yes` anywhere in the release notes body or in the matching `= X.Y.Z =` block in `readme.txt`. WP's `auto_update_plugin` filter picks up the marker and installs without admin action.
+### Update model
+
+Every release surfaces as a standard **"Update available"** notice in `wp-admin → Plugins` on client sites. The admin clicks Update to install. Silent auto-install was removed in **v2.2.8** in favor of explicit admin approval + SHA-256 verification on every download.
+
+Before WP extracts a downloaded zip, the plugin fetches the matching `bspe-connect.zip.sha256` from the release, hashes the local zip, and refuses the install on mismatch (surfaces as a `WP_Error` in the admin UI). A compromised release can't pass this gate without also compromising the checksum file in the same release.
+
+Safety hatch: define `BSPE_CONNECT_REQUIRE_CHECKSUM` as `false` in `wp-config.php` to skip verification. Constant-only on purpose so a compromised admin session can't disable it from the dashboard. Use only if a checksum upload fails and updates need to be unblocked manually.
 
 ## License
 

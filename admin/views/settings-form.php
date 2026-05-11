@@ -273,4 +273,26 @@ Components::row(
 );
 Components::close_card();
 
+/* ----------------- Submissions retention ----------------- */
+Components::open_card(
+	__( 'Submissions retention', 'bspe-connect' ),
+	__( 'Automatically delete old form submissions to keep the database tidy. Set to 0 to keep every submission forever (default).', 'bspe-connect' )
+);
+Components::row(
+	__( 'Keep submissions for', 'bspe-connect' ),
+	static function () use ( $form ): void {
+		Components::number( 'bspe[form][retention_days]', (int) ( $form['retention_days'] ?? 0 ), [
+			'min'    => 0,
+			'max'    => 3650,
+			'step'   => 1,
+			'suffix' => __( 'days', 'bspe-connect' ),
+		] );
+	},
+	[
+		'id'          => 'bspe-form-retention_days',
+		'description' => __( 'A background task runs once a day and deletes submission rows older than this. Already-sent emails are unaffected (they live in the recipient&rsquo;s inbox). The separate analytics-events table has its own retention. Common values: <code>0</code> = keep forever; <code>365</code> = one year; <code>730</code> = two years.', 'bspe-connect' ),
+	]
+);
+Components::close_card();
+
 Components::close_form();

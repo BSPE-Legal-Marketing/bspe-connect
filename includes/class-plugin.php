@@ -15,7 +15,8 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Plugin {
 
-	public const CRON_PRUNE_EVENTS = 'bspe_connect_prune_events';
+	public const CRON_PRUNE_EVENTS      = 'bspe_connect_prune_events';
+	public const CRON_PRUNE_SUBMISSIONS = 'bspe_connect_prune_submissions';
 
 	private static ?Plugin $instance = null;
 
@@ -56,6 +57,17 @@ final class Plugin {
 		add_action( self::CRON_PRUNE_EVENTS, [ self::class, 'cron_prune_events' ] );
 		if ( ! wp_next_scheduled( self::CRON_PRUNE_EVENTS ) ) {
 			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', self::CRON_PRUNE_EVENTS );
+		}
+
+		// Daily prune of form submissions older than form.retention_days.
+		// The callback is a no-op when retention_days is 0 (default), so
+		// existing installs that never touch the setting see no behavior
+		// change.
+		add_action( self::CRON_PRUNE_SUBMISSIONS, [ self::class, 'cron_prune_submissions' ] );
+		if ( ! wp_next_scheduled( self::CRON_PRUNE_SUBMISSIONS ) ) {
+			// Stagger from the events cron by ~30 min so they don't both
+			// fire in the same minute on a busy site.
+			wp_schedule_event( time() + HOUR_IN_SECONDS + ( 30 * MINUTE_IN_SECONDS ), 'daily', self::CRON_PRUNE_SUBMISSIONS );
 		}
 
 		// Diagnostics logger — needs the admin-post hook for "Clear logs"
@@ -108,6 +120,25 @@ final class Plugin {
 			Logger::log( 'info', 'Pruned old analytics events', [
 				'deleted'        => $deleted,
 				'retention_days' => Events::RETENTION_DAYS,
+			] );
+		}
+	}
+
+	/**
+	 * Daily cron callback — prunes old form submissions when the admin has
+	 * set a positive retention window. Logs only on actual deletions so the
+	 * Logs tab doesn't fill with daily no-op entries on default installs.
+	 */
+	public static function cron_prune_submissions(): void {
+		$days = (int) Settings::get( 'form.retention_days', 0 );
+		if ( $days <= 0 ) {
+			return;
+		}
+		$deleted = Submissions::prune_old( $days );
+		if ( $deleted > 0 ) {
+			Logger::log( 'info', 'Pruned old form submissions', [
+				'deleted'        => $deleted,
+				'retention_days' => $days,
 			] );
 		}
 	}

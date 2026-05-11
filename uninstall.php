@@ -28,6 +28,7 @@ delete_option( 'bspe_connect_log' );
 // Clear scheduled cron jobs so WP doesn't try to fire callbacks into
 // classes that no longer exist after uninstall.
 wp_clear_scheduled_hook( 'bspe_connect_prune_events' );
+wp_clear_scheduled_hook( 'bspe_connect_prune_submissions' );
 
 // Clean any rate-limit / event-rate / global-rate transients that
 // may be lingering.

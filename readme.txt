@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.3.1
+Stable tag: 2.4.0
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -64,9 +64,11 @@ This release is the first stable client release:
   analytics REST endpoint and dashboard)
 * GitHub Actions release workflow auto-builds and attaches a clean
   bspe-connect.zip on every tag push (uses .distignore to strip dev files)
-* Auto-update flag — releases with "Auto-Update: yes" in their notes
-  install silently via WP's auto_update_plugin filter; everything else
-  surfaces as a one-click manual update
+* Self-update via plugin-update-checker from the public GitHub repo —
+  every release surfaces as a standard "Update available" notice in
+  wp-admin → Plugins; the admin clicks Update to install. Silent
+  install was removed in v2.2.8 in favor of SHA-256 verification on
+  every download — see Updater::verify_and_download_zip
 * URL redaction filter for analytics page_url — sensitive query keys
   (token, password, email, etc.) are replaced with [redacted] before
   storage; extensible via the bspe_connect_redact_query_keys filter
@@ -102,11 +104,13 @@ Run through this list before installing on a new client site:
 * [ ] CSV export works on submissions page (filters honored)
 * [ ] Analytics records events via /wp-json/bspe-connect/v1/event
 * [ ] Analytics dashboard funnel + tiles + top pages render correctly
-* [ ] Plugin-update-checker connects to private GitHub repo with token
-* [ ] Standard update flow: tag, GitHub Actions builds zip,
-      WP detects update, one-click update succeeds
-* [ ] Auto-update flow: tagged release with "Auto-Update: yes"
-      in the notes installs silently within 12 hours
+* [ ] Plugin-update-checker connects to public GitHub repo
+* [ ] Standard update flow: tag, GitHub Actions builds zip + .sha256,
+      WP detects update, admin clicks Update, SHA-256 verifies, install
+      succeeds
+* [ ] SHA-256 mismatch surfaces as WP_Error in the wp-admin UI when
+      the .sha256 file is missing or doesn't match (validate by editing
+      the .sha256 manually on a test release)
 * [ ] No PHP notices / warnings in debug.log under WP_DEBUG=true
 * [ ] No JS console errors on the bar or in admin
 * [ ] No CSS conflicts with major themes (Astra, GeneratePress, Divi,
@@ -119,11 +123,35 @@ Run through this list before installing on a new client site:
 3. Commit with the conventional message format
 4. git tag -a vX.Y.Z and push the tag
 5. gh release create vX.Y.Z (the GitHub Actions workflow will attach
-   the clean bspe-connect.zip to the release)
-6. To enable silent auto-install on client sites, add the marker line
-   "Auto-Update: yes" in the release notes body
+   the clean bspe-connect.zip and bspe-connect.zip.sha256 to the release)
+6. Every release surfaces as a standard "Update available" notice in
+   wp-admin → Plugins on client sites. Silent auto-install was removed
+   in v2.2.8 — the install proceeds only after the admin clicks Update,
+   and only if the published .sha256 matches the downloaded zip.
 
 == Changelog ==
+
+= 2.4.0 =
+* New: Form → Submissions retention. Optional auto-pruning of saved
+  form submissions for installs that want to limit how long lead data
+  is retained (GDPR / data-minimization use cases, or just keeping the
+  table tidy).
+  - New setting "Keep submissions for [N] days" under the Form tab.
+  - Default is 0 = keep forever (backward-compatible — existing
+    installs see no change).
+  - When set to a positive value, a daily WP-cron job deletes any
+    submissions whose submitted_at is older than the threshold.
+  - Already-sent emails are NOT affected (they live in the recipient's
+    inbox after wp_mail handed them off).
+  - The analytics events table has its own separate 120-day retention
+    (Events::RETENTION_DAYS, set in v2.2.7).
+  - Cron is scheduled in Plugin::boot so installs that upgrade via PUC
+    pick it up on the next page load. Cleared on deactivate / uninstall.
+* Docs: removed stale "Auto-Update: yes" references from the
+  installation, acceptance-checklist, releasing-instructions, and FAQ
+  sections of readme.txt + README.md. v2.2.8 dropped silent auto-
+  install in favor of SHA-256-verified manual-click updates; the docs
+  now match the code. Historical changelog entries kept as-is.
 
 = 2.3.1 =
 * UX: the v2.3.0 palette-mapping panel showed each color as a row in
@@ -569,12 +597,16 @@ In two custom tables, `wp_bspe_connect_submissions` and
 `wp_bspe_connect_events`. They are created on activation and destroyed only
 when the plugin is uninstalled (not when deactivated).
 
-= How do auto-updates work? =
+= How do updates work? =
 
 The plugin checks the `BSPE-Legal-Marketing/bspe-connect` GitHub repository
-every 12 hours using the bundled `plugin-update-checker` library. Releases
-that include `Auto-Update: yes` in their notes are applied silently; all
-other releases produce the standard "Update available" admin notice.
+every 12 hours using the bundled `plugin-update-checker` library. Every
+release surfaces as a standard "Update available" notice in wp-admin →
+Plugins. The admin clicks Update to install. Before WP extracts the
+downloaded zip, the plugin fetches the matching `bspe-connect.zip.sha256`
+file from the release, hashes the zip locally, and refuses the install
+on mismatch (so a tampered release can't be applied). Silent auto-install
+was removed in v2.2.8.
 
 = Why is the GitHub token in wp-config.php instead of a settings field? =
 

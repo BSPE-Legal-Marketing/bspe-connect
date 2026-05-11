@@ -129,6 +129,12 @@ final class Settings {
 					'turnstile_site_key'   => '',
 					'turnstile_secret_key' => '',
 				],
+				// Days to keep saved submissions. 0 = keep forever (default,
+				// backward-compatible). The daily prune cron checks this
+				// setting and deletes rows from wp_bspe_connect_submissions
+				// whose submitted_at is older than retention_days. Sent
+				// emails are untouched.
+				'retention_days' => 0,
 			],
 			'design'         => [
 				'firm_name'   => '',
