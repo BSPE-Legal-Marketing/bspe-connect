@@ -10,6 +10,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use BSPE\Connect\Settings;
+use BSPE\Connect\Theme_Palette;
 use BSPE\Connect\Admin\Components;
 
 $design     = is_array( Settings::get( 'design', [] ) ) ? Settings::get( 'design', [] ) : [];
@@ -80,6 +81,123 @@ foreach ( $color_rows as $row ) {
 		[ 'id' => 'bspe-design-colors-' . $key ]
 	);
 }
+
+/* -- Quick presets: plugin defaults / map from site palette ------------- */
+$plugin_defaults_json = wp_json_encode(
+	array_combine(
+		array_map( static fn( $row ) => $row[0], $color_rows ),
+		array_map( static fn( $row ) => $row[2], $color_rows )
+	)
+);
+$palette          = Theme_Palette::detect();
+$palette_disabled = 'none' === $palette['source'] || empty( $palette['colors'] );
+
+?>
+<div class="bspe-palette-presets">
+	<button type="button"
+		class="bspe-btn bspe-btn--ghost"
+		data-bspe-preset-defaults
+		data-bspe-defaults="<?php echo esc_attr( (string) $plugin_defaults_json ); ?>"
+	>
+		<?php esc_html_e( 'Use Plugin Default Colors', 'bspe-connect' ); ?>
+	</button>
+
+	<button type="button"
+		class="bspe-btn bspe-btn--ghost<?php echo $palette_disabled ? ' is-disabled' : ''; ?>"
+		data-bspe-preset-theme
+		<?php echo $palette_disabled ? 'disabled aria-disabled="true"' : ''; ?>
+		<?php if ( $palette_disabled ) : ?>
+			title="<?php esc_attr_e( 'No palette detected. Install Elementor or use a block theme to enable this.', 'bspe-connect' ); ?>"
+		<?php else : ?>
+			aria-controls="bspe-palette-panel"
+			aria-expanded="false"
+		<?php endif; ?>
+	>
+		<?php esc_html_e( 'Use Default Website Colors', 'bspe-connect' ); ?>
+		<?php if ( ! $palette_disabled ) : ?>
+			<span class="bspe-palette-presets__source">
+				—
+				<?php
+				echo esc_html(
+					sprintf(
+						/* translators: 1: source name (Elementor / Block theme), 2: color count */
+						_n( '%1$s, %2$d color', '%1$s, %2$d colors', count( $palette['colors'] ), 'bspe-connect' ),
+						$palette['label'],
+						count( $palette['colors'] )
+					)
+				);
+				?>
+			</span>
+		<?php endif; ?>
+	</button>
+</div>
+
+<?php if ( ! $palette_disabled ) : ?>
+	<div class="bspe-palette-panel" id="bspe-palette-panel" data-bspe-palette-panel hidden>
+		<div class="bspe-palette-panel__header">
+			<h3 class="bspe-palette-panel__title">
+				<?php
+				echo esc_html(
+					sprintf(
+						/* translators: %s: source name */
+						__( 'Map from your %s palette', 'bspe-connect' ),
+						$palette['label']
+					)
+				);
+				?>
+			</h3>
+			<p class="bspe-palette-panel__hint">
+				<?php esc_html_e( 'Pick which of your palette colors should fill each BSPE Connect color. Nothing is saved until you click Apply and then Save changes.', 'bspe-connect' ); ?>
+			</p>
+		</div>
+
+		<div class="bspe-palette-panel__grid">
+			<?php foreach ( $color_rows as $row ) :
+				[ $key, $label, $default ] = $row;
+				$select_id = 'bspe-palette-map-' . $key;
+				?>
+				<div class="bspe-palette-row">
+					<label class="bspe-palette-row__label" for="<?php echo esc_attr( $select_id ); ?>">
+						<?php echo esc_html( $label ); ?>
+					</label>
+					<div class="bspe-palette-row__control">
+						<span class="bspe-palette-swatch is-empty"
+							data-bspe-palette-swatch="<?php echo esc_attr( $key ); ?>"
+							aria-hidden="true"
+						></span>
+						<div class="bspe-select-wrap bspe-palette-row__select-wrap">
+							<select id="<?php echo esc_attr( $select_id ); ?>"
+								class="bspe-input bspe-select bspe-palette-row__select"
+								data-bspe-palette-select="<?php echo esc_attr( $key ); ?>"
+							>
+								<option value="" data-color=""><?php esc_html_e( '— Pick a color —', 'bspe-connect' ); ?></option>
+								<?php foreach ( $palette['colors'] as $color ) : ?>
+									<option value="<?php echo esc_attr( $color['value'] ); ?>" data-color="<?php echo esc_attr( $color['value'] ); ?>">
+										<?php
+										echo esc_html(
+											sprintf( '%s — %s', $color['label'], strtoupper( $color['value'] ) )
+										);
+										?>
+									</option>
+								<?php endforeach; ?>
+							</select>
+						</div>
+					</div>
+				</div>
+			<?php endforeach; ?>
+		</div>
+
+		<div class="bspe-palette-panel__actions">
+			<button type="button" class="bspe-btn bspe-btn--ghost" data-bspe-palette-cancel>
+				<?php esc_html_e( 'Cancel', 'bspe-connect' ); ?>
+			</button>
+			<button type="button" class="bspe-btn bspe-btn--primary" data-bspe-palette-apply>
+				<?php esc_html_e( 'Apply to color pickers', 'bspe-connect' ); ?>
+			</button>
+		</div>
+	</div>
+<?php endif;
+
 Components::close_card();
 
 /* ----------------- Sizing & layout ----------------- */
