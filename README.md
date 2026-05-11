@@ -1,6 +1,6 @@
 # BSPE Connect
 
-Mobile-only contact bar for WordPress, built for BSPE Legal Marketing's law-firm clients. Bottom-fixed bar with up to four contact buttons (Connect, Call, Text, Email), a welcome bubble, and a built-in lead capture form. Self-updates from this repo.
+Bottom-fixed bar with up to four contact buttons (Connect, Call, Text, Email), a welcome bubble, and a built-in lead capture form. Self-updates from this repo.
 
 ## Install
 
@@ -17,23 +17,6 @@ The "Code → Download ZIP" button packages the source archive as `bspe-connect-
 5. Go to **BSPE Connect** in the admin sidebar and configure the tabs
 
 After this initial install, every future release surfaces in WP admin → Updates within 12 hours with one-click in-place update. No re-download needed unless you're rolling out a brand-new install.
-
-## Optional `wp-config.php` constants
-
-All optional. Constants always win over settings stored in the database — define them when you want secrets out of options exports / admin UIs.
-
-```php
-// Cloudflare Turnstile secret key — keeps it out of the WP database.
-define( 'BSPE_CONNECT_TURNSTILE_SECRET', '0x4AAAAAAA...' );
-
-// GitHub PAT — only needed if the repo is ever flipped back to private,
-// or to raise the GitHub API rate limit from 60/hr (anonymous) to 5,000/hr.
-define( 'BSPE_CONNECT_GITHUB_TOKEN', 'ghp_...' );
-
-// Update channel — default 'stable' uses tag-based releases. Set to 'beta'
-// to follow the tip of the `beta` branch.
-define( 'BSPE_CONNECT_UPDATE_CHANNEL', 'beta' );
-```
 
 ## What it does
 
