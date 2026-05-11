@@ -15,6 +15,8 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Plugin {
 
+	public const CRON_PRUNE_EVENTS = 'bspe_connect_prune_events';
+
 	private static ?Plugin $instance = null;
 
 	private bool $booted = false;
@@ -46,6 +48,15 @@ final class Plugin {
 		$this->maybe_migrate();
 
 		Updater::init();
+
+		// Daily prune of analytics events older than retention window.
+		// We register the cron on activation (Activator::activate) but
+		// also self-schedule here in case the activation hook never ran
+		// for an install that came up on an earlier version.
+		add_action( self::CRON_PRUNE_EVENTS, [ self::class, 'cron_prune_events' ] );
+		if ( ! wp_next_scheduled( self::CRON_PRUNE_EVENTS ) ) {
+			wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', self::CRON_PRUNE_EVENTS );
+		}
 
 		// Diagnostics logger — needs the admin-post hook for "Clear logs"
 		// even when logging is disabled (the button stays available so old
@@ -85,5 +96,19 @@ final class Plugin {
 			'from' => '' === $stored ? '(unset)' : $stored,
 			'to'   => Settings::DB_VERSION,
 		] );
+	}
+
+	/**
+	 * Daily cron callback — prunes old analytics events. Logs only when
+	 * something was actually deleted to keep the Logs tab tidy.
+	 */
+	public static function cron_prune_events(): void {
+		$deleted = Events::prune_old();
+		if ( $deleted > 0 ) {
+			Logger::log( 'info', 'Pruned old analytics events', [
+				'deleted'        => $deleted,
+				'retention_days' => Events::RETENTION_DAYS,
+			] );
+		}
 	}
 }

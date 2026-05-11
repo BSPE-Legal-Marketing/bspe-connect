@@ -17,6 +17,14 @@ defined( 'ABSPATH' ) || exit;
 final class Deactivator {
 
 	public static function deactivate(): void {
-		// Reserved for future cleanup (e.g., flushing rewrite rules in Phase 5).
+		// Clear the daily prune cron so it doesn't accumulate stale
+		// schedules across activate/deactivate cycles. The cron will be
+		// rescheduled automatically on the next plugins_loaded after
+		// reactivation (see Plugin::boot).
+		$timestamp = wp_next_scheduled( Plugin::CRON_PRUNE_EVENTS );
+		if ( false !== $timestamp ) {
+			wp_unschedule_event( $timestamp, Plugin::CRON_PRUNE_EVENTS );
+		}
+		wp_clear_scheduled_hook( Plugin::CRON_PRUNE_EVENTS );
 	}
 }

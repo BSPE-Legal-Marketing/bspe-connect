@@ -15,6 +15,9 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Events {
 
+	/** Retention window — events older than this are pruned by the daily cron. */
+	public const RETENTION_DAYS = 120;
+
 	/** Allowed event types — duplicated client-side and validated server-side. */
 	public const TYPES = [
 		'bar_shown',
@@ -33,6 +36,24 @@ final class Events {
 	public static function table(): string {
 		global $wpdb;
 		return $wpdb->prefix . 'bspe_connect_events';
+	}
+
+	/**
+	 * Delete events older than self::RETENTION_DAYS. Returns the number of
+	 * rows removed. Called from the daily cron registered in Plugin::boot.
+	 * Cheap when the table is small (no rows match the WHERE), so safe to
+	 * run unconditionally.
+	 */
+	public static function prune_old(): int {
+		global $wpdb;
+		$cutoff = gmdate( 'Y-m-d H:i:s', strtotime( '-' . (int) self::RETENTION_DAYS . ' days' ) );
+		$table  = self::table();
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$deleted = (int) $wpdb->query(
+			$wpdb->prepare( "DELETE FROM {$table} WHERE occurred_at < %s", $cutoff )
+		);
+		return $deleted;
 	}
 
 	public static function is_allowed_type( string $type ): bool {

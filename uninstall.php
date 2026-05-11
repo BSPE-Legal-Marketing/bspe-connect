@@ -23,6 +23,12 @@ foreach ( $tables as $table ) {
 
 delete_option( 'bspe_connect_settings' );
 delete_option( 'bspe_connect_db_version' );
+delete_option( 'bspe_connect_log' );
 
-// Clean any rate-limit transients that may be lingering.
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_bspe_connect_rl_%' OR option_name LIKE '_transient_timeout_bspe_connect_rl_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+// Clear scheduled cron jobs so WP doesn't try to fire callbacks into
+// classes that no longer exist after uninstall.
+wp_clear_scheduled_hook( 'bspe_connect_prune_events' );
+
+// Clean any rate-limit / event-rate / global-rate transients that
+// may be lingering.
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_bspe_connect_rl_%' OR option_name LIKE '_transient_timeout_bspe_connect_rl_%' OR option_name LIKE '_transient_bspe_connect_evt_rl_%' OR option_name LIKE '_transient_timeout_bspe_connect_evt_rl_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared

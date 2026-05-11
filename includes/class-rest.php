@@ -21,6 +21,14 @@ final class Rest {
 	public const ROUTE            = '/event';
 	public const RATE_LIMIT_PER   = 60;       // events per minute per hashed IP
 	public const RATE_LIMIT_TTL   = 60;       // seconds
+	// Backstop in case the per-IP limit is bypassed by a botnet OR by a
+	// reverse-proxy config that strips REMOTE_ADDR (in which case
+	// Submissions::client_ip() returns '' and the per-IP limit doesn't
+	// engage). 600 events / minute across the entire site is well above
+	// any normal traffic — a single visitor produces at most a handful
+	// of events per page load — but caps DB growth from abuse.
+	public const GLOBAL_RATE_PER  = 600;
+	public const GLOBAL_RATE_TTL  = 60;
 	public const PAGE_URL_MAX     = 500;
 	public const SESSION_ID_MAX   = 64;
 
@@ -79,6 +87,22 @@ final class Rest {
 			Logger::log( 'warn', 'Analytics event rejected — invalid type', [ 'event_type' => $event_type ] );
 			return $response;
 		}
+
+		// Global rate cap — backstop against (a) reverse-proxy configs
+		// that strip REMOTE_ADDR (Submissions::client_ip() returns ''
+		// and the per-IP limit skips), and (b) distributed abuse where
+		// each IP stays under 60/min but the site-wide total balloons.
+		$global_key    = 'bspe_connect_evt_rl_global';
+		$global_bucket = (int) get_transient( $global_key );
+		if ( $global_bucket >= self::GLOBAL_RATE_PER ) {
+			Logger::log( 'warn', 'Analytics event rate-limited (global cap)', [
+				'event_type' => $event_type,
+				'count'      => $global_bucket,
+				'limit'      => self::GLOBAL_RATE_PER,
+			] );
+			return $response;
+		}
+		set_transient( $global_key, $global_bucket + 1, self::GLOBAL_RATE_TTL );
 
 		// Rate limit per hashed IP — silent drop on excess.
 		$ip = Submissions::client_ip();

