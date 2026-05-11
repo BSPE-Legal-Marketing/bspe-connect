@@ -320,6 +320,129 @@
 	}
 
 	/* ---------------------------------------------------------------- */
+	/*  Palette presets — "Use Plugin Default Colors" / "Use Default    */
+	/*  Website Colors" on the Design tab.                              */
+	/* ---------------------------------------------------------------- */
+	function initPalettePresets() {
+		var defaultsBtn = document.querySelector('[data-bspe-preset-defaults]');
+		var themeBtn    = document.querySelector('[data-bspe-preset-theme]');
+		var panel       = document.querySelector('[data-bspe-palette-panel]');
+
+		if (defaultsBtn) {
+			defaultsBtn.addEventListener('click', function (ev) {
+				ev.preventDefault();
+				var raw = defaultsBtn.getAttribute('data-bspe-defaults') || '{}';
+				var defaults;
+				try { defaults = JSON.parse(raw); }
+				catch (err) { defaults = {}; }
+				Object.keys(defaults).forEach(function (key) {
+					setColorPickerByKey(key, defaults[key]);
+				});
+			});
+		}
+
+		if (themeBtn && panel && !themeBtn.hasAttribute('disabled')) {
+			themeBtn.addEventListener('click', function (ev) {
+				ev.preventDefault();
+				var open = !panel.hasAttribute('hidden');
+				if (open) {
+					panel.setAttribute('hidden', '');
+					themeBtn.setAttribute('aria-expanded', 'false');
+				} else {
+					panel.removeAttribute('hidden');
+					themeBtn.setAttribute('aria-expanded', 'true');
+					// Reset all selects to the "— Pick a color —" empty
+					// option every time the panel opens, so a re-open
+					// always presents a clean explicit-choice state.
+					var selects = panel.querySelectorAll('[data-bspe-palette-select]');
+					selects.forEach(function (sel) {
+						sel.value = '';
+						syncSwatchForSelect(sel);
+					});
+					// Scroll the panel into view so it isn't hidden below
+					// the fold on long settings pages.
+					if (typeof panel.scrollIntoView === 'function') {
+						try { panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+						catch (e) { panel.scrollIntoView(); }
+					}
+				}
+			});
+		}
+
+		if (panel) {
+			// Each mapping select updates its sibling swatch on change.
+			var selects = panel.querySelectorAll('[data-bspe-palette-select]');
+			selects.forEach(function (sel) {
+				sel.addEventListener('change', function () { syncSwatchForSelect(sel); });
+			});
+
+			var applyBtn = panel.querySelector('[data-bspe-palette-apply]');
+			if (applyBtn) {
+				applyBtn.addEventListener('click', function (ev) {
+					ev.preventDefault();
+					selects.forEach(function (sel) {
+						var key = sel.getAttribute('data-bspe-palette-select') || '';
+						var val = sel.value || '';
+						// Empty value = "Keep current" — skip without
+						// touching the WP color picker.
+						if (key && val) {
+							setColorPickerByKey(key, val);
+						}
+					});
+					panel.setAttribute('hidden', '');
+					if (themeBtn) { themeBtn.setAttribute('aria-expanded', 'false'); }
+				});
+			}
+
+			var cancelBtn = panel.querySelector('[data-bspe-palette-cancel]');
+			if (cancelBtn) {
+				cancelBtn.addEventListener('click', function (ev) {
+					ev.preventDefault();
+					panel.setAttribute('hidden', '');
+					if (themeBtn) { themeBtn.setAttribute('aria-expanded', 'false'); }
+				});
+			}
+		}
+	}
+
+	// Programmatically update one of the design.colors[*] pickers so the
+	// WP color picker UI, the underlying input value, and the dirty-tracker
+	// all see the new value. Using wpColorPicker('color', ...) is the
+	// blessed API — it sets the value AND fires the change event.
+	function setColorPickerByKey(key, hex) {
+		if (!key || !hex) { return; }
+		var input = document.querySelector('input[name="bspe[design][colors][' + key + ']"]');
+		if (!input) { return; }
+		if (window.jQuery && window.jQuery.fn && window.jQuery.fn.wpColorPicker) {
+			try {
+				window.jQuery(input).wpColorPicker('color', hex);
+				return;
+			} catch (err) { /* fall through to manual */ }
+		}
+		input.value = hex;
+		input.dispatchEvent(new Event('input',  { bubbles: true }));
+		input.dispatchEvent(new Event('change', { bubbles: true }));
+	}
+
+	function syncSwatchForSelect(select) {
+		if (!select) { return; }
+		var key   = select.getAttribute('data-bspe-palette-select');
+		if (!key) { return; }
+		var panel = select.closest('[data-bspe-palette-panel]');
+		if (!panel) { return; }
+		var swatch = panel.querySelector('[data-bspe-palette-swatch="' + key + '"]');
+		if (!swatch) { return; }
+		var val = select.value || '';
+		if (val) {
+			swatch.style.background = val;
+			swatch.classList.remove('is-empty');
+		} else {
+			swatch.style.background = '';
+			swatch.classList.add('is-empty');
+		}
+	}
+
+	/* ---------------------------------------------------------------- */
 	/*  Boot                                                            */
 	/* ---------------------------------------------------------------- */
 	ready(function () {
@@ -333,6 +456,7 @@
 		initSubmissionRows();
 		initIconLibrarySwap();
 		initColorPickers();
+		initPalettePresets();
 		initFormDirtyTracking();
 	});
 })();

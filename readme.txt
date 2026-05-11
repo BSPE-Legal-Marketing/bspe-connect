@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.2.8
+Stable tag: 2.3.0
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -124,6 +124,23 @@ Run through this list before installing on a new client site:
    "Auto-Update: yes" in the release notes body
 
 == Changelog ==
+
+= 2.3.0 =
+* New: Design → Colors now has two preset shortcuts below the six
+  color pickers.
+  - "Use Plugin Default Colors" instantly resets every color to the
+    BSPE Plum Noir palette (Plum, Ivory, Logo Teal).
+  - "Use Default Website Colors" detects the host site's palette
+    (Elementor first, with all system + custom colors; falls back to
+    the block-theme theme.json palette) and opens a mapping panel
+    where the admin manually picks which of their site's colors fills
+    each BSPE Connect color slot. Every dropdown starts on
+    "— Pick a color —" so the mapping is always an explicit choice,
+    never an auto-guess. Apply pushes the picks into the color
+    pickers, then the admin clicks Save Changes as normal.
+* The Default Website Colors button is disabled with an explanation
+  on sites without Elementor or a block theme (classic-theme installs
+  without a theme.json palette).
 
 = 2.2.8 =
 * Supply-chain hardening — removed silent auto-install + added
