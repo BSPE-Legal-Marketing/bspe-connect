@@ -18,8 +18,133 @@ final class Submissions_Controller {
 	public const EXPORT_ACTION = 'bspe_connect_export_csv';
 	public const EXPORT_NONCE  = 'bspe_connect_export';
 
+	public const DELETE_SELECTED_ACTION = 'bspe_connect_submissions_delete_selected';
+	public const DELETE_SELECTED_NONCE  = 'bspe_connect_submissions_delete_selected';
+	public const DELETE_ALL_ACTION      = 'bspe_connect_submissions_delete_all';
+	public const DELETE_ALL_NONCE       = 'bspe_connect_submissions_delete_all';
+
 	public static function init(): void {
-		add_action( 'admin_post_' . self::EXPORT_ACTION, [ self::class, 'export_csv' ] );
+		add_action( 'admin_post_' . self::EXPORT_ACTION,          [ self::class, 'export_csv' ] );
+		add_action( 'admin_post_' . self::DELETE_SELECTED_ACTION, [ self::class, 'handle_delete_selected' ] );
+		add_action( 'admin_post_' . self::DELETE_ALL_ACTION,      [ self::class, 'handle_delete_all' ] );
+	}
+
+	/**
+	 * Hard-delete the submission IDs posted from the bulk checkboxes.
+	 * Capability + nonce gated; bounded to MAX_DELETE_BATCH by the
+	 * Submissions class. Redirects back to the submissions tab, preserving
+	 * filter state, with a flash message in the URL.
+	 */
+	public static function handle_delete_selected(): void {
+		if ( ! current_user_can( Admin::CAPABILITY ) ) {
+			wp_die( esc_html__( 'You do not have permission to delete submissions.', 'bspe-connect' ), 403 );
+		}
+		check_admin_referer( self::DELETE_SELECTED_NONCE );
+
+		$raw_ids = isset( $_POST['ids'] ) && is_array( $_POST['ids'] )
+			? wp_unslash( $_POST['ids'] )
+			: [];
+
+		$ids = [];
+		foreach ( $raw_ids as $value ) {
+			$n = (int) $value;
+			if ( $n > 0 ) {
+				$ids[] = $n;
+			}
+		}
+
+		$deleted = \BSPE\Connect\Submissions::delete_by_ids( $ids );
+
+		\BSPE\Connect\Logger::log(
+			$deleted > 0 ? 'warn' : 'info',
+			$deleted > 0 ? 'Submissions hard-deleted (bulk)' : 'Bulk delete request matched no rows',
+			[
+				'deleted'      => $deleted,
+				'requested'    => count( $ids ),
+				'admin_user'   => get_current_user_id(),
+			]
+		);
+
+		self::redirect_back_with_flash( 'deleted_selected', $deleted );
+	}
+
+	/**
+	 * Hard-delete every submission matching the filter state posted from
+	 * the "Delete all matching" form. The filter values are re-validated
+	 * via read_filters_from_post() so a hostile POST can't bypass the
+	 * status / source allowlists.
+	 */
+	public static function handle_delete_all(): void {
+		if ( ! current_user_can( Admin::CAPABILITY ) ) {
+			wp_die( esc_html__( 'You do not have permission to delete submissions.', 'bspe-connect' ), 403 );
+		}
+		check_admin_referer( self::DELETE_ALL_NONCE );
+
+		$filters = self::read_filters_from_post();
+		[ $where_sql, $where_args ] = self::build_where_clause( $filters );
+
+		$deleted = \BSPE\Connect\Submissions::delete_by_where( $where_sql, $where_args );
+
+		\BSPE\Connect\Logger::log(
+			$deleted > 0 ? 'warn' : 'info',
+			$deleted > 0 ? 'Submissions hard-deleted (all matching filters)' : 'Delete-all matched no rows',
+			[
+				'deleted'    => $deleted,
+				'filters'    => $filters,
+				'admin_user' => get_current_user_id(),
+			]
+		);
+
+		self::redirect_back_with_flash( 'deleted_all', $deleted, $filters );
+	}
+
+	/**
+	 * Parse the same filter set as read_filters_from_request() but from
+	 * $_POST instead of $_GET. Used by the delete-all handler so the
+	 * delete is scoped to the filters the admin actually saw.
+	 *
+	 * @return array{from:string,to:string,source:string,status:string,paged:int}
+	 */
+	private static function read_filters_from_post(): array {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce verified by caller via check_admin_referer
+		$from   = isset( $_POST['from'] )   ? sanitize_text_field( wp_unslash( (string) $_POST['from'] ) )   : '';
+		$to     = isset( $_POST['to'] )     ? sanitize_text_field( wp_unslash( (string) $_POST['to'] ) )     : '';
+		$source = isset( $_POST['source'] ) ? sanitize_key( wp_unslash( (string) $_POST['source'] ) )         : 'all';
+		$status = isset( $_POST['status'] ) ? sanitize_key( wp_unslash( (string) $_POST['status'] ) )         : 'all';
+		// phpcs:enable
+
+		return [
+			'from'   => self::clean_date( $from ),
+			'to'     => self::clean_date( $to ),
+			'source' => in_array( $source, [ 'text', 'email', 'all' ], true ) ? $source : 'all',
+			'status' => in_array( $status, [ 'sent', 'failed', 'pending', 'all' ], true ) ? $status : 'all',
+			'paged'  => 1,
+		];
+	}
+
+	/**
+	 * Build the redirect URL after a delete operation. Re-applies the
+	 * filter state so the admin lands back on the same view they were
+	 * looking at (minus the rows that just got removed). Flash params
+	 * are read by the view to render a one-time success notice.
+	 *
+	 * @param array<string,mixed>|null $filters
+	 */
+	private static function redirect_back_with_flash( string $kind, int $deleted, ?array $filters = null ): void {
+		$args = [
+			'page'         => Admin::PAGE_SLUG,
+			'tab'          => 'submissions',
+			'bspe_flash'   => $kind,
+			'bspe_count'   => $deleted,
+		];
+		if ( null !== $filters ) {
+			if ( '' !== $filters['from'] )   { $args['from']   = $filters['from']; }
+			if ( '' !== $filters['to'] )     { $args['to']     = $filters['to']; }
+			if ( 'all' !== $filters['source'] ) { $args['source'] = $filters['source']; }
+			if ( 'all' !== $filters['status'] ) { $args['status'] = $filters['status']; }
+		}
+		wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php' ) ) );
+		exit;
 	}
 
 	/**
@@ -96,7 +221,7 @@ final class Submissions_Controller {
 	 *
 	 * @return array{0:string,1:array<int,mixed>}
 	 */
-	private static function build_where_clause( array $filters ): array {
+	public static function build_where_clause( array $filters ): array {
 		$where = [ '1=1' ];
 		$args  = [];
 

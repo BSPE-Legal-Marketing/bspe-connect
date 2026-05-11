@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm, sticky-bar
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 2.4.0
+Stable tag: 2.4.1
 License: Proprietary
 
 Mobile-only contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -130,6 +130,31 @@ Run through this list before installing on a new client site:
    and only if the published .sha256 matches the downloaded zip.
 
 == Changelog ==
+
+= 2.4.1 =
+* New: manual delete actions on the Submissions tab.
+  - Per-row checkboxes + a "Select all on this page" checkbox in the
+    header. When at least one row is checked, a sticky "N selected
+    [Delete selected]" bar appears above the table. Clicking the
+    button asks for a JS confirmation showing the exact count before
+    submitting.
+  - A "Delete all matching filters" / "Delete all submissions" button
+    sits next to the Export CSV button in the table header. The label
+    switches between the two phrasings depending on whether any
+    filters are active. A second JS confirmation describes the scope
+    explicitly ("...matching the current filters" vs "...empty the
+    entire submissions table").
+  - Both actions log to the diagnostics ring buffer at warn level
+    when rows are actually removed, with the admin user ID and the
+    deleted count, so the Logs tab is the audit trail.
+  - Already-sent emails are not affected (they live in the
+    recipient's inbox after wp_mail handed them to the SMTP server).
+    Only the WordPress historical record is removed.
+  - Bulk endpoint is capped at Submissions::MAX_DELETE_BATCH (1000)
+    rows per request so a hostile POST can't issue an unbounded
+    DELETE. Filter-scoped delete-all carries the same WHERE-clause
+    builder as the list view, so allowlists for source / status
+    can't be bypassed by tampering with $_POST.
 
 = 2.4.0 =
 * New: Form → Submissions retention. Optional auto-pruning of saved

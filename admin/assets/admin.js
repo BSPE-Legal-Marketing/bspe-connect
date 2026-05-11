@@ -235,6 +235,87 @@
 	}
 
 	/* ---------------------------------------------------------------- */
+	/*  Submissions bulk delete — checkbox tracking + confirm dialog    */
+	/* ---------------------------------------------------------------- */
+	function initSubmissionsBulkDelete() {
+		var form = document.querySelector('[data-bspe-bulk-form]');
+		if (!form) { return; }
+
+		var bar         = form.querySelector('[data-bspe-bulk-bar]');
+		var countEl     = form.querySelector('[data-bspe-bulk-count]');
+		var checkAll    = form.querySelector('[data-bspe-check-all]');
+		var rowChecks   = form.querySelectorAll('[data-bspe-row-check]');
+		var deleteBtn   = form.querySelector('[data-bspe-bulk-delete]');
+		var clearBtn    = form.querySelector('[data-bspe-bulk-clear]');
+
+		function refresh() {
+			var checked = form.querySelectorAll('[data-bspe-row-check]:checked');
+			var n = checked.length;
+			if (countEl) { countEl.textContent = String(n); }
+			if (bar) {
+				if (n > 0) { bar.removeAttribute('hidden'); }
+				else       { bar.setAttribute('hidden', ''); }
+			}
+			if (deleteBtn) { deleteBtn.disabled = n === 0; }
+			if (checkAll) {
+				var total = rowChecks.length;
+				checkAll.checked       = n > 0 && n === total;
+				checkAll.indeterminate = n > 0 && n < total;
+			}
+		}
+
+		rowChecks.forEach(function (cb) {
+			cb.addEventListener('change', refresh);
+		});
+
+		if (checkAll) {
+			checkAll.addEventListener('change', function () {
+				rowChecks.forEach(function (cb) { cb.checked = checkAll.checked; });
+				refresh();
+			});
+		}
+
+		if (clearBtn) {
+			clearBtn.addEventListener('click', function () {
+				rowChecks.forEach(function (cb) { cb.checked = false; });
+				if (checkAll) { checkAll.checked = false; }
+				refresh();
+			});
+		}
+
+		form.addEventListener('submit', function (ev) {
+			var checked = form.querySelectorAll('[data-bspe-row-check]:checked');
+			if (checked.length === 0) { ev.preventDefault(); return; }
+			var msg = 'Delete ' + checked.length + ' submission' + (checked.length === 1 ? '' : 's') + '?\n\nThis cannot be undone. Already-sent emails are not affected.';
+			if (!window.confirm(msg)) { ev.preventDefault(); }
+		});
+
+		refresh();
+	}
+
+	/* ---------------------------------------------------------------- */
+	/*  Submissions "Delete all matching filters" — confirm dialog      */
+	/* ---------------------------------------------------------------- */
+	function initSubmissionsDeleteAll() {
+		var form = document.querySelector('[data-bspe-delete-all-form]');
+		if (!form) { return; }
+
+		form.addEventListener('submit', function (ev) {
+			var count   = parseInt(form.getAttribute('data-bspe-delete-count'), 10);
+			var scoped  = form.getAttribute('data-bspe-delete-scoped') === '1';
+			if (!isFinite(count) || count <= 0) { ev.preventDefault(); return; }
+
+			var msg;
+			if (scoped) {
+				msg = 'Delete all ' + count + ' submission' + (count === 1 ? '' : 's') + ' matching the current filters?\n\nThis cannot be undone. Already-sent emails are not affected.';
+			} else {
+				msg = 'Delete ALL ' + count + ' submission' + (count === 1 ? '' : 's') + '?\n\nThere are no filters active — this will empty the entire submissions table. This cannot be undone. Already-sent emails are not affected.';
+			}
+			if (!window.confirm(msg)) { ev.preventDefault(); }
+		});
+	}
+
+	/* ---------------------------------------------------------------- */
 	/*  Per-button icon-library live swap                               */
 	/*                                                                  */
 	/*  When the Icon library <select> changes for a button, hide /     */
@@ -484,5 +565,7 @@
 		initColorPickers();
 		initPalettePresets();
 		initFormDirtyTracking();
+		initSubmissionsBulkDelete();
+		initSubmissionsDeleteAll();
 	});
 })();

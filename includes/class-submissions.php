@@ -29,6 +29,66 @@ final class Submissions {
 	 * after wp_mail handed them to the SMTP server. This only trims the
 	 * historical record kept inside WordPress.
 	 */
+	/**
+	 * Hard-delete submissions by row ID. Returns the number of rows that
+	 * actually went away (which may be less than count($ids) if some IDs
+	 * were already gone or never existed). Bounded to MAX_DELETE_BATCH so
+	 * a malicious POST can't issue an unbounded DELETE.
+	 *
+	 * @param int[] $ids
+	 */
+	public const MAX_DELETE_BATCH = 1000;
+
+	public static function delete_by_ids( array $ids ): int {
+		$clean = [];
+		foreach ( $ids as $id ) {
+			$n = (int) $id;
+			if ( $n > 0 ) {
+				$clean[] = $n;
+			}
+		}
+		$clean = array_values( array_unique( $clean ) );
+		if ( empty( $clean ) ) {
+			return 0;
+		}
+		if ( count( $clean ) > self::MAX_DELETE_BATCH ) {
+			$clean = array_slice( $clean, 0, self::MAX_DELETE_BATCH );
+		}
+
+		global $wpdb;
+		$table        = self::table();
+		$placeholders = implode( ',', array_fill( 0, count( $clean ), '%d' ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$deleted = (int) $wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$table} WHERE id IN ({$placeholders})",
+				$clean
+			)
+		);
+		return $deleted;
+	}
+
+	/**
+	 * Hard-delete submissions whose row matches the given WHERE clause and
+	 * args (produced by Submissions_Controller::build_where_clause). The
+	 * controller passes the same filter state the admin saw in the list,
+	 * so "delete all matching" is scoped to whatever date / source / status
+	 * filters were active.
+	 *
+	 * @param string             $where_sql
+	 * @param array<int,mixed>   $where_args
+	 */
+	public static function delete_by_where( string $where_sql, array $where_args ): int {
+		global $wpdb;
+		$table = self::table();
+		$sql   = "DELETE FROM {$table} WHERE {$where_sql}";
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$deleted = empty( $where_args )
+			? (int) $wpdb->query( $sql )
+			: (int) $wpdb->query( $wpdb->prepare( $sql, $where_args ) );
+		return $deleted;
+	}
+
 	public static function prune_old( int $days ): int {
 		if ( $days <= 0 ) {
 			return 0;

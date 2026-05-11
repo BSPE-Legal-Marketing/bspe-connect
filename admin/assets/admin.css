@@ -1358,6 +1358,102 @@
 	background: rgba(53, 30, 40, 0.04);
 }
 
+/* Destructive action — used by both "Delete selected" and "Delete all
+   matching" on the Submissions tab. Muted by default so it doesn't shout
+   on every page render; goes full-red on hover/focus. */
+.bspe-button--danger {
+	background: #fff;
+	color: #a92a3a;
+	border-color: rgba(169, 42, 58, 0.32);
+}
+
+.bspe-button--danger:hover,
+.bspe-button--danger:focus-visible {
+	background: #a92a3a;
+	color: #fff;
+	border-color: #a92a3a;
+	outline: none;
+}
+
+.bspe-button--danger:focus-visible {
+	box-shadow: 0 0 0 2px rgba(169, 42, 58, 0.35);
+}
+
+.bspe-button--danger:disabled,
+.bspe-button--danger.is-disabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+	background: #fff;
+	color: #a92a3a;
+	border-color: rgba(169, 42, 58, 0.24);
+}
+
+/* Card header right side now holds Export + Delete-all stacked
+   horizontally on wide screens, wrapping to a column on narrow ones. */
+.bspe-card__head-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+}
+
+/* The "Delete all matching" form is just a wrapper around a single
+   submit button — strip any inherited form padding so it sits flush. */
+.bspe-inline-form {
+	margin: 0;
+	padding: 0;
+	display: inline-flex;
+}
+
+/* Sticky bulk-action bar that appears above the submissions table when
+   any checkbox is ticked. Pinned to top so it stays visible while the
+   admin scrolls through pages. */
+.bspe-bulk-bar {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 14px;
+	margin: 0 0 12px;
+	background: rgba(58, 175, 185, 0.08);
+	border: 1px solid rgba(58, 175, 185, 0.28);
+	border-radius: 10px;
+	position: sticky;
+	top: 8px;
+	z-index: 2;
+}
+
+.bspe-bulk-bar__count {
+	font-weight: 600;
+	color: var(--bspe-plum);
+}
+
+/* Checkbox column in the submissions table */
+.bspe-table__col-check {
+	width: 36px;
+	text-align: center;
+}
+
+.bspe-table__col-check input[type="checkbox"] {
+	margin: 0;
+	transform: scale(1.05);
+	cursor: pointer;
+}
+
+/* One-time success notice after a redirect */
+.bspe-notice {
+	padding: 10px 14px;
+	margin: 0 0 14px;
+	border-radius: 8px;
+	font-size: 13px;
+	line-height: 1.4;
+}
+
+.bspe-notice--success {
+	background: rgba(58, 175, 185, 0.10);
+	border: 1px solid rgba(58, 175, 185, 0.30);
+	color: var(--bspe-plum);
+}
+
 .bspe-form__actions {
 	position: sticky;
 	bottom: 0;
