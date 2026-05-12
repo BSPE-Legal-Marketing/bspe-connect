@@ -12,14 +12,17 @@
 	text-align: left;
 }
 
+#qri-code img,
 #qri-code svg {
 	display: inline-block;
 	background: #fff;
+	max-width: 100%;
+	height: auto;
 }
 
 #qri-code .bspe-qri-link {
 	display: inline-block;
-	line-height: 0;       /* kill the inline-element baseline gap under SVGs */
+	line-height: 0;       /* kill the inline-element baseline gap under images */
 	text-decoration: none;
 }
 
