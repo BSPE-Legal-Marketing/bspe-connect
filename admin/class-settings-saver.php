@@ -162,10 +162,37 @@ final class Settings_Saver {
 
 		Settings::save( $existing );
 
+		// AJAX path — the admin.js form-submit handler intercepts the
+		// settings form and re-POSTs with X-Requested-With set. We
+		// detect that header and respond with JSON instead of doing
+		// the traditional set-transient-then-redirect dance. Same
+		// pipeline either way (cap check, nonce, sanitize, save) —
+		// only the response shape changes.
+		if ( self::is_xhr_request() ) {
+			wp_send_json_success( [
+				'message' => __( 'Settings saved.', 'bspe-connect' ),
+				'tab'     => $tab,
+			] );
+		}
+
 		set_transient( self::NOTICE_KEY . '_' . get_current_user_id(), 'saved', 60 );
 
 		wp_safe_redirect( Admin::tab_url( $tab ) );
 		exit;
+	}
+
+	/**
+	 * Detect a fetch / XHR call by sniffing the standard
+	 * X-Requested-With header. WordPress's wp_doing_ajax() doesn't
+	 * help here because settings posts go through admin-post.php,
+	 * not admin-ajax.php.
+	 */
+	private static function is_xhr_request(): bool {
+		if ( empty( $_SERVER['HTTP_X_REQUESTED_WITH'] ) ) {
+			return false;
+		}
+		$hdr = (string) wp_unslash( $_SERVER['HTTP_X_REQUESTED_WITH'] );
+		return 'xmlhttprequest' === strtolower( $hdr );
 	}
 
 	/**

@@ -1517,6 +1517,17 @@
 	color: #6e1e2a;
 }
 
+/* Inline notice rendered by the AJAX submit handler. Fades after a
+   few seconds for success; sticks for errors so admins can read them. */
+.bspe-notice--inline {
+	transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.bspe-notice--inline.is-fading {
+	opacity: 0;
+	transform: translateY(-6px);
+}
+
 .bspe-notice--warn {
 	background: rgba(212, 175, 55, 0.10);
 	border: 1px solid rgba(212, 175, 55, 0.45);

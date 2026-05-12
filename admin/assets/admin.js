@@ -439,7 +439,81 @@
 
 			form.addEventListener('input', check);
 			form.addEventListener('change', check);
+
+			// AJAX submit. Posts the form via fetch, expects JSON back,
+			// shows an inline notice instead of reloading the page. The
+			// PHP handler detects X-Requested-With and short-circuits
+			// its usual redirect-with-transient flow. If JS breaks for
+			// any reason we let the browser do its normal POST + reload
+			// — the form's action / method are unchanged.
+			form.addEventListener('submit', function (ev) {
+				if (!window.fetch || !window.FormData) { return; }
+				ev.preventDefault();
+
+				if (saveBtn) {
+					saveBtn.disabled = true;
+					saveBtn.setAttribute('data-bspe-saving', '1');
+				}
+				clearInlineNotices(form);
+
+				var fd  = new FormData(form);
+				var url = form.getAttribute('action') || window.location.href;
+
+				fetch(url, {
+					method: 'POST',
+					body: fd,
+					credentials: 'same-origin',
+					headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+				}).then(function (resp) {
+					return resp.json().then(function (json) { return { ok: resp.ok, status: resp.status, json: json }; });
+				}).then(function (result) {
+					if (!result.ok || !result.json || result.json.success === false) {
+						var msg = (result.json && result.json.data && result.json.data.message)
+							|| ('Save failed (HTTP ' + result.status + ').');
+						showInlineNotice(form, 'error', msg);
+						return;
+					}
+					var okMsg = (result.json && result.json.data && result.json.data.message) || 'Settings saved.';
+					showInlineNotice(form, 'success', okMsg);
+					// Update the dirty-tracking snapshot so the save
+					// button shrinks back to the "no unsaved changes"
+					// state without a reload.
+					snapshot = serializeForm(form);
+					setDirty(false);
+				}).catch(function (err) {
+					showInlineNotice(form, 'error', (err && err.message) || 'Network error while saving.');
+				}).then(function () {
+					if (saveBtn) {
+						saveBtn.disabled = false;
+						saveBtn.removeAttribute('data-bspe-saving');
+					}
+				});
+			});
 		});
+	}
+
+	function clearInlineNotices(form) {
+		var existing = form.parentNode && form.parentNode.querySelectorAll('.bspe-notice.bspe-notice--inline');
+		if (!existing) { return; }
+		existing.forEach(function (n) { n.parentNode.removeChild(n); });
+	}
+
+	function showInlineNotice(form, kind, message) {
+		clearInlineNotices(form);
+		var div = document.createElement('div');
+		div.className = 'bspe-notice bspe-notice--inline bspe-notice--' + (kind === 'error' ? 'error' : 'success');
+		div.setAttribute('role', kind === 'error' ? 'alert' : 'status');
+		div.textContent = message;
+		form.parentNode.insertBefore(div, form);
+		// Fade the notice out after a few seconds for success messages.
+		if (kind !== 'error') {
+			setTimeout(function () {
+				div.classList.add('is-fading');
+				setTimeout(function () {
+					if (div.parentNode) { div.parentNode.removeChild(div); }
+				}, 600);
+			}, 2400);
+		}
 	}
 
 	function serializeForm(form) {
