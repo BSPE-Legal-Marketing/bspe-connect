@@ -45,7 +45,7 @@ final class Licensing {
 	 * License server base URL. Override via BSPE_CONNECT_LICENSE_URL
 	 * wp-config constant if needed (e.g. development / staging).
 	 */
-	private const DEFAULT_SERVER_URL = 'https://bspe-connect-manager.up.railway.app';
+	private const DEFAULT_SERVER_URL = 'https://bspe-connect-manager-production.up.railway.app';
 
 	/**
 	 * Expected `iss` claim in every signed response from the manager.
