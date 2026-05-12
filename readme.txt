@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 3.2.0
+Stable tag: 3.2.1
 License: Proprietary
 
 Mobile contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -48,6 +48,7 @@ Reach out to BSPE Legal Marketing through your usual channel.
 
 == Changelog ==
 
+= 3.2.1 = Gate Site utilities (QR, external links, REST users hide) on the license.
 = 3.2.0 = AJAX settings save — no more page reload when clicking Save.
 = 3.1.5 = Defaults: Connect weight 600 + simpler mail subject/from; mobile breakpoint step 1; body padding so bar doesn't cover footer.
 = 3.1.4 = QR: drop loading="lazy" to avoid conflicts with image-optimization plugins.
