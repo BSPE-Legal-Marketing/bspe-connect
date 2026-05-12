@@ -281,15 +281,33 @@
 		var formatBits = 0x77C4;
 		for (var f = 0; f < 15; f++) {
 			var bit = (formatBits >> f) & 1;
-			// Upper-left area
-			if (f < 6)       m[8][f]                 = bit;
-			else if (f < 8)  m[8][f + 1]             = bit;
-			else if (f === 8) m[7][8]                = bit;
-			else              m[14 - f][8]           = bit;
-			// Lower-left + upper-right
-			if (f < 8)       m[size - 1 - f][8]      = bit;
-			else             m[8][size - 15 + f]     = bit;
+
+			// Primary copy — around top-left finder.
+			//   bits 0-5 : row 8, cols 0-5
+			//   bit 6    : row 8, col 7  (col 6 is timing)
+			//   bit 7    : row 8, col 8
+			//   bit 8    : row 7, col 8
+			//   bits 9-14: row 5,4,3,2,1,0, col 8 (row 6 is timing)
+			if (f < 6)        m[8][f]       = bit;
+			else if (f < 8)   m[8][f + 1]   = bit;
+			else if (f === 8) m[7][8]       = bit;
+			else              m[14 - f][8]  = bit;
+
+			// Secondary copy — split between bottom-left and right of
+			// top-right finder.
+			//   bits 0-6 : col 8, rows size-1 down to size-7
+			//   bits 7-14: row 8, cols size-8 to size-1
+			//
+			// Note: m[size-8][8] is the dark module (always 1) and is
+			// NOT part of the format info. The cutoff is therefore at
+			// f === 7, not f === 8.
+			if (f < 7) m[size - 1 - f][8]    = bit;
+			else       m[8][size - 15 + f]   = bit;
 		}
+
+		// Re-affirm the dark module after format info placement —
+		// belt-and-suspenders in case any reservation logic missed it.
+		m[size - 8][8] = 1;
 
 		return { matrix: m, size: size };
 	}

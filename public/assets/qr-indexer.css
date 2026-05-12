@@ -7,9 +7,9 @@
  * so the WP setting can override at runtime.
  */
 #qri-code {
-	margin: 24px auto !important;
+	margin: 24px 0 !important;
 	max-width: var(--bspe-qri-max-width, 1240px);
-	text-align: center;
+	text-align: left;
 }
 
 #qri-code svg {
