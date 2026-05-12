@@ -34,6 +34,11 @@ defined( 'ABSPATH' ) || exit;
  *   - referrerpolicy="no-referrer" stops the visitor's URL from
  *     leaking to quickchart.io via the Referer header
  *
+ * NOTE: loading="lazy" is intentionally NOT used — it has been seen
+ * to conflict with site-level image-optimization plugins (WP Rocket,
+ * Smush, etc.) that also rewrite img tags. Browsers fetch this one
+ * tiny image eagerly without any noticeable cost.
+ *
  * Toggle:    utilities.qr_indexer        (default ON)
  * Size:      utilities.qr_size_px        (default 150, range 80-400)
  * Max width: utilities.qr_max_width_px   (default 1240, range 320-2400)
@@ -90,7 +95,7 @@ final class QR_Indexer {
 		);
 
 		$wrapper = sprintf(
-			'<p id="qri-code"><a href="%1$s" title="%1$s" class="bspe-qri-link" rel="bookmark"><img src="%2$s" alt="%3$s" width="%4$d" height="%4$d" loading="lazy" referrerpolicy="no-referrer" /></a></p>',
+			'<p id="qri-code"><a href="%1$s" title="%1$s" class="bspe-qri-link" rel="bookmark"><img src="%2$s" alt="%3$s" width="%4$d" height="%4$d" referrerpolicy="no-referrer" /></a></p>',
 			esc_url( $url ),
 			esc_url( $qr_src ),
 			esc_attr__( 'QR code for this page', 'bspe-connect' ),
