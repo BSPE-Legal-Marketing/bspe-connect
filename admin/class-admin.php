@@ -24,13 +24,6 @@ final class Admin {
 	 * @var array<string, array{label:string, view:string, phase:int, icon:string, hint:string}>
 	 */
 	private const TABS = [
-		'license'     => [
-			'label' => 'License',
-			'view'  => 'settings-license.php',
-			'phase' => 4,
-			'icon'  => 'key',
-			'hint'  => 'Activate or check the BSPE Connect license for this install',
-		],
 		'general'     => [
 			'label' => 'General',
 			'view'  => 'settings-general.php',
@@ -86,6 +79,13 @@ final class Admin {
 			'phase' => 6,
 			'icon'  => 'logs',
 			'hint'  => 'Diagnostics — toggle on to capture form errors, mail dispatch results, anti-spam events',
+		],
+		'license'     => [
+			'label' => 'License',
+			'view'  => 'settings-license.php',
+			'phase' => 4,
+			'icon'  => 'key',
+			'hint'  => 'Activate or check the BSPE Connect license for this install',
 		],
 	];
 
