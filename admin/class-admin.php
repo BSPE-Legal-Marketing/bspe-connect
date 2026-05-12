@@ -85,7 +85,7 @@ final class Admin {
 			'view'  => 'settings-license.php',
 			'phase' => 4,
 			'icon'  => 'key',
-			'hint'  => 'Activate or check the BSPE Connect license for this install',
+			'hint'  => 'Plugin built by BSPE Legal Marketing for various marketing purposes.',
 		],
 	];
 
