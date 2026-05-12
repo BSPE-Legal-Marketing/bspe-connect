@@ -16,6 +16,7 @@ use BSPE\Connect\Admin\Settings_Saver;
 $enabled    = (bool) Settings::get( 'enabled', false );
 $bubble     = is_array( Settings::get( 'welcome_bubble', [] ) ) ? Settings::get( 'welcome_bubble', [] ) : [];
 $display    = is_array( Settings::get( 'display', [] ) ) ? Settings::get( 'display', [] ) : [];
+$utilities  = is_array( Settings::get( 'utilities', [] ) ) ? Settings::get( 'utilities', [] ) : [];
 $action_url = admin_url( 'admin-post.php' );
 
 Components::open_form( 'general', $action_url );
@@ -178,6 +179,81 @@ Components::row(
 	[
 		'id'          => 'bspe-display-mobile_breakpoint',
 		'description' => __( 'Screens wider than this never see the bar.', 'bspe-connect' ),
+	]
+);
+Components::close_card();
+
+/* ----------------- Site utilities ----------------- */
+Components::open_card(
+	__( 'Site utilities', 'bspe-connect' ),
+	__( 'Optional extras that improve every BSPE Legal Marketing site. All on by default.', 'bspe-connect' )
+);
+
+Components::row(
+	__( 'Page QR code', 'bspe-connect' ),
+	static function () use ( $utilities ): void {
+		Components::toggle( 'bspe[utilities][qr_indexer]', ! empty( $utilities['qr_indexer'] ), [
+			'label' => __( 'Append a QR code at the bottom of every post and page', 'bspe-connect' ),
+		] );
+	},
+	[
+		'description' => __( 'Generated locally on the visitor\'s browser — no external service. The QR encodes the current page URL so visitors can scan it on a phone.', 'bspe-connect' ),
+	]
+);
+
+Components::row(
+	__( 'QR code size', 'bspe-connect' ),
+	static function () use ( $utilities ): void {
+		Components::number( 'bspe[utilities][qr_size_px]', (int) ( $utilities['qr_size_px'] ?? 150 ), [
+			'min'    => 80,
+			'max'    => 400,
+			'step'   => 10,
+			'suffix' => __( 'px', 'bspe-connect' ),
+		] );
+	},
+	[
+		'id'          => 'bspe-utilities-qr_size_px',
+		'description' => __( 'Default 150 px. Image side length on the page.', 'bspe-connect' ),
+	]
+);
+
+Components::row(
+	__( 'QR container max width', 'bspe-connect' ),
+	static function () use ( $utilities ): void {
+		Components::number( 'bspe[utilities][qr_max_width_px]', (int) ( $utilities['qr_max_width_px'] ?? 1240 ), [
+			'min'    => 320,
+			'max'    => 2400,
+			'step'   => 10,
+			'suffix' => __( 'px', 'bspe-connect' ),
+		] );
+	},
+	[
+		'id'          => 'bspe-utilities-qr_max_width_px',
+		'description' => __( 'Default 1240 px. Caps the centered wrapper so the QR doesn\'t span full width on long-form layouts.', 'bspe-connect' ),
+	]
+);
+
+Components::row(
+	__( 'External links in new tab', 'bspe-connect' ),
+	static function () use ( $utilities ): void {
+		Components::toggle( 'bspe[utilities][external_links_new_tab]', ! empty( $utilities['external_links_new_tab'] ), [
+			'label' => __( 'Open links to other domains in a new tab', 'bspe-connect' ),
+		] );
+	},
+	[
+		'description' => __( 'Adds <code>target="_blank" rel="noopener noreferrer"</code> to every external link on page load. Same-domain links (including subdomains like <code>www.</code> and <code>staging.</code>) are left alone.', 'bspe-connect' ),
+	]
+);
+
+Components::row(
+	__( 'Hide users from REST API', 'bspe-connect' ),
+	static function () use ( $utilities ): void {
+		Components::toggle( 'bspe[utilities][hide_users_rest]', ! empty( $utilities['hide_users_rest'] ), [
+			'label' => __( 'Block anonymous access to <code>/wp-json/wp/v2/users</code>', 'bspe-connect' ),
+		] );
+	},
+	[
+		'description' => __( 'WordPress publishes the list of authors at <code>/wp-json/wp/v2/users</code> by default — useful for usernames-then-passwords attacks. This toggle closes that endpoint for anonymous requests while leaving it open to logged-in admins.', 'bspe-connect' ),
 	]
 );
 Components::close_card();

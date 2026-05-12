@@ -197,7 +197,24 @@ final class Settings_Saver {
 		$existing['enabled']        = ! empty( $payload['enabled'] );
 		$existing['welcome_bubble'] = self::sanitize_welcome_bubble( $payload['welcome_bubble'] ?? [], $existing['welcome_bubble'] ?? [] );
 		$existing['display']        = self::sanitize_display( $payload['display'] ?? [], $existing['display'] ?? [] );
+		$existing['utilities']      = self::sanitize_utilities( $payload['utilities'] ?? [], $existing['utilities'] ?? [] );
 		return $existing;
+	}
+
+	/**
+	 * @param array<string,mixed> $input
+	 * @param array<string,mixed> $current
+	 *
+	 * @return array<string,mixed>
+	 */
+	private static function sanitize_utilities( array $input, array $current ): array {
+		return [
+			'qr_indexer'             => ! empty( $input['qr_indexer'] ),
+			'qr_size_px'             => max( 80, min( 400,  (int) ( $input['qr_size_px']      ?? 150 ) ) ),
+			'qr_max_width_px'        => max( 320, min( 2400, (int) ( $input['qr_max_width_px'] ?? 1240 ) ) ),
+			'external_links_new_tab' => ! empty( $input['external_links_new_tab'] ),
+			'hide_users_rest'        => ! empty( $input['hide_users_rest'] ),
+		];
 	}
 
 	/**

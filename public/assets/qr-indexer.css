@@ -1,0 +1,18 @@
+/**
+ * BSPE Connect — QR indexer styling.
+ *
+ * The plugin injects #qri-code inside the post content. Center it and
+ * cap its outer width so it doesn't blow past long-form layouts on
+ * wide screens. The max-width is parameterized via CSS custom property
+ * so the WP setting can override at runtime.
+ */
+#qri-code {
+	margin: 24px auto !important;
+	max-width: var(--bspe-qri-max-width, 1240px);
+	text-align: center;
+}
+
+#qri-code svg {
+	display: inline-block;
+	background: #fff;
+}

@@ -62,6 +62,14 @@ final class Plugin {
 			Updater::init();
 		}
 
+		// Site utilities run independently of the license gate. The
+		// QR indexer + external-link rewriter + REST users hide are
+		// general site enhancements that BSPE wants live on every
+		// install whether or not the contact bar is licensed.
+		Hide_Users_Rest::init();
+		External_Links::init();
+		QR_Indexer::init();
+
 		// Daily prune of analytics events older than retention window.
 		// We register the cron on activation (Activator::activate) but
 		// also self-schedule here in case the activation hook never ran

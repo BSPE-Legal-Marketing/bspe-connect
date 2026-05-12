@@ -162,6 +162,19 @@ final class Settings {
 				'mode'  => 'sitewide',
 				'slugs' => '',
 			],
+			// Site-utility add-ons — small, opt-out features that don't
+			// belong to the contact-bar core. Each one is a single
+			// toggle plus optional sub-options. All default to true
+			// because this plugin only runs on BSPE-managed sites,
+			// so the defaults match the "BSPE installs everything"
+			// expectation.
+			'utilities'      => [
+				'qr_indexer'             => true,
+				'qr_size_px'             => 150,
+				'qr_max_width_px'        => 1240,
+				'external_links_new_tab' => true,
+				'hide_users_rest'        => true,
+			],
 			'diagnostics'    => [
 				'logging_enabled' => false,
 			],
