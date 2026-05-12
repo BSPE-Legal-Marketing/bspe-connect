@@ -411,18 +411,18 @@ final class Frontend {
 					// Image mode removed in v2.1.2 — Connect is label + optional library icon only.
 					break;
 				case 'call':
-					$phone = self::digits( (string) ( $cfg['phone'] ?? '' ) );
-					if ( strlen( $phone ) === 10 ) {
+					$phone = self::normalize_phone_for_uri( (string) ( $cfg['phone'] ?? '' ) );
+					if ( '' !== $phone ) {
 						$entry['tag']  = 'a';
-						$entry['href'] = 'tel:+1' . $phone;
+						$entry['href'] = 'tel:' . $phone;
 					}
 					break;
 				case 'text':
 					$entry['mode'] = (string) ( $cfg['mode'] ?? 'sms' );
-					$phone         = self::digits( (string) ( $cfg['phone'] ?? '' ) );
-					if ( 'sms' === $entry['mode'] && strlen( $phone ) === 10 ) {
+					$phone         = self::normalize_phone_for_uri( (string) ( $cfg['phone'] ?? '' ) );
+					if ( 'sms' === $entry['mode'] && '' !== $phone ) {
 						$entry['tag']  = 'a';
-						$entry['href'] = 'sms:+1' . $phone;
+						$entry['href'] = 'sms:' . $phone;
 					}
 					break;
 				case 'email':
@@ -435,8 +435,34 @@ final class Frontend {
 		return $out;
 	}
 
-	private static function digits( string $value ): string {
-		return preg_replace( '/\D/', '', $value ) ?? '';
+	/**
+	 * Normalize an admin-entered phone string for use inside a tel: or
+	 * sms: URI. Rules:
+	 *
+	 *   - Strip every non-digit character (parentheses, dashes, spaces…)
+	 *   - Preserve a leading `+` only if the admin's input started with
+	 *     one. So `(555) 123-4567` → `5551234567`, but
+	 *     `+1 (555) 123-4567` → `+15551234567`.
+	 *   - Accept either a 10-digit US-shape number (no plus) or a
+	 *     plus-prefixed E.164 number (10-15 digits). Anything outside
+	 *     those returns '' so the call/text button stays inert rather
+	 *     than producing a broken tel: link.
+	 */
+	private static function normalize_phone_for_uri( string $value ): string {
+		$value    = trim( $value );
+		if ( '' === $value ) {
+			return '';
+		}
+		$had_plus = ( '+' === $value[0] );
+		$digits   = preg_replace( '/\D/', '', $value ) ?? '';
+		if ( '' === $digits ) {
+			return '';
+		}
+		if ( $had_plus ) {
+			$len = strlen( $digits );
+			return ( $len >= 10 && $len <= 15 ) ? '+' . $digits : '';
+		}
+		return ( strlen( $digits ) === 10 ) ? $digits : '';
 	}
 
 	/**

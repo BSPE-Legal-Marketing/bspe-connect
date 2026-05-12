@@ -16,3 +16,14 @@
 	display: inline-block;
 	background: #fff;
 }
+
+#qri-code .bspe-qri-link {
+	display: inline-block;
+	line-height: 0;       /* kill the inline-element baseline gap under SVGs */
+	text-decoration: none;
+}
+
+#qri-code .bspe-qri-link:focus-visible {
+	outline: 2px solid #3AAFB9;
+	outline-offset: 2px;
+}

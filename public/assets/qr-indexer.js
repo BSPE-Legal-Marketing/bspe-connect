@@ -316,7 +316,9 @@
 
 	function renderSvg(qr, pxSize) {
 		var size = qr.size;
-		var pad = 2; // quiet zone in modules
+		// QR spec requires 4 modules of quiet zone around the symbol.
+		// With less, many scanners refuse to detect the code at all.
+		var pad = 4;
 		var totalModules = size + pad * 2;
 		var cell = pxSize / totalModules;
 
@@ -363,7 +365,27 @@
 				// than rendering a broken QR.
 				continue;
 			}
-			node.innerHTML = renderSvg(qr, size);
+			// Wrap the SVG in an anchor so:
+			//   - hovering shows the destination URL (browser tooltip
+			//     from title + native href hover)
+			//   - clicking on desktop opens the page
+			//   - phone camera scanning still hits the SAME URL because
+			//     that's what the QR encodes
+			var svg = renderSvg(qr, size);
+			var anchor =
+				'<a href="' + escapeAttr(url) + '" title="' + escapeAttr(url) + '" ' +
+				'class="bspe-qri-link" rel="bookmark">' +
+				svg +
+				'</a>';
+			node.innerHTML = anchor;
 		}
 	});
+
+	function escapeAttr(s) {
+		return String(s)
+			.replace(/&/g, '&amp;')
+			.replace(/"/g, '&quot;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;');
+	}
 })();
