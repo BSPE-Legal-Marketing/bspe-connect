@@ -55,7 +55,10 @@ final class Settings {
 					'label'           => 'Connect',
 					'icon_library'    => 'none',
 					'icon'            => '',
-					'label_weight'    => '',
+					// Connect specifically gets a heavier weight by default
+					// — it's the primary CTA, so it carries more visual weight
+					// than the Call/Text/Email buttons which inherit.
+					'label_weight'    => '600',
 					// Connect specifically forces UPPERCASE by default — the
 					// other buttons inherit (which now defaults to off).
 					'label_uppercase' => 'yes',
@@ -118,9 +121,9 @@ final class Settings {
 				'submit_label'   => 'Send',
 				'success_msg'    => "Thanks. We'll be in touch shortly.",
 				'mail_to'        => '',
-				'mail_subject'   => 'New lead from {site_name}: {source}',
+				'mail_subject'   => 'New lead from {site_name}',
 				'mail_from'      => '',
-				'mail_from_name' => '{site_name}',
+				'mail_from_name' => '{site_name} Website',
 				'antispam'       => [
 					'honeypot'             => true,
 					'min_seconds'          => 2,

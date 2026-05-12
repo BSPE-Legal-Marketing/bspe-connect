@@ -172,7 +172,7 @@ Components::row(
 		Components::number( 'bspe[display][mobile_breakpoint]', (int) ( $display['mobile_breakpoint'] ?? 768 ), [
 			'min'    => 320,
 			'max'    => 2000,
-			'step'   => 10,
+			'step'   => 1,
 			'suffix' => __( 'px', 'bspe-connect' ),
 		] );
 	},

@@ -338,6 +338,24 @@ final class Frontend {
 		echo '@media (min-width: ' . esc_html( (string) $breakpoint ) . "px) {\n";
 		echo "\t.bspe-connect { display: none !important; }\n";
 		echo "}\n";
+
+		// Below the breakpoint, add bottom padding to the page body so a
+		// visitor who scrolls to the very end of a long post can still
+		// see the site's footer / copyright text above the fixed bar
+		// instead of having it hidden underneath. Height is computed
+		// from the same icon / label / padding settings the bar itself
+		// uses, plus a small buffer.
+		$pad_top    = max( 0, (int) Settings::get( 'design.button_padding_top',    6 ) );
+		$pad_bottom = max( 0, (int) Settings::get( 'design.button_padding_bottom', 6 ) );
+		$gap        = max( 0, (int) Settings::get( 'design.icon_label_gap',        2 ) );
+		$icon_size  = max( 0, (int) Settings::get( 'design.icon_size',            16 ) );
+		$label_size = max( 0, (int) Settings::get( 'design.label_size',           12 ) );
+		$bar_h      = $pad_top + $icon_size + $gap + $label_size + $pad_bottom + 24; // 24 = bar margins + safe-area-inset buffer
+
+		echo '@media (max-width: ' . esc_html( (string) ( $breakpoint - 1 ) ) . "px) {\n";
+		echo "\tbody { padding-bottom: " . esc_html( (string) $bar_h ) . "px !important; }\n";
+		echo "}\n";
+
 		echo "</style>\n";
 	}
 
