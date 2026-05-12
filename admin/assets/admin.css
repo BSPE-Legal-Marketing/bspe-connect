@@ -1517,6 +1517,50 @@
 	color: #6e1e2a;
 }
 
+.bspe-notice--warn {
+	background: rgba(212, 175, 55, 0.10);
+	border: 1px solid rgba(212, 175, 55, 0.45);
+	color: #6f5612;
+}
+
+/* Key/value pair grid used by the License tab status panel. Two
+   columns on wide screens (label / value), one column on narrow. */
+.bspe-kv {
+	display: grid;
+	grid-template-columns: 200px 1fr;
+	gap: 8px 18px;
+	margin: 0;
+	font-size: 13px;
+}
+
+.bspe-kv dt {
+	color: var(--bspe-muted);
+	font-weight: 500;
+}
+
+.bspe-kv dd {
+	margin: 0;
+	color: var(--bspe-plum);
+}
+
+.bspe-mono {
+	font-family: 'SFMono-Regular', Menlo, Consolas, monospace;
+	font-size: 12.5px;
+	letter-spacing: 0.01em;
+}
+
+.bspe-danger-zone {
+	border: 1px solid rgba(169, 42, 58, 0.18);
+	background: rgba(169, 42, 58, 0.02);
+	padding: 16px;
+	border-radius: 10px;
+}
+
+@media (max-width: 720px) {
+	.bspe-kv { grid-template-columns: 1fr; gap: 2px 0; }
+	.bspe-kv dt { margin-top: 8px; }
+}
+
 .bspe-form__actions {
 	position: sticky;
 	bottom: 0;

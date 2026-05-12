@@ -3,7 +3,7 @@
  * Plugin Name:       BSPE Connect
  * Plugin URI:        https://github.com/BSPE-Legal-Marketing/bspe-connect
  * Description:       Mobile contact bar with lead capture, by BSPE Legal Marketing.
- * Version:           2.4.3
+ * Version:           3.0.0
  * Requires at least: 6.0
  * Requires PHP:      8.0
  * Author:            BSPE Legal Marketing
@@ -18,7 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'BSPE_CONNECT_VERSION', '2.4.3' );
+define( 'BSPE_CONNECT_VERSION', '3.0.0' );
 define( 'BSPE_CONNECT_FILE', __FILE__ );
 define( 'BSPE_CONNECT_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BSPE_CONNECT_URL', plugin_dir_url( __FILE__ ) );
@@ -29,6 +29,7 @@ require_once BSPE_CONNECT_DIR . 'includes/class-activator.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-deactivator.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-settings.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-theme-palette.php';
+require_once BSPE_CONNECT_DIR . 'includes/class-licensing.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-updater.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-submissions.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-events.php';
@@ -41,6 +42,7 @@ require_once BSPE_CONNECT_DIR . 'admin/class-admin.php';
 require_once BSPE_CONNECT_DIR . 'admin/class-settings-saver.php';
 require_once BSPE_CONNECT_DIR . 'admin/class-submissions-controller.php';
 require_once BSPE_CONNECT_DIR . 'admin/class-analytics-controller.php';
+require_once BSPE_CONNECT_DIR . 'admin/class-license-controller.php';
 require_once BSPE_CONNECT_DIR . 'admin/views/components.php';
 
 register_activation_hook( __FILE__, [ 'BSPE\\Connect\\Activator', 'activate' ] );

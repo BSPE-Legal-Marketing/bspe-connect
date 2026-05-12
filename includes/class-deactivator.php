@@ -21,7 +21,7 @@ final class Deactivator {
 		// schedules across activate/deactivate cycles. The crons will be
 		// rescheduled automatically on the next plugins_loaded after
 		// reactivation (see Plugin::boot).
-		foreach ( [ Plugin::CRON_PRUNE_EVENTS, Plugin::CRON_PRUNE_SUBMISSIONS ] as $hook ) {
+		foreach ( [ Plugin::CRON_PRUNE_EVENTS, Plugin::CRON_PRUNE_SUBMISSIONS, Licensing::CRON_HOOK ] as $hook ) {
 			$timestamp = wp_next_scheduled( $hook );
 			if ( false !== $timestamp ) {
 				wp_unschedule_event( $timestamp, $hook );

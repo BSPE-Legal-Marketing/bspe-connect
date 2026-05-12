@@ -48,7 +48,19 @@ final class Plugin {
 		// fail with "Table 'wp_bspe_connect_events' doesn't exist".
 		$this->maybe_migrate();
 
-		Updater::init();
+		// License gate. Must register BEFORE the runtime services so its
+		// cron + admin-post hooks attach, but the actual is_functional()
+		// check happens at each service's init() call below — admins can
+		// still reach the wp-admin UI when unactivated to enter a key.
+		Licensing::init();
+
+		$licensed = Licensing::is_functional();
+
+		// Updater gates on license — no updates flow to unlicensed
+		// installs (a revoked client doesn't get newer versions).
+		if ( $licensed ) {
+			Updater::init();
+		}
 
 		// Daily prune of analytics events older than retention window.
 		// We register the cron on activation (Activator::activate) but
@@ -75,17 +87,22 @@ final class Plugin {
 		// entries can be wiped).
 		Logger::init();
 
-		// Form submission handler — registered regardless of context because
-		// admin-ajax.php is reached from the frontend bar but reports is_admin() true.
-		Form_Handler::init();
+		// Form submission handler — gated on license. Without a valid
+		// license the form modal can't post to the server, so even if
+		// someone tampers with the JS to render the bar manually, no
+		// submissions accumulate.
+		if ( $licensed ) {
+			Form_Handler::init();
+		}
 
-		// REST API for analytics events — same reason: rest_api_init runs in
-		// both admin and frontend contexts.
-		Rest::init();
+		// REST API for analytics events — same gating logic.
+		if ( $licensed ) {
+			Rest::init();
+		}
 
 		if ( is_admin() ) {
 			Admin\Admin::init();
-		} else {
+		} elseif ( $licensed ) {
 			Frontend::init();
 		}
 	}

@@ -24,11 +24,13 @@ foreach ( $tables as $table ) {
 delete_option( 'bspe_connect_settings' );
 delete_option( 'bspe_connect_db_version' );
 delete_option( 'bspe_connect_log' );
+delete_option( 'bspe_connect_license' );
 
 // Clear scheduled cron jobs so WP doesn't try to fire callbacks into
 // classes that no longer exist after uninstall.
 wp_clear_scheduled_hook( 'bspe_connect_prune_events' );
 wp_clear_scheduled_hook( 'bspe_connect_prune_submissions' );
+wp_clear_scheduled_hook( 'bspe_connect_license_check' );
 
 // Clean any rate-limit / event-rate / global-rate transients that
 // may be lingering.

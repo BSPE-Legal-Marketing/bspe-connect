@@ -24,6 +24,13 @@ final class Admin {
 	 * @var array<string, array{label:string, view:string, phase:int, icon:string, hint:string}>
 	 */
 	private const TABS = [
+		'license'     => [
+			'label' => 'License',
+			'view'  => 'settings-license.php',
+			'phase' => 4,
+			'icon'  => 'key',
+			'hint'  => 'Activate or check the BSPE Connect license for this install',
+		],
 		'general'     => [
 			'label' => 'General',
 			'view'  => 'settings-general.php',
@@ -97,15 +104,60 @@ final class Admin {
 		'analytics' => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17h14"/><rect x="5" y="11" width="2.5" height="5" rx=".4"/><rect x="9" y="7" width="2.5" height="9" rx=".4"/><rect x="13" y="3.5" width="2.5" height="12.5" rx=".4"/></svg>',
 		'inbox'     => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 11.5h4l1 2h5l1-2h4"/><path d="M3 11.5l1.7-6a1.5 1.5 0 0 1 1.45-1.1h7.7a1.5 1.5 0 0 1 1.45 1.1L17 11.5"/><rect x="2.5" y="11.5" width="15" height="5" rx="1.4"/></svg>',
 		'logs'      => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h7l3 3v11a1.5 1.5 0 0 1-1.5 1.5h-8.5A1.5 1.5 0 0 1 3.5 17V4.5A1.5 1.5 0 0 1 5 3z"/><path d="M12 3v3.5h3"/><path d="M6.5 11.5h7M6.5 14h5"/></svg>',
+		'key'       => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7" cy="13" r="3"/><path d="M9.1 10.9l7.4-7.4M13.5 6.5l2 2"/></svg>',
 	];
 
 	public static function init(): void {
 		add_action( 'admin_menu', [ self::class, 'register_menu' ] );
 		add_action( 'admin_enqueue_scripts', [ self::class, 'enqueue_assets' ] );
 
+		// Admin-wide notice when the install isn't functional. Shown
+		// on every wp-admin page so the gap doesn't go unnoticed.
+		add_action( 'admin_notices', [ self::class, 'render_license_notice' ] );
+
 		Settings_Saver::init();
 		Submissions_Controller::init();
 		Analytics_Controller::init();
+		License_Controller::init();
+	}
+
+	/**
+	 * Render a wp-admin-style notice when BSPE Connect is gated by a
+	 * license issue (unactivated, revoked, domain mismatch, grace
+	 * window expired). Links to the License tab so the fix is one
+	 * click away.
+	 */
+	public static function render_license_notice(): void {
+		if ( ! current_user_can( self::CAPABILITY ) ) {
+			return;
+		}
+		if ( \BSPE\Connect\Licensing::is_functional() ) {
+			return;
+		}
+
+		$state = \BSPE\Connect\Licensing::state();
+		$status = (string) $state['status'];
+		$tab_url = self::tab_url( 'license' );
+
+		$headline = __( 'BSPE Connect is disabled', 'bspe-connect' );
+		$body     = __( 'No license is active for this site, so the frontend bar and the form handler are dormant.', 'bspe-connect' );
+
+		if ( 'revoked' === $status ) {
+			$body = __( 'This site\'s license has been revoked by BSPE Legal Marketing. Contact BSPE for a new key.', 'bspe-connect' );
+		} elseif ( 'domain_mismatch' === $status ) {
+			$body = __( 'This license key is registered to a different domain. Contact BSPE to transfer it.', 'bspe-connect' );
+		} elseif ( 'active' === $status ) {
+			$body = __( 'The license server has been unreachable for more than 7 days. The plugin is paused until contact is restored.', 'bspe-connect' );
+		}
+		?>
+		<div class="notice notice-error">
+			<p>
+				<strong><?php echo esc_html( $headline ); ?>:</strong>
+				<?php echo esc_html( $body ); ?>
+				<a href="<?php echo esc_url( $tab_url ); ?>"><?php esc_html_e( 'Open the License tab', 'bspe-connect' ); ?> &rarr;</a>
+			</p>
+		</div>
+		<?php
 	}
 
 	public static function register_menu(): void {
