@@ -27,3 +27,10 @@ composer.lock
 
 # Node — only if Phase 4 ever needs a build step
 node_modules/
+
+# BSPE Connect Manager — sibling project living in a subfolder for
+# convenience but tracked in its own private repo
+# (BSPE-Legal-Marketing/bspe-connect-manager). Never gets pushed
+# through this repo, never ends up in the plugin zip.
+BSPE Connect Manager/
+

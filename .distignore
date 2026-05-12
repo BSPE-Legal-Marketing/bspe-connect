@@ -32,6 +32,11 @@ tests
 bspe-connect-spec.md
 README-dev.md
 
+# BSPE Connect Manager — sibling project, separate private repo, never
+# ships with the plugin. Already gitignored upstream but kept here as
+# belt-and-suspenders in case it ever ends up untracked.
+BSPE Connect Manager
+
 # Vendored dev-only paths inside plugin-update-checker (already cloned w/o examples,
 # but defense in depth in case someone re-clones it manually)
 vendor/plugin-update-checker/examples
