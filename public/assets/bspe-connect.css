@@ -321,14 +321,23 @@
 	flex-shrink: 0;
 }
 
-.bspe-connect__bubble-avatar img {
+/* <img> element — theme `.elementor-kit-N img` rules sit at the same
+   (0,1,1) specificity and could win on source order. #bspe-connect
+   prefix lifts this to (1,1,1) so the avatar sizing always holds. */
+#bspe-connect .bspe-connect__bubble-avatar img {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
 	display: block;
 }
 
-.bspe-connect__bubble-heading {
+/* These text nodes are <p> elements. Page-builder themes (Elementor,
+   especially) ship rules like `.elementor-kit-N p { margin-block-end:
+   16px }` at specificity (0,1,1), which outweighs a bare
+   `.bspe-connect__bubble-heading` (0,1,0) and injects unwanted
+   spacing. Prefixing with the `#bspe-connect` ID lifts every one of
+   these to (1,1,0) so the plugin's own margins always win. */
+#bspe-connect .bspe-connect__bubble-heading {
 	margin: 0 0 2px;
 	font-size: 14px;
 	font-weight: 700;
@@ -337,7 +346,7 @@
 	letter-spacing: -0.005em;
 }
 
-.bspe-connect__bubble-message {
+#bspe-connect .bspe-connect__bubble-message {
 	margin: 0;
 	font-size: 13px;
 	font-weight: 400;
@@ -465,7 +474,10 @@
 	flex-shrink: 0;
 }
 
-.bspe-connect__modal-heading {
+/* modal-heading is an <h2>, modal-subheading is a <p> — both get the
+   #bspe-connect prefix so theme `h2` / `p` rules can't override the
+   plugin's spacing (see the bubble-heading note above). */
+#bspe-connect .bspe-connect__modal-heading {
 	margin: 0;
 	font-size: 18px;
 	font-weight: 700;
@@ -474,7 +486,7 @@
 	line-height: 1.25;
 }
 
-.bspe-connect__modal-subheading {
+#bspe-connect .bspe-connect__modal-subheading {
 	margin: 4px 0 0;
 	font-size: 13px;
 	font-weight: 400;
@@ -536,7 +548,10 @@
 /* ---------------------------------------------------------------------- */
 /*  Form fields                                                            */
 /* ---------------------------------------------------------------------- */
-.bspe-connect__form {
+/* <form> element — theme `.elementor-kit-N form` rules (margin /
+   padding) would otherwise displace the modal's layout. #bspe-connect
+   prefix wins the cascade. */
+#bspe-connect .bspe-connect__form {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
@@ -636,14 +651,16 @@
 	letter-spacing: 0.02em;
 }
 
-.bspe-connect__field-error {
+/* Both error nodes are <p> elements — #bspe-connect prefix keeps
+   theme `p` margins from displacing them. */
+#bspe-connect .bspe-connect__field-error {
 	margin: 0;
 	font-size: 12.5px;
 	color: #c0392b;
 	line-height: 1.35;
 }
 
-.bspe-connect__form-error {
+#bspe-connect .bspe-connect__form-error {
 	margin: 0;
 	padding: 10px 12px;
 	border-radius: 8px;
@@ -797,7 +814,8 @@
 	stroke-dashoffset: 0;
 }
 
-.bspe-connect__success-message {
+/* <p> element — #bspe-connect prefix per the note above. */
+#bspe-connect .bspe-connect__success-message {
 	margin: 0;
 	font-size: 16px;
 	font-weight: 500;
