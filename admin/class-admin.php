@@ -115,6 +115,12 @@ final class Admin {
 		// on every wp-admin page so the gap doesn't go unnoticed.
 		add_action( 'admin_notices', [ self::class, 'render_license_notice' ] );
 
+		// Map the currently-active tab onto the right entry of the
+		// wp-admin sidebar flyout. Without this, the WP sidebar would
+		// always highlight the first submenu regardless of which tab
+		// the admin is on.
+		add_filter( 'submenu_file', [ self::class, 'highlight_active_submenu' ], 10, 2 );
+
 		Settings_Saver::init();
 		Submissions_Controller::init();
 		Analytics_Controller::init();
@@ -170,6 +176,61 @@ final class Admin {
 			'dashicons-format-chat',
 			30
 		);
+
+		// Register one submenu entry per tab. Each one is a direct
+		// link to admin.php?page=bspe-connect&tab=<id> — using an
+		// absolute URL as the menu_slug short-circuits WordPress's
+		// usual page-handler routing and just sends the admin to the
+		// same render_page() callback with the right query string.
+		// WordPress draws this list as a hover flyout off the main
+		// "BSPE Connect" menu item, matching the Elementor pattern.
+		foreach ( self::TABS as $tab_id => $tab ) {
+			$url = 'admin.php?page=' . self::PAGE_SLUG . '&tab=' . rawurlencode( $tab_id );
+			add_submenu_page(
+				self::PAGE_SLUG,
+				sprintf(
+					/* translators: %s: tab label */
+					__( 'BSPE Connect — %s', 'bspe-connect' ),
+					$tab['label']
+				),
+				$tab['label'],
+				self::CAPABILITY,
+				$url
+			);
+		}
+
+		// WordPress auto-inserts a first submenu entry that duplicates
+		// the parent's label. Remove it — the parent already serves as
+		// the implicit "go to default tab" link, and a duplicate adds
+		// confusion.
+		remove_submenu_page( self::PAGE_SLUG, self::PAGE_SLUG );
+	}
+
+	/**
+	 * Highlight the right submenu flyout item based on the active tab.
+	 * Without this, WordPress would always show the first submenu as
+	 * active when the admin is on a tab that came in via the in-page
+	 * sidebar (which doesn't change the `page` query var).
+	 *
+	 * @param string|null $submenu_file
+	 * @param string|null $parent_file
+	 *
+	 * @return string|null
+	 */
+	public static function highlight_active_submenu( $submenu_file, $parent_file = null ) {
+		unset( $parent_file );
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only navigation
+		$page = isset( $_GET['page'] ) ? sanitize_key( (string) wp_unslash( $_GET['page'] ) ) : '';
+		if ( self::PAGE_SLUG !== $page ) {
+			return $submenu_file;
+		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only navigation
+		$tab = isset( $_GET['tab'] ) ? sanitize_key( (string) wp_unslash( $_GET['tab'] ) ) : '';
+		if ( '' === $tab || ! array_key_exists( $tab, self::TABS ) ) {
+			return $submenu_file;
+		}
+		return 'admin.php?page=' . self::PAGE_SLUG . '&tab=' . $tab;
 	}
 
 	public static function enqueue_assets( string $hook ): void {
