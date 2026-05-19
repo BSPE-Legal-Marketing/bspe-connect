@@ -185,10 +185,11 @@ final class Settings {
 			// and that heading, in which case the widget is placed
 			// before the iframe instead. See class-in-post-widget.php.
 			'in_post_widget' => [
-				'enabled'          => false,
-				'shortcode'        => '',
-				'margin_bottom_px' => 20,
-				'exclude_ids'      => '',
+				'enabled'                  => false,
+				'shortcode'                => '',
+				'margin_bottom_px'         => 20,
+				'fallback_after_paragraph' => 1,
+				'exclude_ids'              => '',
 			],
 			'diagnostics'    => [
 				'logging_enabled' => false,

@@ -387,10 +387,11 @@ final class Settings_Saver {
 		$exclude     = implode( ',', $exclude_ids );
 
 		return [
-			'enabled'          => ! empty( $input['enabled'] ),
-			'shortcode'        => $shortcode,
-			'margin_bottom_px' => max( 0, min( 200, (int) ( $input['margin_bottom_px'] ?? 20 ) ) ),
-			'exclude_ids'      => $exclude,
+			'enabled'                  => ! empty( $input['enabled'] ),
+			'shortcode'                => $shortcode,
+			'margin_bottom_px'         => max( 0, min( 200, (int) ( $input['margin_bottom_px'] ?? 20 ) ) ),
+			'fallback_after_paragraph' => max( 1, min( 10, (int) ( $input['fallback_after_paragraph'] ?? 1 ) ) ),
+			'exclude_ids'              => $exclude,
 		];
 	}
 

@@ -20,8 +20,10 @@ defined( 'ABSPATH' ) || exit;
  *      articles that open with a video embed where the CTA needs to
  *      sit above the player.
  *   3. Otherwise, the widget goes right before the heading.
- *   4. If the article has no heading at all (short post), append at
- *      the end so the shortcode still renders.
+ *   4. Fallback (no heading at all in the post body): place the widget
+ *      after the Nth paragraph (configurable via
+ *      in_post_widget.fallback_after_paragraph, default 1). If the
+ *      post has fewer paragraphs than that, append at the end.
  *
  * Posts-only — pages, attachments, and custom post types are never
  * touched. The admin can blacklist specific post IDs via the
@@ -94,19 +96,39 @@ final class In_Post_Widget {
 
 		// Find the first heading (h2 through h6). Post bodies in
 		// WordPress don't use h1 — the post title owns h1.
-		if ( ! preg_match( '/<h[2-6]\b[^>]*>/i', $content, $h_match, PREG_OFFSET_CAPTURE ) ) {
-			// No heading at all — short post. Append at end.
+		if ( preg_match( '/<h[2-6]\b[^>]*>/i', $content, $h_match, PREG_OFFSET_CAPTURE ) ) {
+			$heading_pos = (int) $h_match[0][1];
+
+			// Look for an iframe in the slice BEFORE the first heading.
+			$preamble  = substr( $content, 0, $heading_pos );
+			$insert_at = $heading_pos;
+			if ( preg_match( '/<iframe\b[^>]*>/i', $preamble, $iframe_match, PREG_OFFSET_CAPTURE ) ) {
+				$insert_at = (int) $iframe_match[0][1];
+			}
+			return substr( $content, 0, $insert_at ) . $rendered . substr( $content, $insert_at );
+		}
+
+		// Fallback path: no heading anywhere in the post body. Drop the
+		// widget after the Nth paragraph (configurable). If the post
+		// has fewer paragraphs than that, append at the end.
+		$fallback_n = (int) Settings::get( 'in_post_widget.fallback_after_paragraph', 1 );
+		$fallback_n = max( 1, min( 10, $fallback_n ) );
+
+		$pos    = false;
+		$offset = 0;
+		for ( $i = 0; $i < $fallback_n; $i++ ) {
+			$found = stripos( $content, '</p>', $offset );
+			if ( false === $found ) {
+				$pos = false;
+				break;
+			}
+			$pos    = $found + 4; // length of `</p>`
+			$offset = $pos;
+		}
+		if ( false === $pos ) {
+			// Not enough paragraphs — last-resort append.
 			return $content . $rendered;
 		}
-		$heading_pos = (int) $h_match[0][1];
-
-		// Look for an iframe in the slice BEFORE the first heading.
-		$preamble = substr( $content, 0, $heading_pos );
-		$insert_at = $heading_pos;
-		if ( preg_match( '/<iframe\b[^>]*>/i', $preamble, $iframe_match, PREG_OFFSET_CAPTURE ) ) {
-			$insert_at = (int) $iframe_match[0][1];
-		}
-
-		return substr( $content, 0, $insert_at ) . $rendered . substr( $content, $insert_at );
+		return substr( $content, 0, $pos ) . $rendered . substr( $content, $pos );
 	}
 }

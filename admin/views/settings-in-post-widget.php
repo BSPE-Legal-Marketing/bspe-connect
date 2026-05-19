@@ -72,10 +72,24 @@ Components::row(
 );
 Components::close_card();
 
-/* ----------------- Placement (informational) ----------------- */
+/* ----------------- Placement (mostly automatic) ----------------- */
 Components::open_card(
 	__( 'Placement', 'bspe-connect' ),
-	__( 'Automatic. The widget is inserted before the first heading found in the post (h2 through h6 — h1 is the post title and isn\'t used in the body). If an iframe sits between the start of the content and that heading, the widget goes before the iframe instead — useful for articles that open with a video embed where the CTA should appear above the player. Posts with no heading at all get the widget appended at the end.', 'bspe-connect' )
+	__( 'Automatic. The widget is inserted before the first heading found in the post (h2 through h6 — h1 is the post title and isn\'t used in the body). If an iframe sits between the start of the content and that heading, the widget goes before the iframe instead — useful for articles that open with a video embed where the CTA should appear above the player.', 'bspe-connect' )
+);
+Components::row(
+	__( 'Fallback: after paragraph #', 'bspe-connect' ),
+	static function () use ( $cfg ): void {
+		Components::number( 'bspe[in_post_widget][fallback_after_paragraph]', (int) ( $cfg['fallback_after_paragraph'] ?? 1 ), [
+			'min'  => 1,
+			'max'  => 10,
+			'step' => 1,
+		] );
+	},
+	[
+		'id'          => 'bspe-in_post_widget-fallback_after_paragraph',
+		'description' => __( 'Only used when the post has no heading at all. Drops the widget after this many paragraphs instead. Default 1. If the post has fewer paragraphs than this number, the widget is appended at the end.', 'bspe-connect' ),
+	]
 );
 Components::row(
 	__( 'Exclude post IDs', 'bspe-connect' ),
