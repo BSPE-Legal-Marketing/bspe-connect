@@ -178,16 +178,17 @@ final class Settings {
 				'external_links_new_tab' => true,
 				'hide_users_rest'        => true,
 			],
-			// In-Post Widget — injects a saved shortcode into post / page
-			// content after the Nth paragraph. Default OFF; admin must
-			// enter a shortcode + flip the toggle on the In-Post Widget
-			// tab. See class-in-post-widget.php for the runtime hook.
+			// In-Post Widget — injects a saved shortcode into blog post
+			// content. Posts only (no pages / CPTs). Placement: before
+			// the first heading (h2-h6) found in the rendered HTML —
+			// unless an iframe sits between the start of the content
+			// and that heading, in which case the widget is placed
+			// before the iframe instead. See class-in-post-widget.php.
 			'in_post_widget' => [
-				'enabled'        => false,
-				'shortcode'      => '',
-				'after_paragraph' => 1,
-				'post_types'     => [ 'post' ], // posts only by default; admin can add 'page'
-				'exclude_ids'    => '',         // comma-separated post IDs
+				'enabled'          => false,
+				'shortcode'        => '',
+				'margin_bottom_px' => 20,
+				'exclude_ids'      => '',
 			],
 			'diagnostics'    => [
 				'logging_enabled' => false,

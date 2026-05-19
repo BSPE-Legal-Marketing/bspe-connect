@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 3.3.0
+Stable tag: 3.3.1
 License: Proprietary
 
 Mobile contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -48,6 +48,7 @@ Reach out to BSPE Legal Marketing through your usual channel.
 
 == Changelog ==
 
+= 3.3.1 = In-Post Widget: smarter placement (before first heading, or before iframe if one sits above); posts-only hardcoded; margin setting.
 = 3.3.0 = New "In-Post Widget" tab — inject any shortcode after the Nth paragraph of post / page content.
 = 3.2.4 = Hover flyout in the WP admin sidebar with quick-jump links to every plugin tab.
 = 3.2.3 = Fix Elementor (and other page builders) injecting margins into the bubble / modal text.

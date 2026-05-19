@@ -373,18 +373,6 @@ final class Settings_Saver {
 	 * @return array<string,mixed>
 	 */
 	private static function sanitize_in_post_widget( array $input ): array {
-		// Allowed post-type values. WordPress has many — restrict to a
-		// reasonable set so a tampered POST can't make us inject into
-		// e.g. attachment pages.
-		$allowed_types = [ 'post', 'page' ];
-		$raw_types = isset( $input['post_types'] ) && is_array( $input['post_types'] )
-			? $input['post_types']
-			: [ 'post' ];
-		$post_types = array_values( array_intersect( $allowed_types, array_map( 'sanitize_key', $raw_types ) ) );
-		if ( empty( $post_types ) ) {
-			$post_types = [ 'post' ];
-		}
-
 		// Shortcode field — wp_kses is too strict, sanitize_textarea_field
 		// strips legitimate shortcode brackets. Trim and let the admin's
 		// raw input through; the runtime hook passes it to do_shortcode
@@ -399,11 +387,10 @@ final class Settings_Saver {
 		$exclude     = implode( ',', $exclude_ids );
 
 		return [
-			'enabled'         => ! empty( $input['enabled'] ),
-			'shortcode'       => $shortcode,
-			'after_paragraph' => max( 1, min( 10, (int) ( $input['after_paragraph'] ?? 1 ) ) ),
-			'post_types'      => $post_types,
-			'exclude_ids'     => $exclude,
+			'enabled'          => ! empty( $input['enabled'] ),
+			'shortcode'        => $shortcode,
+			'margin_bottom_px' => max( 0, min( 200, (int) ( $input['margin_bottom_px'] ?? 20 ) ) ),
+			'exclude_ids'      => $exclude,
 		];
 	}
 

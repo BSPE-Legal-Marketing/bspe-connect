@@ -10,17 +10,22 @@ namespace BSPE\Connect;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Hooks the_content filter, finds the Nth `</p>` in the rendered HTML,
- * and splices a saved shortcode's rendered output after it. Common
- * pattern for "in-content CTA" placement — typically the highest-
- * conversion-rate spot in a long-form article.
+ * Hooks the_content filter and splices a saved shortcode's rendered
+ * output into the post HTML at a specific anchor point:
  *
- * Settings shape (see Settings::defaults().in_post_widget):
- *   enabled          bool
- *   shortcode        string  — raw shortcode, e.g. [elementor-template id="123"]
- *   after_paragraph  int     — 1..10 (1 = after the first <p>)
- *   post_types       array   — ['post'] by default; admin can add 'page'
- *   exclude_ids      string  — comma-separated post IDs to skip
+ *   1. Find the first heading in the post body (h2-h6 — h1 isn't used
+ *      in WP post bodies; the post title takes that role).
+ *   2. Scan the slice of content BEFORE that heading for an <iframe>.
+ *      If found, the widget goes right before the iframe — useful for
+ *      articles that open with a video embed where the CTA needs to
+ *      sit above the player.
+ *   3. Otherwise, the widget goes right before the heading.
+ *   4. If the article has no heading at all (short post), append at
+ *      the end so the shortcode still renders.
+ *
+ * Posts-only — pages, attachments, and custom post types are never
+ * touched. The admin can blacklist specific post IDs via the
+ * exclude_ids setting.
  *
  * Toggle:  in_post_widget.enabled  (default OFF)
  * Gated:   only runs when Licensing::is_functional() — same as the
@@ -41,23 +46,15 @@ final class In_Post_Widget {
 		// Priority 11 puts us just after WP's default the_content
 		// processing (priority 10 = wpautop, do_shortcode). That way
 		// our injection happens on the already-paragraphed HTML so
-		// counting `</p>` is reliable.
+		// the heading / iframe pattern matching is reliable.
 		add_filter( 'the_content', [ self::class, 'inject' ], 11 );
 	}
 
-	/**
-	 * Inject the shortcode output after the configured paragraph.
-	 *
-	 * The guards mirror what every "in-content widget" plugin does:
-	 *  - only on singular templates (post / page detail view)
-	 *  - only on the main query, in the loop
-	 *  - only on allowed post types
-	 *  - skip excluded post IDs
-	 *  - find the Nth `</p>`; fall back to "append at end" if there
-	 *    aren't enough paragraphs (very short articles)
-	 */
 	public static function inject( string $content ): string {
-		if ( ! is_singular() ) {
+		// Posts only. is_singular('post') is the cleanest gate — it
+		// rejects pages, archives, attachments, and every custom post
+		// type in a single call.
+		if ( ! is_singular( 'post' ) ) {
 			return $content;
 		}
 		if ( ! in_the_loop() || ! is_main_query() ) {
@@ -66,15 +63,6 @@ final class In_Post_Widget {
 
 		$post = get_post();
 		if ( ! $post ) {
-			return $content;
-		}
-
-		// Post-type allowlist
-		$allowed_types = Settings::get( 'in_post_widget.post_types', [ 'post' ] );
-		if ( ! is_array( $allowed_types ) ) {
-			$allowed_types = [ 'post' ];
-		}
-		if ( ! in_array( $post->post_type, $allowed_types, true ) ) {
 			return $content;
 		}
 
@@ -87,34 +75,38 @@ final class In_Post_Widget {
 			}
 		}
 
-		$after_n = max( 1, min( 10, (int) Settings::get( 'in_post_widget.after_paragraph', 1 ) ) );
 		$shortcode = trim( (string) Settings::get( 'in_post_widget.shortcode', '' ) );
 		if ( '' === $shortcode ) {
 			return $content;
 		}
 
+		// Wrap the rendered shortcode in a div with the configured
+		// bottom margin baked in as an inline style. Theme CSS rules
+		// can still override via #wrapper-id selectors if needed.
+		$margin   = (int) Settings::get( 'in_post_widget.margin_bottom_px', 20 );
+		$margin   = max( 0, min( 200, $margin ) );
 		$rendered = do_shortcode( $shortcode );
-		$rendered = '<div class="bspe-in-post-widget">' . $rendered . '</div>';
+		$rendered = sprintf(
+			'<div class="bspe-in-post-widget" style="margin-bottom: %dpx;">%s</div>',
+			$margin,
+			$rendered
+		);
 
-		// Find the position right after the Nth `</p>`.
-		$offset = 0;
-		$pos    = false;
-		for ( $i = 0; $i < $after_n; $i++ ) {
-			$found = stripos( $content, '</p>', $offset );
-			if ( false === $found ) {
-				$pos = false;
-				break;
-			}
-			$pos    = $found + 4; // length of `</p>`
-			$offset = $pos;
-		}
-
-		if ( false === $pos ) {
-			// Not enough paragraphs in this article — append at the
-			// end rather than failing silently.
+		// Find the first heading (h2 through h6). Post bodies in
+		// WordPress don't use h1 — the post title owns h1.
+		if ( ! preg_match( '/<h[2-6]\b[^>]*>/i', $content, $h_match, PREG_OFFSET_CAPTURE ) ) {
+			// No heading at all — short post. Append at end.
 			return $content . $rendered;
 		}
+		$heading_pos = (int) $h_match[0][1];
 
-		return substr( $content, 0, $pos ) . $rendered . substr( $content, $pos );
+		// Look for an iframe in the slice BEFORE the first heading.
+		$preamble = substr( $content, 0, $heading_pos );
+		$insert_at = $heading_pos;
+		if ( preg_match( '/<iframe\b[^>]*>/i', $preamble, $iframe_match, PREG_OFFSET_CAPTURE ) ) {
+			$insert_at = (int) $iframe_match[0][1];
+		}
+
+		return substr( $content, 0, $insert_at ) . $rendered . substr( $content, $insert_at );
 	}
 }
