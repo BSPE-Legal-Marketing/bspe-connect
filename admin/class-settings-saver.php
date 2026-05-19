@@ -28,7 +28,7 @@ final class Settings_Saver {
 	public const RESET_NONCE   = 'bspe_connect_reset_settings';
 	public const RESET_PHRASE  = 'RESET';
 
-	private const ALLOWED_TABS = [ 'general', 'buttons', 'form', 'design', 'display', 'logs' ];
+	private const ALLOWED_TABS = [ 'general', 'buttons', 'form', 'design', 'display', 'logs', 'in_post_widget' ];
 
 	private const ALLOWED_ICON_LIBRARIES = [ 'none', 'fa-solid', 'fa-regular' ];
 
@@ -157,6 +157,9 @@ final class Settings_Saver {
 				break;
 			case 'logs':
 				$existing['diagnostics']    = self::sanitize_diagnostics( $payload['diagnostics'] ?? [] );
+				break;
+			case 'in_post_widget':
+				$existing['in_post_widget'] = self::sanitize_in_post_widget( $payload['in_post_widget'] ?? [] );
 				break;
 		}
 
@@ -361,6 +364,46 @@ final class Settings_Saver {
 	private static function sanitize_diagnostics( array $input ): array {
 		return [
 			'logging_enabled' => ! empty( $input['logging_enabled'] ),
+		];
+	}
+
+	/**
+	 * @param array<string,mixed> $input
+	 *
+	 * @return array<string,mixed>
+	 */
+	private static function sanitize_in_post_widget( array $input ): array {
+		// Allowed post-type values. WordPress has many — restrict to a
+		// reasonable set so a tampered POST can't make us inject into
+		// e.g. attachment pages.
+		$allowed_types = [ 'post', 'page' ];
+		$raw_types = isset( $input['post_types'] ) && is_array( $input['post_types'] )
+			? $input['post_types']
+			: [ 'post' ];
+		$post_types = array_values( array_intersect( $allowed_types, array_map( 'sanitize_key', $raw_types ) ) );
+		if ( empty( $post_types ) ) {
+			$post_types = [ 'post' ];
+		}
+
+		// Shortcode field — wp_kses is too strict, sanitize_textarea_field
+		// strips legitimate shortcode brackets. Trim and let the admin's
+		// raw input through; the runtime hook passes it to do_shortcode
+		// which is the canonical pipeline anyway.
+		$shortcode = isset( $input['shortcode'] ) ? trim( (string) wp_unslash( $input['shortcode'] ) ) : '';
+		// Strip control characters that have no business in a shortcode.
+		$shortcode = preg_replace( '/[\x00-\x08\x0E-\x1F]/', '', $shortcode ) ?? '';
+
+		// Exclusion list — comma / whitespace separated post IDs.
+		$exclude_raw = isset( $input['exclude_ids'] ) ? (string) wp_unslash( $input['exclude_ids'] ) : '';
+		$exclude_ids = array_filter( array_map( 'intval', preg_split( '/[\s,]+/', $exclude_raw ) ?: [] ) );
+		$exclude     = implode( ',', $exclude_ids );
+
+		return [
+			'enabled'         => ! empty( $input['enabled'] ),
+			'shortcode'       => $shortcode,
+			'after_paragraph' => max( 1, min( 10, (int) ( $input['after_paragraph'] ?? 1 ) ) ),
+			'post_types'      => $post_types,
+			'exclude_ids'     => $exclude,
 		];
 	}
 

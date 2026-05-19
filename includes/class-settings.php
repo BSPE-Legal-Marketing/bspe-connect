@@ -178,6 +178,17 @@ final class Settings {
 				'external_links_new_tab' => true,
 				'hide_users_rest'        => true,
 			],
+			// In-Post Widget — injects a saved shortcode into post / page
+			// content after the Nth paragraph. Default OFF; admin must
+			// enter a shortcode + flip the toggle on the In-Post Widget
+			// tab. See class-in-post-widget.php for the runtime hook.
+			'in_post_widget' => [
+				'enabled'        => false,
+				'shortcode'      => '',
+				'after_paragraph' => 1,
+				'post_types'     => [ 'post' ], // posts only by default; admin can add 'page'
+				'exclude_ids'    => '',         // comma-separated post IDs
+			],
 			'diagnostics'    => [
 				'logging_enabled' => false,
 			],

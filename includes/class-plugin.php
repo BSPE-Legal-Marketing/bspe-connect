@@ -64,13 +64,14 @@ final class Plugin {
 
 		// Site utilities are gated on the license — a client whose
 		// license has lapsed or been revoked loses the QR indexer,
-		// external-link rewriter, and REST users hide along with the
-		// contact bar. This is BSPE's deliberate "everything goes
-		// dark on revoke" stance.
+		// external-link rewriter, REST users hide, and In-Post Widget
+		// along with the contact bar. This is BSPE's deliberate
+		// "everything goes dark on revoke" stance.
 		if ( $licensed ) {
 			Hide_Users_Rest::init();
 			External_Links::init();
 			QR_Indexer::init();
+			In_Post_Widget::init();
 		}
 
 		// Daily prune of analytics events older than retention window.

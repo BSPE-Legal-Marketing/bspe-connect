@@ -80,6 +80,13 @@ final class Admin {
 			'icon'  => 'logs',
 			'hint'  => 'Diagnostics — toggle on to capture form errors, mail dispatch results, anti-spam events',
 		],
+		'in_post_widget' => [
+			'label' => 'In-Post Widget',
+			'view'  => 'settings-in-post-widget.php',
+			'phase' => 4,
+			'icon'  => 'in_post',
+			'hint'  => 'Inject a saved shortcode into post content after the Nth paragraph.',
+		],
 		'license'     => [
 			'label' => 'License',
 			'view'  => 'settings-license.php',
@@ -105,6 +112,7 @@ final class Admin {
 		'inbox'     => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 11.5h4l1 2h5l1-2h4"/><path d="M3 11.5l1.7-6a1.5 1.5 0 0 1 1.45-1.1h7.7a1.5 1.5 0 0 1 1.45 1.1L17 11.5"/><rect x="2.5" y="11.5" width="15" height="5" rx="1.4"/></svg>',
 		'logs'      => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h7l3 3v11a1.5 1.5 0 0 1-1.5 1.5h-8.5A1.5 1.5 0 0 1 3.5 17V4.5A1.5 1.5 0 0 1 5 3z"/><path d="M12 3v3.5h3"/><path d="M6.5 11.5h7M6.5 14h5"/></svg>',
 		'key'       => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7" cy="13" r="3"/><path d="M9.1 10.9l7.4-7.4M13.5 6.5l2 2"/></svg>',
+		'in_post'   => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M6 7h8M6 10h3M11 10h3M6 14h8"/></svg>',
 	];
 
 	public static function init(): void {
