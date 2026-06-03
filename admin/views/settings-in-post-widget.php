@@ -75,7 +75,7 @@ Components::close_card();
 /* ----------------- Placement (mostly automatic) ----------------- */
 Components::open_card(
 	__( 'Placement', 'bspe-connect' ),
-	__( 'Automatic. The widget is inserted before the first heading found in the post (h2 through h6 — h1 is the post title and isn\'t used in the body). If an iframe sits between the start of the content and that heading, the widget goes before the iframe instead — useful for articles that open with a video embed where the CTA should appear above the player.', 'bspe-connect' )
+	__( 'Automatic. The widget is inserted before the first heading found in the post (h2 through h6 — h1 is the post title and isn\'t used in the body). If a Google Map embed sits above that heading, the widget goes before the map instead — so the CTA appears above the office-location map. Other embeds (YouTube, Pinterest, etc.) are ignored and never capture the widget.', 'bspe-connect' )
 );
 Components::row(
 	__( 'Fallback: after paragraph #', 'bspe-connect' ),

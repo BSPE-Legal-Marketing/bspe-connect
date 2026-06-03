@@ -15,10 +15,12 @@ defined( 'ABSPATH' ) || exit;
  *
  *   1. Find the first heading in the post body (h2-h6 — h1 isn't used
  *      in WP post bodies; the post title takes that role).
- *   2. Scan the slice of content BEFORE that heading for an <iframe>.
- *      If found, the widget goes right before the iframe — useful for
- *      articles that open with a video embed where the CTA needs to
- *      sit above the player.
+ *   2. Scan the slice of content BEFORE that heading for a GOOGLE MAPS
+ *      embed (iframe whose URL contains google.com/maps). If found, the
+ *      widget goes right before the map — useful for articles that show
+ *      an office-location map near the top where the CTA should sit
+ *      above it. Non-maps embeds (YouTube, Pinterest, etc.) are ignored
+ *      so the widget never lands on top of a video player.
  *   3. Otherwise, the widget goes right before the heading.
  *   4. Fallback (no heading at all in the post body): place the widget
  *      after the Nth paragraph (configurable via
@@ -99,11 +101,20 @@ final class In_Post_Widget {
 		if ( preg_match( '/<h[2-6]\b[^>]*>/i', $content, $h_match, PREG_OFFSET_CAPTURE ) ) {
 			$heading_pos = (int) $h_match[0][1];
 
-			// Look for an iframe in the slice BEFORE the first heading.
+			// Look ONLY for a Google Maps embed in the slice BEFORE the
+			// first heading. Earlier versions matched ANY iframe, which
+			// meant a YouTube/Pinterest/etc. embed above the heading
+			// would wrongly capture the widget (reported: a YouTube
+			// short sat above a Google Map, and the widget landed on the
+			// short instead of the map). We now match a maps iframe
+			// specifically — google.com/maps or maps.google. in the tag.
+			// If there's no maps embed before the heading, we fall
+			// through to placing the widget right before the heading.
 			$preamble  = substr( $content, 0, $heading_pos );
 			$insert_at = $heading_pos;
-			if ( preg_match( '/<iframe\b[^>]*>/i', $preamble, $iframe_match, PREG_OFFSET_CAPTURE ) ) {
-				$insert_at = (int) $iframe_match[0][1];
+			$map_pos   = self::find_google_map( $preamble );
+			if ( false !== $map_pos ) {
+				$insert_at = $map_pos;
 			}
 			return substr( $content, 0, $insert_at ) . $rendered . substr( $content, $insert_at );
 		}
@@ -130,5 +141,32 @@ final class In_Post_Widget {
 			return $content . $rendered;
 		}
 		return substr( $content, 0, $pos ) . $rendered . substr( $content, $pos );
+	}
+
+	/**
+	 * Return the byte offset of the first Google Maps <iframe> inside the
+	 * given HTML, or false if none is present.
+	 *
+	 * Matches a maps embed by scanning each iframe opening tag for a
+	 * Google Maps URL. Covers the standard embed
+	 * (https://www.google.com/maps/embed?pb=...), the older
+	 * maps.google.com form, and any lazy-load variant that keeps the URL
+	 * in a data-/nitro- attribute — we match the URL substring anywhere
+	 * in the tag rather than only the src attribute.
+	 *
+	 * @return int|false
+	 */
+	private static function find_google_map( string $html ) {
+		if ( ! preg_match_all( '/<iframe\b[^>]*>/i', $html, $matches, PREG_OFFSET_CAPTURE ) ) {
+			return false;
+		}
+		foreach ( $matches[0] as $match ) {
+			$tag    = (string) $match[0];
+			$offset = (int) $match[1];
+			if ( preg_match( '#google\.com/maps|maps\.google\.#i', $tag ) ) {
+				return $offset;
+			}
+		}
+		return false;
 	}
 }
