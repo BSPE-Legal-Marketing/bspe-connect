@@ -525,7 +525,7 @@ final class Settings_Saver {
 	/**
 	 * @param array<string,mixed> $input
 	 *
-	 * @return array{enabled:bool, url:string, secret:string}
+	 * @return array{enabled:bool, url:string}
 	 */
 	private static function sanitize_webhook( array $input ): array {
 		// esc_url_raw normalizes + strips dangerous schemes. We then
@@ -533,14 +533,9 @@ final class Settings_Saver {
 		// in. An invalid URL is stored as '' so the dispatcher no-ops.
 		$url = esc_url_raw( trim( (string) ( $input['url'] ?? '' ) ), [ 'http', 'https' ] );
 
-		// Secret is an opaque token — keep it verbatim (it may contain
-		// symbols), just strip line breaks + surrounding whitespace.
-		$secret = trim( str_replace( [ "\r", "\n", "\0" ], '', (string) ( $input['secret'] ?? '' ) ) );
-
 		return [
 			'enabled' => ! empty( $input['enabled'] ),
 			'url'     => $url,
-			'secret'  => $secret,
 		];
 	}
 

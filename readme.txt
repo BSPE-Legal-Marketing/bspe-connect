@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 3.4.0
+Stable tag: 3.4.1
 License: Proprietary
 
 Mobile contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -48,6 +48,7 @@ Reach out to BSPE Legal Marketing through your usual channel.
 
 == Changelog ==
 
+= 3.4.1 = Webhook: removed the optional signing secret — just toggle + URL now.
 = 3.4.0 = Form webhook — POST each submission as JSON to a CRM / Zapier / Make endpoint, with optional HMAC signing. On/off toggle.
 = 3.3.3 = In-Post Widget: target Google Map embeds specifically (ignore YouTube/other iframes above the first heading).
 = 3.3.2 = In-Post Widget: paragraph fallback when the post has no headings — after paragraph N (default 1).

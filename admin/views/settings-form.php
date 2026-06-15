@@ -325,18 +325,6 @@ Components::row(
 		'description' => __( 'Must start with https://. The submission is POSTed here as a JSON body with the lead\'s name, phone, email, message, source, page URL, and timestamp.', 'bspe-connect' ),
 	]
 );
-Components::row(
-	__( 'Signing secret', 'bspe-connect' ),
-	static function () use ( $webhook ): void {
-		Components::text( 'bspe[form][webhook][secret]', (string) ( $webhook['secret'] ?? '' ), [
-			'placeholder' => __( 'Optional', 'bspe-connect' ),
-		] );
-	},
-	[
-		'id'          => 'bspe-form-webhook-secret',
-		'description' => __( 'Optional. When set, each request carries an <code>X-BSPE-Signature: sha256=…</code> header — an HMAC of the body keyed with this secret — so the receiver can verify the request genuinely came from this site. Leave blank if your endpoint doesn\'t check signatures.', 'bspe-connect' ),
-	]
-);
 Components::close_card();
 
 Components::close_form();

@@ -17,9 +17,6 @@ defined( 'ABSPATH' ) || exit;
  * Settings shape (Settings::defaults().form.webhook):
  *   enabled  bool
  *   url      string   — https endpoint
- *   secret   string   — optional; when set, the request carries an
- *                       X-BSPE-Signature: sha256=<hmac> header so the
- *                       receiver can verify the body wasn't tampered.
  *
  * Delivery is blocking with a 10s timeout so the result can be logged
  * (lead delivery matters — admins want to know if the CRM didn't get
@@ -63,14 +60,6 @@ final class Webhook {
 			'User-Agent'            => 'BSPE-Connect/' . BSPE_CONNECT_VERSION,
 			'X-BSPE-Connect-Event'  => 'form_submission',
 		];
-
-		// Optional HMAC signature so the receiver can confirm the body
-		// came from us and wasn't altered in transit. Format mirrors
-		// GitHub / Stripe webhooks: "sha256=<hex>".
-		$secret = (string) Settings::get( 'form.webhook.secret', '' );
-		if ( '' !== $secret ) {
-			$headers['X-BSPE-Signature'] = 'sha256=' . hash_hmac( 'sha256', $body, $secret );
-		}
 
 		$response = wp_remote_post( $url, [
 			'timeout'     => self::TIMEOUT,
