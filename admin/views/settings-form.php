@@ -295,4 +295,48 @@ Components::row(
 );
 Components::close_card();
 
+/* ----------------- Webhook ----------------- */
+$webhook = is_array( $form['webhook'] ?? null ) ? $form['webhook'] : [];
+Components::open_card(
+	__( 'Webhook', 'bspe-connect' ),
+	__( 'Send a copy of every successful submission to an external URL — a CRM, Zapier / Make / n8n flow, or any endpoint that accepts JSON. This runs in addition to the email and the stored submission; it never replaces them.', 'bspe-connect' )
+);
+Components::row(
+	__( 'Enable webhook', 'bspe-connect' ),
+	static function () use ( $webhook ): void {
+		Components::toggle( 'bspe[form][webhook][enabled]', ! empty( $webhook['enabled'] ), [
+			'label' => __( 'POST each submission as JSON to the URL below', 'bspe-connect' ),
+		] );
+	},
+	[
+		'description' => __( 'When off, nothing is sent and no outbound request is made.', 'bspe-connect' ),
+	]
+);
+Components::row(
+	__( 'Webhook URL', 'bspe-connect' ),
+	static function () use ( $webhook ): void {
+		Components::text( 'bspe[form][webhook][url]', (string) ( $webhook['url'] ?? '' ), [
+			'type'        => 'url',
+			'placeholder' => 'https://hooks.zapier.com/hooks/catch/...',
+		] );
+	},
+	[
+		'id'          => 'bspe-form-webhook-url',
+		'description' => __( 'Must start with https://. The submission is POSTed here as a JSON body with the lead\'s name, phone, email, message, source, page URL, and timestamp.', 'bspe-connect' ),
+	]
+);
+Components::row(
+	__( 'Signing secret', 'bspe-connect' ),
+	static function () use ( $webhook ): void {
+		Components::text( 'bspe[form][webhook][secret]', (string) ( $webhook['secret'] ?? '' ), [
+			'placeholder' => __( 'Optional', 'bspe-connect' ),
+		] );
+	},
+	[
+		'id'          => 'bspe-form-webhook-secret',
+		'description' => __( 'Optional. When set, each request carries an <code>X-BSPE-Signature: sha256=…</code> header — an HMAC of the body keyed with this secret — so the receiver can verify the request genuinely came from this site. Leave blank if your endpoint doesn\'t check signatures.', 'bspe-connect' ),
+	]
+);
+Components::close_card();
+
 Components::close_form();

@@ -149,6 +149,25 @@ final class Form_Handler {
 			]
 		);
 
+		// 8b. Outbound webhook (CRM / Zapier / etc.). Self-gates on the
+		// form.webhook.enabled setting. A failed webhook is logged but
+		// never blocks the submission from succeeding — the lead is
+		// already saved + emailed at this point.
+		Webhook::maybe_send( [
+			'event'        => 'form_submission',
+			'source'       => $source,
+			'submitted_at' => current_time( 'c' ),
+			'name'         => $fields['name'],
+			'phone'        => $fields['phone'],
+			'email'        => $fields['email'],
+			'message'      => $fields['message'],
+			'contact_pref' => $fields['contact_pref'] ?? '',
+			'page_url'     => $page_url,
+			'site_name'    => (string) get_bloginfo( 'name' ),
+			'firm_name'    => (string) ( Settings::get( 'design.firm_name', '' ) ?: get_bloginfo( 'name' ) ),
+			'submission_id' => (int) $row_id,
+		] );
+
 		// 9. Increment rate-limit transient (1-hour window).
 		if ( '' !== $ip_hash ) {
 			$rate_key = 'bspe_connect_rl_' . $ip_hash;

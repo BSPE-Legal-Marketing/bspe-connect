@@ -518,6 +518,29 @@ final class Settings_Saver {
 			'mail_from_name' => sanitize_text_field( (string) ( $input['mail_from_name'] ?? '' ) ),
 			'antispam'       => $as_out,
 			'retention_days' => max( 0, min( 3650, (int) ( $input['retention_days'] ?? 0 ) ) ),
+			'webhook'        => self::sanitize_webhook( $input['webhook'] ?? [] ),
+		];
+	}
+
+	/**
+	 * @param array<string,mixed> $input
+	 *
+	 * @return array{enabled:bool, url:string, secret:string}
+	 */
+	private static function sanitize_webhook( array $input ): array {
+		// esc_url_raw normalizes + strips dangerous schemes. We then
+		// enforce http(s) only — no mailto:, javascript:, etc. sneaking
+		// in. An invalid URL is stored as '' so the dispatcher no-ops.
+		$url = esc_url_raw( trim( (string) ( $input['url'] ?? '' ) ), [ 'http', 'https' ] );
+
+		// Secret is an opaque token — keep it verbatim (it may contain
+		// symbols), just strip line breaks + surrounding whitespace.
+		$secret = trim( str_replace( [ "\r", "\n", "\0" ], '', (string) ( $input['secret'] ?? '' ) ) );
+
+		return [
+			'enabled' => ! empty( $input['enabled'] ),
+			'url'     => $url,
+			'secret'  => $secret,
 		];
 	}
 

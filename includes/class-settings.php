@@ -138,6 +138,17 @@ final class Settings {
 				// whose submitted_at is older than retention_days. Sent
 				// emails are untouched.
 				'retention_days' => 0,
+				// Outbound webhook — when enabled, every successful form
+				// submission is POSTed as JSON to the configured URL (in
+				// addition to the email + DB row). Used to pipe leads into
+				// a CRM / Zapier / Make / n8n. Optional secret produces an
+				// HMAC-SHA256 signature header so the receiver can verify
+				// authenticity. Default OFF.
+				'webhook'        => [
+					'enabled' => false,
+					'url'     => '',
+					'secret'  => '',
+				],
 			],
 			'design'         => [
 				'firm_name'   => '',
