@@ -73,6 +73,33 @@
 		}
 	}
 
+	// ----- Footer clearance --------------------------------------------
+	// Reserve exactly the bar's rendered height (plus a 5px snug gap) as
+	// body padding-bottom, so when the visitor scrolls to the very end of
+	// the page the fixed bar doesn't cover the footer — and there's no
+	// oversized empty band either. Measuring offsetHeight is pixel-exact:
+	// it already includes the bar's min-height, padding, border, and the
+	// iOS safe-area inset, none of which the PHP-side estimate can know.
+	//
+	// The PHP CSS fallback (a rough estimate, !important, mobile media
+	// query) stays in place for the no-JS case; this overrides it with
+	// the precise value via an inline !important declaration, which wins
+	// over a stylesheet !important rule.
+	var SNUG_GAP = 5;
+	function syncBodyClearance() {
+		if (!bar || !document.body) { return; }
+		// offsetHeight is the full box even while the bar is translated
+		// off-screen (transform doesn't change layout height). It's only
+		// 0 when the bar is display:none — i.e. above the mobile
+		// breakpoint, where no padding should be reserved at all.
+		var h = bar.offsetHeight;
+		if (h > 0) {
+			document.body.style.setProperty('padding-bottom', (h + SNUG_GAP) + 'px', 'important');
+		} else {
+			document.body.style.removeProperty('padding-bottom');
+		}
+	}
+
 	// ----- Bar show / hide ---------------------------------------------
 	// Two layered triggers. Both are opt-in via the General → Display
 	// behavior settings; with defaults (threshold = 0, hideOnScrollUp =
@@ -133,6 +160,28 @@
 				updateBarFromScroll();
 			});
 		}, { passive: true });
+	}
+
+	// Reserve footer clearance now, and re-measure when anything that
+	// can change the bar height happens: viewport resize / rotation
+	// (also handles crossing the mobile breakpoint, where the bar goes
+	// display:none and clearance drops to 0) and web-font load (font
+	// swap can change the label line height).
+	syncBodyClearance();
+	var clearanceFrame = 0;
+	window.addEventListener('resize', function () {
+		if (clearanceFrame) { return; }
+		clearanceFrame = requestAnimationFrame(function () {
+			clearanceFrame = 0;
+			syncBodyClearance();
+		});
+	}, { passive: true });
+	if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
+		document.fonts.ready.then(syncBodyClearance).catch(function () {});
+	} else {
+		// Fonts API unavailable — re-measure once after a beat so a late
+		// font swap doesn't leave the reservation slightly off.
+		setTimeout(syncBodyClearance, 600);
 	}
 
 	// ----- Welcome bubble -----
