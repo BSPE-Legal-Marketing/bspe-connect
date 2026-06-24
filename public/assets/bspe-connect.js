@@ -74,18 +74,21 @@
 	}
 
 	// ----- Footer clearance --------------------------------------------
-	// Reserve exactly the bar's rendered height (plus a 5px snug gap) as
-	// body padding-bottom, so when the visitor scrolls to the very end of
-	// the page the fixed bar doesn't cover the footer — and there's no
-	// oversized empty band either. Measuring offsetHeight is pixel-exact:
-	// it already includes the bar's min-height, padding, border, and the
-	// iOS safe-area inset, none of which the PHP-side estimate can know.
+	// Reserve exactly the bar's rendered height as body padding-bottom,
+	// so when the visitor scrolls to the very end of the page the fixed
+	// bar doesn't cover the footer — and there's no oversized empty band
+	// either. Measuring offsetHeight is pixel-exact: it already includes
+	// the bar's min-height, padding, border, and the iOS safe-area inset,
+	// none of which the PHP-side estimate can know.
+	//
+	// SNUG_GAP is the extra breathing space between the footer and the
+	// bar. 0 = footer sits flush on top of the bar.
 	//
 	// The PHP CSS fallback (a rough estimate, !important, mobile media
 	// query) stays in place for the no-JS case; this overrides it with
 	// the precise value via an inline !important declaration, which wins
 	// over a stylesheet !important rule.
-	var SNUG_GAP = 5;
+	var SNUG_GAP = 0;
 	function syncBodyClearance() {
 		if (!bar || !document.body) { return; }
 		// offsetHeight is the full box even while the bar is translated

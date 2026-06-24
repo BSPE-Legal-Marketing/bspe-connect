@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 3.4.2
+Stable tag: 3.4.3
 License: Proprietary
 
 Mobile contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -48,6 +48,7 @@ Reach out to BSPE Legal Marketing through your usual channel.
 
 == Changelog ==
 
+= 3.4.3 = Footer clearance gap set to 0 — footer sits flush above the bar, no gap.
 = 3.4.2 = Footer clearance now measured precisely in JS (snug 5px gap) instead of an oversized estimate — removes the empty band above the bar.
 = 3.4.1 = Webhook: removed the optional signing secret — just toggle + URL now.
 = 3.4.0 = Form webhook — POST each submission as JSON to a CRM / Zapier / Make endpoint, with optional HMAC signing. On/off toggle.

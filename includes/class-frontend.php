@@ -346,7 +346,7 @@ final class Frontend {
 		//
 		// This CSS value is only a NO-JS FALLBACK. The frontend script
 		// (syncBodyClearance) measures the bar's real rendered height and
-		// overrides this with an exact value + 5px snug gap via an inline
+		// overrides this with the exact value (no extra gap) via an inline
 		// !important style, which beats this stylesheet !important rule.
 		// We deliberately err slightly high here (so the no-JS case never
 		// clips the footer) while the JS path keeps the gap tight. The
