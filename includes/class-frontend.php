@@ -31,6 +31,9 @@ final class Frontend {
 		add_action( 'wp_enqueue_scripts', [ self::class, 'maybe_enqueue_assets' ], 20 );
 		add_action( 'wp_head', [ self::class, 'print_inline_css_vars' ], 100 );
 		add_action( 'wp_footer', [ self::class, 'render_bar' ], 100 );
+		// Live-chat provider script — printed late in the footer, after
+		// the bar, only when chat is enabled and the bar context applies.
+		add_action( 'wp_footer', [ self::class, 'print_chat_widget' ], 105 );
 	}
 
 	/**
@@ -126,6 +129,12 @@ final class Frontend {
 				return true;
 			}
 		}
+		// Chat counts too: a firm may run a chat-only bar, or use chat
+		// with no bar button (native launcher only) — either way the
+		// plugin still needs to load its assets + the provider script.
+		if ( Settings::get( 'chat.enabled', false ) ) {
+			return true;
+		}
 		return false;
 	}
 
@@ -166,6 +175,14 @@ final class Frontend {
 				],
 				'restEndpoint'     => esc_url_raw( rest_url( 'bspe-connect/v1/event' ) ),
 				'restNonce'        => wp_create_nonce( 'wp_rest' ),
+				'chat'             => [
+					'enabled'       => (bool) Settings::get( 'chat.enabled', false ),
+					// Ordered list of selectors the Chat button tries to
+					// click to open the provider's chat. A configured
+					// override wins; otherwise we fall back to the known
+					// provider launchers.
+					'openSelectors' => self::chat_open_selectors(),
+				],
 			]
 		);
 
@@ -216,6 +233,14 @@ final class Frontend {
 				$needs_fa = true;
 				break;
 			}
+		}
+
+		// The Chat button always uses a Font Awesome solid icon.
+		if ( ! $needs_fa
+			&& Settings::get( 'chat.enabled', false )
+			&& Settings::get( 'chat.show_button', true )
+			&& '' !== (string) Settings::get( 'chat.button_icon', '' ) ) {
+			$needs_fa = true;
 		}
 
 		if ( $needs_fa ) {
@@ -458,7 +483,105 @@ final class Frontend {
 
 			$out[] = $entry;
 		}
+
+		// Chat button — appended last. Distinct from the four core
+		// buttons: it isn't in the buttons[] settings group, it's driven
+		// by the chat[] group. Rendered as a plain <button data-action=
+		// "chat"> that the frontend JS wires to open the provider chat.
+		if ( Settings::get( 'chat.enabled', false ) && Settings::get( 'chat.show_button', true ) ) {
+			$chat_icon = preg_replace( '/[^a-z0-9-]/i', '', (string) Settings::get( 'chat.button_icon', 'comment-dots' ) );
+			$out[] = [
+				'key'          => 'chat',
+				'label'        => (string) Settings::get( 'chat.button_label', 'Chat' ),
+				'icon_library' => '' !== $chat_icon ? 'fa-solid' : 'none',
+				'icon'         => $chat_icon,
+				'icon_url'     => '',
+				'href'         => '#',
+				'tag'          => 'button',
+				'attrs'        => [],
+				'mode'         => '',
+			];
+		}
+
 		return $out;
+	}
+
+	/**
+	 * Resolve the ordered list of CSS selectors the Chat button will try
+	 * to click to open the provider's chat. An admin override comes
+	 * first; then the known launcher selectors for the configured
+	 * provider. Intaker renders an in-page launcher with these classes
+	 * (verified against their chat.min.js).
+	 *
+	 * @return string[]
+	 */
+	private static function chat_open_selectors(): array {
+		$selectors = [];
+
+		$override = trim( (string) Settings::get( 'chat.open_selector', '' ) );
+		if ( '' !== $override ) {
+			$selectors[] = $override;
+		}
+
+		$provider = (string) Settings::get( 'chat.provider', 'intaker' );
+		if ( 'intaker' === $provider ) {
+			$selectors[] = '.icw--launcher--item';
+			$selectors[] = '.widget-button';
+		}
+
+		return array_values( array_unique( array_filter( $selectors ) ) );
+	}
+
+	/**
+	 * Print the live-chat provider script in the footer. Same gating as
+	 * the bar (display rules + plugin enabled), plus chat.enabled. The
+	 * provider's own floating launcher is intentionally left visible —
+	 * the firm wanted both the native launcher AND the bar's Chat button.
+	 *
+	 * For Intaker we build the canonical embed snippet from the saved
+	 * account ODL. For Custom we print the admin-pasted script verbatim
+	 * (admin-trusted, manage_options-gated, same trust model as any
+	 * header/footer-script plugin).
+	 */
+	public static function print_chat_widget(): void {
+		if ( ! self::should_show_bar() ) {
+			return;
+		}
+		if ( ! Settings::get( 'chat.enabled', false ) ) {
+			return;
+		}
+
+		$provider = (string) Settings::get( 'chat.provider', 'intaker' );
+
+		if ( 'custom' === $provider ) {
+			$script = (string) Settings::get( 'chat.custom_script', '' );
+			if ( '' === trim( $script ) ) {
+				return;
+			}
+			echo "\n<!-- BSPE Connect: custom chat widget -->\n";
+			// Admin-authored markup/script — output verbatim. Only
+			// manage_options users can set it (Settings_Saver gates on
+			// capability + nonce), so this is the same trust model as a
+			// theme footer-script field.
+			echo $script . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- admin-trusted custom script
+			return;
+		}
+
+		// Intaker: build the embed from the saved account ODL. The ODL is
+		// an account slug; restrict to a safe charset and JS-escape it
+		// into the snippet.
+		$odl = preg_replace( '/[^a-z0-9_-]/i', '', (string) Settings::get( 'chat.intaker_odl', '' ) );
+		if ( '' === $odl ) {
+			return;
+		}
+		?>
+<!-- BSPE Connect: Intaker chat widget -->
+<script>(function (w,d,s,v,odl){(w[v]=w[v]||{})['odl']=odl;
+var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;
+j.src='https://intaker.azureedge.net/widget/chat.min.js';
+f.parentNode.insertBefore(j,f);
+})(window, document, 'script', 'Intaker', '<?php echo esc_js( $odl ); ?>');</script>
+		<?php
 	}
 
 	/**

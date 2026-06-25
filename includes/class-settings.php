@@ -173,6 +173,22 @@ final class Settings {
 				'mode'  => 'sitewide',
 				'slugs' => '',
 			],
+			// Live-chat integration. When enabled, the chosen provider's
+			// script loads on the frontend (its own floating launcher
+			// stays visible) AND an optional "Chat" button is added to the
+			// bar that opens the same chat by triggering the provider's
+			// launcher. Providers: 'intaker' (built from the account ODL)
+			// or 'custom' (admin pastes the raw embed script). Default OFF.
+			'chat'           => [
+				'enabled'       => false,
+				'provider'      => 'intaker',  // 'intaker' | 'custom'
+				'intaker_odl'   => '',          // Intaker account id (the trailing arg in their snippet)
+				'custom_script' => '',          // raw <script> for the custom provider
+				'open_selector' => '',          // CSS selector our button clicks; '' = provider default
+				'show_button'   => true,        // show the Chat button in the bar
+				'button_label'  => 'Chat',
+				'button_icon'   => 'comment-dots', // fa-solid icon name
+			],
 			// Site-utility add-ons — small, opt-out features that don't
 			// belong to the contact-bar core. Each one is a single
 			// toggle plus optional sub-options. All default to true

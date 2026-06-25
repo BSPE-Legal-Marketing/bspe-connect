@@ -27,6 +27,7 @@ final class Events {
 		'call_click',
 		'text_click',
 		'email_click',
+		'chat_click',
 		'form_open',
 		'form_submit',
 		'form_success',

@@ -28,7 +28,7 @@ final class Settings_Saver {
 	public const RESET_NONCE   = 'bspe_connect_reset_settings';
 	public const RESET_PHRASE  = 'RESET';
 
-	private const ALLOWED_TABS = [ 'general', 'buttons', 'form', 'design', 'display', 'logs', 'in_post_widget' ];
+	private const ALLOWED_TABS = [ 'general', 'buttons', 'form', 'design', 'display', 'logs', 'in_post_widget', 'chat' ];
 
 	private const ALLOWED_ICON_LIBRARIES = [ 'none', 'fa-solid', 'fa-regular' ];
 
@@ -160,6 +160,9 @@ final class Settings_Saver {
 				break;
 			case 'in_post_widget':
 				$existing['in_post_widget'] = self::sanitize_in_post_widget( $payload['in_post_widget'] ?? [] );
+				break;
+			case 'chat':
+				$existing['chat'] = self::sanitize_chat( $payload['chat'] ?? [], $existing['chat'] ?? [] );
 				break;
 		}
 
@@ -372,17 +375,63 @@ final class Settings_Saver {
 	 *
 	 * @return array<string,mixed>
 	 */
+	/**
+	 * @param array<string,mixed> $input
+	 * @param array<string,mixed> $current
+	 *
+	 * @return array<string,mixed>
+	 */
+	private static function sanitize_chat( array $input, array $current ): array {
+		$provider = (string) ( $input['provider'] ?? 'intaker' );
+		$provider = in_array( $provider, [ 'intaker', 'custom' ], true ) ? $provider : 'intaker';
+
+		// Intaker ODL is an account slug — restrict to a safe charset.
+		$odl = preg_replace( '/[^a-z0-9_-]/i', '', (string) ( $input['intaker_odl'] ?? '' ) ) ?? '';
+
+		// Custom embed script is admin-authored markup. Don't run it
+		// through wp_kses (that would strip the <script>); just strip
+		// null / control bytes. Same trust model as the In-Post Widget
+		// shortcode + any header/footer-script plugin.
+		// NOTE: handle() already wp_unslash'd the whole $payload, so we
+		// must NOT unslash again here — a second pass would mangle real
+		// backslashes the admin typed (e.g. \d in an embedded regex).
+		$custom = (string) ( $input['custom_script'] ?? '' );
+		$custom = preg_replace( '/[\x00-\x08\x0E-\x1F]/', '', $custom ) ?? '';
+		$custom = trim( $custom );
+
+		// Open-selector override — a CSS selector. Keep it simple: strip
+		// tags + line breaks, cap length. Empty = use provider default.
+		$selector = sanitize_text_field( (string) ( $input['open_selector'] ?? '' ) );
+		$selector = substr( $selector, 0, 200 );
+
+		$icon = preg_replace( '/[^a-z0-9-]/i', '', (string) ( $input['button_icon'] ?? 'comment-dots' ) ) ?? '';
+
+		return [
+			'enabled'       => ! empty( $input['enabled'] ),
+			'provider'      => $provider,
+			'intaker_odl'   => $odl,
+			'custom_script' => $custom,
+			'open_selector' => $selector,
+			'show_button'   => ! empty( $input['show_button'] ),
+			'button_label'  => sanitize_text_field( (string) ( $input['button_label'] ?? 'Chat' ) ),
+			'button_icon'   => '' !== $icon ? $icon : 'comment-dots',
+		];
+	}
+
 	private static function sanitize_in_post_widget( array $input ): array {
 		// Shortcode field — wp_kses is too strict, sanitize_textarea_field
 		// strips legitimate shortcode brackets. Trim and let the admin's
 		// raw input through; the runtime hook passes it to do_shortcode
 		// which is the canonical pipeline anyway.
-		$shortcode = isset( $input['shortcode'] ) ? trim( (string) wp_unslash( $input['shortcode'] ) ) : '';
+		// NOTE: handle() already wp_unslash'd the whole $payload, so we
+		// must NOT unslash again here (a second pass mangles backslashes
+		// the admin actually typed).
+		$shortcode = isset( $input['shortcode'] ) ? trim( (string) $input['shortcode'] ) : '';
 		// Strip control characters that have no business in a shortcode.
 		$shortcode = preg_replace( '/[\x00-\x08\x0E-\x1F]/', '', $shortcode ) ?? '';
 
 		// Exclusion list — comma / whitespace separated post IDs.
-		$exclude_raw = isset( $input['exclude_ids'] ) ? (string) wp_unslash( $input['exclude_ids'] ) : '';
+		$exclude_raw = isset( $input['exclude_ids'] ) ? (string) $input['exclude_ids'] : '';
 		$exclude_ids = array_filter( array_map( 'intval', preg_split( '/[\s,]+/', $exclude_raw ) ?: [] ) );
 		$exclude     = implode( ',', $exclude_ids );
 

@@ -87,6 +87,13 @@ final class Admin {
 			'icon'  => 'in_post',
 			'hint'  => 'Inject a saved shortcode into post content after the Nth paragraph.',
 		],
+		'chat'        => [
+			'label' => 'Chat',
+			'view'  => 'settings-chat.php',
+			'phase' => 4,
+			'icon'  => 'chat',
+			'hint'  => 'Live-chat integration (Intaker / custom) + an optional Chat button on the bar.',
+		],
 		'license'     => [
 			'label' => 'License',
 			'view'  => 'settings-license.php',
@@ -113,6 +120,7 @@ final class Admin {
 		'logs'      => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h7l3 3v11a1.5 1.5 0 0 1-1.5 1.5h-8.5A1.5 1.5 0 0 1 3.5 17V4.5A1.5 1.5 0 0 1 5 3z"/><path d="M12 3v3.5h3"/><path d="M6.5 11.5h7M6.5 14h5"/></svg>',
 		'key'       => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7" cy="13" r="3"/><path d="M9.1 10.9l7.4-7.4M13.5 6.5l2 2"/></svg>',
 		'in_post'   => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M6 7h8M6 10h3M11 10h3M6 14h8"/></svg>',
+		'chat'      => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5.5A1.5 1.5 0 0 1 4.5 4h11A1.5 1.5 0 0 1 17 5.5v7a1.5 1.5 0 0 1-1.5 1.5H8l-3.5 3v-3H4.5A1.5 1.5 0 0 1 3 12.5z"/><path d="M6.5 8h7M6.5 10.5h4"/></svg>',
 	];
 
 	public static function init(): void {

@@ -275,6 +275,46 @@
 		openForm('email');
 	});
 
+	bindButton('[data-action="chat"]', function (event) {
+		event.preventDefault();
+		fire('chat_click');
+		openProviderChat();
+	});
+
+	// Open the third-party chat (Intaker / custom) by triggering its own
+	// launcher. The provider's launcher stays visible on the page; our
+	// Chat button is a second way in. We dispatch a click on the first
+	// matching launcher selector. Because the provider script loads
+	// async, the launcher may not exist on the first try — retry a few
+	// times over ~2.5s before giving up.
+	function openProviderChat() {
+		var cfg = (data && data.chat) || {};
+		var selectors = cfg.openSelectors || [];
+		if (!selectors.length) { return; }
+
+		var attempts = 0;
+		var maxAttempts = 10;
+		(function tryOpen() {
+			for (var i = 0; i < selectors.length; i++) {
+				var el = document.querySelector(selectors[i]);
+				if (el) {
+					// Prefer a native click (fires the provider's bound
+					// handler); fall back to a dispatched MouseEvent.
+					if (typeof el.click === 'function') {
+						el.click();
+					} else {
+						el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+					}
+					return;
+				}
+			}
+			attempts++;
+			if (attempts < maxAttempts) {
+				setTimeout(tryOpen, 250);
+			}
+		})();
+	}
+
 	function openForm(source) {
 		// Phase 3 subscribes to this event to open the bottom-sheet modal.
 		try {
