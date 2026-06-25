@@ -17,6 +17,16 @@ $chat       = is_array( Settings::get( 'chat', [] ) ) ? Settings::get( 'chat', [
 $action_url = admin_url( 'admin-post.php' );
 $provider   = (string) ( $chat['provider'] ?? 'intaker' );
 
+$library_options = [
+	'none'       => __( 'No icon (label only)', 'bspe-connect' ),
+	'fa-solid'   => __( 'Font Awesome — Solid (filled)', 'bspe-connect' ),
+	'fa-regular' => __( 'Font Awesome — Regular (outline)', 'bspe-connect' ),
+];
+$chat_icon_lib = (string) ( $chat['button_icon_library'] ?? 'fa-solid' );
+if ( ! in_array( $chat_icon_lib, [ 'none', 'fa-solid', 'fa-regular' ], true ) ) {
+	$chat_icon_lib = 'fa-solid';
+}
+
 Components::open_form( 'chat', $action_url );
 
 /* ----------------- Master ----------------- */
@@ -58,7 +68,7 @@ Components::row(
 	__( 'Account ID', 'bspe-connect' ),
 	static function () use ( $chat ): void {
 		Components::text( 'bspe[chat][intaker_odl]', (string) ( $chat['intaker_odl'] ?? '' ), [
-			'placeholder' => 'ticketcrushers',
+			'placeholder' => __( 'client id', 'bspe-connect' ),
 		] );
 	},
 	[
@@ -114,17 +124,26 @@ Components::row(
 	[ 'id' => 'bspe-chat-button_label' ]
 );
 Components::row(
-	__( 'Button icon', 'bspe-connect' ),
-	static function () use ( $chat ): void {
-		Components::text( 'bspe[chat][button_icon]', (string) ( $chat['button_icon'] ?? 'comment-dots' ), [
-			'placeholder' => 'comment-dots',
-		] );
+	__( 'Icon library', 'bspe-connect' ),
+	static function () use ( $chat_icon_lib, $library_options ): void {
+		Components::select(
+			'bspe[chat][button_icon_library]',
+			$chat_icon_lib,
+			$library_options,
+			[ 'data' => [ 'bspe-icon-library-select' => 'chat' ] ]
+		);
 	},
-	[
-		'id'          => 'bspe-chat-button_icon',
-		'description' => __( 'A Font Awesome solid icon name (no <em>fa-</em> prefix), e.g. <em>comment-dots</em>, <em>comments</em>, <em>headset</em>. Leave blank for a label-only button.', 'bspe-connect' ),
-	]
+	[ 'description' => __( 'Pick "No icon" for a label-only button, or a Font Awesome variant, then choose a glyph below — same picker as the other buttons.', 'bspe-connect' ) ]
 );
+foreach ( [ 'fa-solid', 'fa-regular' ] as $lib ) :
+	Components::row(
+		__( 'Icon', 'bspe-connect' ),
+		static function () use ( $chat, $lib ): void {
+			Components::library_icon_picker( 'bspe[chat][button_icon]', (string) ( $chat['button_icon'] ?? 'comment-dots' ), 'chat', $lib );
+		},
+		[ 'data' => [ 'bspe-icon-pane' => $lib, 'bspe-button' => 'chat' ] ]
+	);
+endforeach;
 Components::close_card();
 
 /* ----------------- Advanced ----------------- */

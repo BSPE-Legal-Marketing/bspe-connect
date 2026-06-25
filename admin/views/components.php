@@ -450,6 +450,10 @@ final class Components {
 				'fa-solid'    => [ 'envelope', 'envelope-open', 'paper-plane', 'at' ],
 				'fa-regular'  => [ 'envelope', 'envelope-open', 'paper-plane', 'at' ],
 			],
+			'chat'    => [
+				'fa-solid'    => [ 'comment-dots', 'comments', 'message', 'comment', 'headset', 'comment-sms' ],
+				'fa-regular'  => [ 'comment-dots', 'comments', 'message', 'comment' ],
+			],
 		];
 	}
 

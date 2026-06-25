@@ -406,15 +406,21 @@ final class Settings_Saver {
 
 		$icon = preg_replace( '/[^a-z0-9-]/i', '', (string) ( $input['button_icon'] ?? 'comment-dots' ) ) ?? '';
 
+		// Icon library — same allow-list as the core buttons (none /
+		// fa-solid / fa-regular).
+		$icon_lib = (string) ( $input['button_icon_library'] ?? 'fa-solid' );
+		$icon_lib = in_array( $icon_lib, [ 'none', 'fa-solid', 'fa-regular' ], true ) ? $icon_lib : 'fa-solid';
+
 		return [
-			'enabled'       => ! empty( $input['enabled'] ),
-			'provider'      => $provider,
-			'intaker_odl'   => $odl,
-			'custom_script' => $custom,
-			'open_selector' => $selector,
-			'show_button'   => ! empty( $input['show_button'] ),
-			'button_label'  => sanitize_text_field( (string) ( $input['button_label'] ?? 'Chat' ) ),
-			'button_icon'   => '' !== $icon ? $icon : 'comment-dots',
+			'enabled'             => ! empty( $input['enabled'] ),
+			'provider'            => $provider,
+			'intaker_odl'         => $odl,
+			'custom_script'       => $custom,
+			'open_selector'       => $selector,
+			'show_button'         => ! empty( $input['show_button'] ),
+			'button_label'        => sanitize_text_field( (string) ( $input['button_label'] ?? 'Chat' ) ),
+			'button_icon_library' => $icon_lib,
+			'button_icon'         => '' !== $icon ? $icon : 'comment-dots',
 		];
 	}
 

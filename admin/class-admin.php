@@ -279,7 +279,7 @@ final class Admin {
 		// loaded so the previews render real glyphs. Other tabs skip the
 		// load.
 		$active_tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( (string) $_GET['tab'] ) ) : 'general'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only navigation
-		if ( 'buttons' === $active_tab ) {
+		if ( in_array( $active_tab, [ 'buttons', 'chat' ], true ) ) {
 			wp_enqueue_style(
 				'bspe-connect-fa',
 				'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',

@@ -235,10 +235,11 @@ final class Frontend {
 			}
 		}
 
-		// The Chat button always uses a Font Awesome solid icon.
+		// The Chat button can use a Font Awesome icon too.
 		if ( ! $needs_fa
 			&& Settings::get( 'chat.enabled', false )
 			&& Settings::get( 'chat.show_button', true )
+			&& 0 === strpos( (string) Settings::get( 'chat.button_icon_library', 'fa-solid' ), 'fa-' )
 			&& '' !== (string) Settings::get( 'chat.button_icon', '' ) ) {
 			$needs_fa = true;
 		}
@@ -489,11 +490,15 @@ final class Frontend {
 		// by the chat[] group. Rendered as a plain <button data-action=
 		// "chat"> that the frontend JS wires to open the provider chat.
 		if ( Settings::get( 'chat.enabled', false ) && Settings::get( 'chat.show_button', true ) ) {
+			$chat_lib  = (string) Settings::get( 'chat.button_icon_library', 'fa-solid' );
+			if ( ! in_array( $chat_lib, [ 'none', 'fa-solid', 'fa-regular' ], true ) ) {
+				$chat_lib = 'fa-solid';
+			}
 			$chat_icon = preg_replace( '/[^a-z0-9-]/i', '', (string) Settings::get( 'chat.button_icon', 'comment-dots' ) );
 			$out[] = [
 				'key'          => 'chat',
 				'label'        => (string) Settings::get( 'chat.button_label', 'Chat' ),
-				'icon_library' => '' !== $chat_icon ? 'fa-solid' : 'none',
+				'icon_library' => ( 'none' === $chat_lib || '' === $chat_icon ) ? 'none' : $chat_lib,
 				'icon'         => $chat_icon,
 				'icon_url'     => '',
 				'href'         => '#',
