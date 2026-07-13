@@ -427,6 +427,20 @@ final class Frontend {
 			}
 		}
 
+		// While the visitor has the site's own mobile menu (hamburger) open,
+		// hide our bar and the third-party chat / accessibility launchers we
+		// sit beside. All three are pinned near the 32-bit max z-index (we do
+		// it deliberately so the welcome bubble beats them during normal
+		// browsing), so without this they'd float on top of the full-screen
+		// menu. The frontend JS detects the open menu (Elementor's toggle,
+		// common body classes, aria-expanded) and stamps `html.bspe-menu-open`;
+		// these rules do the hiding. #icw is Intaker (its green "Call us" lives
+		// inside it, so it goes too); .userway_buttons_wrapper is UserWay. Both
+		// third-party selectors harmlessly match nothing when absent. Emitted
+		// outside the media query: the flag is only ever set on mobile menus,
+		// and hiding a stray desktop overlay's floaters is equally desirable.
+		echo "html.bspe-menu-open #bspe-connect, html.bspe-menu-open #icw, html.bspe-menu-open .userway_buttons_wrapper { display: none !important; }\n";
+
 		echo "</style>\n";
 	}
 

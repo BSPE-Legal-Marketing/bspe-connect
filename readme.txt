@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 3.5.9
+Stable tag: 3.6.0
 License: Proprietary
 
 Mobile contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -48,6 +48,7 @@ Reach out to BSPE Legal Marketing through your usual channel.
 
 == Changelog ==
 
+= 3.6.0 = Yield to the site's mobile menu: when the hamburger menu is open, the bar and the third-party chat (Intaker) + accessibility (UserWay) launchers are hidden so they no longer float on top of the full-screen menu. Theme-agnostic detection covers both nav-toggle menus (Elementor nav, aria-expanded/active toggles) and popup/off-canvas menus (Elementor popups, Popup Maker, scroll-lock body classes, full-screen fixed overlays).
 = 3.5.9 = Fix Intaker "Call us" hide — target the button by ID (icw--multiContact-call) + the standalone call launcher; the class selector never matched.
 = 3.5.8 = Hide Intaker's "Call us" on all viewports with a wider selector.
 = 3.5.7 = Chat close now clears Intaker's page-dim blur reliably; new toggle hides Intaker's redundant floating "Call us" button (on by default).

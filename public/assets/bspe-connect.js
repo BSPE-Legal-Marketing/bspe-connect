@@ -184,6 +184,117 @@
 	}
 	setTimeout(pinRootLast, 1500);
 
+	// ----- Yield to the site's mobile menu -----------------------------
+	// We (and the third-party chat / accessibility widgets we sit beside)
+	// pin ourselves at the 32-bit max z-index so the welcome bubble beats
+	// those widgets during normal browsing. The side effect: when the
+	// visitor opens the theme's hamburger menu, all of that floating UI
+	// sails on top of it — the menu overlays are usually a modest z-index
+	// (Elementor popups sit at 9999, far below us). Rather than guess and
+	// chase every theme's menu z-index (it varies per site and we don't
+	// cleanly own the widgets' values), we detect the open menu and stamp
+	// `html.bspe-menu-open`; the stylesheet then hides the bar, Intaker
+	// (#icw, its green "Call us" included) and UserWay while it's set. The
+	// menu itself is never touched.
+	//
+	// Detection is theme-agnostic and covers the two shapes these client
+	// sites actually use:
+	//   1. A toggle that flips aria-expanded / an active class
+	//      (Elementor nav: `.elementor-menu-toggle.elementor-active`).
+	//   2. A full-screen overlay/popup that adds a scroll-lock body class
+	//      (Elementor popup menus add `dialog-prevent-scroll` +
+	//      `dialog-lightbox-body`; Popup Maker adds `pum-open`) and/or
+	//      mounts a fixed full-viewport modal element.
+	// A site owner can add an extra toggle signal via the
+	// `menuOpenSelector` localized string for exotic themes.
+	var MENU_OPEN_SELECTORS = [
+		'.elementor-menu-toggle.elementor-active',
+		'.elementor-menu-toggle[aria-expanded="true"]',
+		'.menu-toggle[aria-expanded="true"]',
+		'.menu-toggle.toggled-on',
+		'.mobile-menu-toggle.active',
+		'.mobile-nav-toggle.active',
+		'.hamburger.is-active',
+		'.hamburger.active',
+		'[aria-controls][aria-expanded="true"][class*="menu"]',
+		'[aria-controls][aria-expanded="true"][class*="nav"]',
+		'[aria-controls][aria-expanded="true"][class*="hamburger"]'
+	];
+	if (data.menuOpenSelector) {
+		MENU_OPEN_SELECTORS.push(String(data.menuOpenSelector));
+	}
+	// Body/html classes set while a menu / full-screen modal is open.
+	// Includes Elementor's dialog library (popup menus + lightboxes) and
+	// Popup Maker — both add a body class we can read cheaply.
+	var MENU_OPEN_BODY_CLASSES = [
+		'menu-open', 'nav-open', 'mobile-menu-open', 'mobile-nav-open',
+		'off-canvas-open', 'ast-off-canvas-open', 'is-menu-open',
+		'has-mobile-menu-open', 'slideout-open', 'oceanwp-off-canvas-open',
+		'elementskit-menu-hamburger-active',
+		'dialog-prevent-scroll', 'dialog-lightbox-body', // Elementor popups / lightboxes
+		'pum-open', 'pum-open-overlay'                    // Popup Maker
+	];
+	// Fixed, roughly full-viewport overlay elements — catches Elementor
+	// popup menus / Popup Maker even if the body-class names ever change.
+	var MENU_OPEN_OVERLAYS = '.elementor-popup-modal, .pum-overlay, .off-canvas.is-open';
+	function hasBlockingOverlay() {
+		var els;
+		try { els = document.querySelectorAll(MENU_OPEN_OVERLAYS); }
+		catch (e) { return false; }
+		for (var i = 0; i < els.length; i++) {
+			var el = els[i], cs = getComputedStyle(el);
+			if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity || '1') < 0.05) { continue; }
+			var r = el.getBoundingClientRect();
+			// Only a large overlay counts as a menu — a fixed full-screen
+			// modal, not a small inline embed.
+			if (r.width >= window.innerWidth * 0.5 && r.height >= window.innerHeight * 0.4) { return true; }
+		}
+		return false;
+	}
+	function isMobileMenuOpen() {
+		var de = document.documentElement, b = document.body;
+		for (var i = 0; i < MENU_OPEN_BODY_CLASSES.length; i++) {
+			var c = MENU_OPEN_BODY_CLASSES[i];
+			if (de.classList.contains(c) || (b && b.classList.contains(c))) { return true; }
+		}
+		for (var j = 0; j < MENU_OPEN_SELECTORS.length; j++) {
+			try {
+				if (document.querySelector(MENU_OPEN_SELECTORS[j])) { return true; }
+			} catch (e) { /* unsupported selector on this engine — skip */ }
+		}
+		// getComputedStyle path last — only reached when the cheap class /
+		// selector checks all missed.
+		return hasBlockingOverlay();
+	}
+	var menuOpenNow = false;
+	function syncMenuOpenState() {
+		var open = isMobileMenuOpen();
+		if (open === menuOpenNow) { return; }
+		menuOpenNow = open;
+		document.documentElement.classList.toggle('bspe-menu-open', open);
+	}
+	var menuFrame = 0;
+	function scheduleMenuSync() {
+		if (menuFrame) { return; }
+		menuFrame = requestAnimationFrame(function () {
+			menuFrame = 0;
+			syncMenuOpenState();
+		});
+	}
+	try {
+		// One observer on the document subtree. Watches the attributes
+		// menus flip (class / aria-expanded / inline style) plus node
+		// insertion (Elementor popups mount their modal lazily). Bursts
+		// collapse to one cheap re-check per frame via requestAnimationFrame.
+		new MutationObserver(scheduleMenuSync).observe(document.documentElement, {
+			subtree: true,
+			childList: true,
+			attributes: true,
+			attributeFilter: ['class', 'aria-expanded', 'style']
+		});
+	} catch (e) { /* MutationObserver unavailable — static check below still runs */ }
+	syncMenuOpenState();
+
 	// Reserve footer clearance now, and re-measure when anything that
 	// can change the bar height happens: viewport resize / rotation
 	// (also handles crossing the mobile breakpoint, where the bar goes
