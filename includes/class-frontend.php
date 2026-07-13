@@ -410,16 +410,20 @@ final class Frontend {
 			echo "\t#icw:not(.icw--is-frame) .icw--launcher--item, #icw:not(.icw--is-frame) .widget-button, #icw:not(.icw--is-frame) .icw--multiContact-chat-icon { transform: scale(" . esc_html( $scale_f ) . ") !important; transform-origin: bottom right !important; }\n";
 			echo "}\n";
 
-			// Hide Intaker's own floating "Call us" element (its
-			// multiContact call channel). The bar already carries a Call
-			// button, so this is a redundant duplicate. Emitted OUTSIDE
-			// the mobile media query (redundant on every viewport) and
-			// with a wide selector net — Intaker's call channel carries
-			// the `icw--multiContact-call` class on the button and
-			// `icw--multiContact-call-icon` on its glyph; we also match
-			// any element whose class combines "multiContact" + "call".
+			// Hide Intaker's own floating "Call us" element. The bar
+			// already carries a Call button, so it's a redundant
+			// duplicate. Emitted OUTSIDE the mobile media query (redundant
+			// on every viewport). Selector set derived from Intaker's
+			// chat.min.js source:
+			//   - the multiContact call button is <button
+			//     id="icw--multiContact-call" class="icw--multiContact--button">
+			//     — an ID, not a class (our earlier .class selector was
+			//     the bug: it matched nothing).
+			//   - the standalone call-channel launcher button is
+			//     .icw--call--button.
+			//   - plus the call glyph .icw--multiContact-call-icon.
 			if ( Settings::get( 'chat.hide_intaker_call', true ) ) {
-				echo ".icw--multiContact-call, .icw--multiContact-call-icon, [class*=\"multiContact\"][class*=\"-call\"] { display: none !important; }\n";
+				echo "#icw--multiContact-call, .icw--multiContact-call, .icw--multiContact-call-icon, .icw--call--button { display: none !important; }\n";
 			}
 		}
 
