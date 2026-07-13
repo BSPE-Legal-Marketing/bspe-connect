@@ -408,13 +408,19 @@ final class Frontend {
 			// position untouched so we don't distort it.
 			echo "\t#icw:not(.icw--is-frame) { bottom: " . esc_html( (string) $bottom ) . "px !important; }\n";
 			echo "\t#icw:not(.icw--is-frame) .icw--launcher--item, #icw:not(.icw--is-frame) .widget-button, #icw:not(.icw--is-frame) .icw--multiContact-chat-icon { transform: scale(" . esc_html( $scale_f ) . ") !important; transform-origin: bottom right !important; }\n";
-			// Optionally hide Intaker's own floating "Call us" element (its
-			// multiContact call channel). The bar already carries a Call
-			// button, so this is a redundant duplicate on most sites.
-			if ( Settings::get( 'chat.hide_intaker_call', true ) ) {
-				echo "\t.icw--multiContact-call { display: none !important; }\n";
-			}
 			echo "}\n";
+
+			// Hide Intaker's own floating "Call us" element (its
+			// multiContact call channel). The bar already carries a Call
+			// button, so this is a redundant duplicate. Emitted OUTSIDE
+			// the mobile media query (redundant on every viewport) and
+			// with a wide selector net — Intaker's call channel carries
+			// the `icw--multiContact-call` class on the button and
+			// `icw--multiContact-call-icon` on its glyph; we also match
+			// any element whose class combines "multiContact" + "call".
+			if ( Settings::get( 'chat.hide_intaker_call', true ) ) {
+				echo ".icw--multiContact-call, .icw--multiContact-call-icon, [class*=\"multiContact\"][class*=\"-call\"] { display: none !important; }\n";
+			}
 		}
 
 		echo "</style>\n";
