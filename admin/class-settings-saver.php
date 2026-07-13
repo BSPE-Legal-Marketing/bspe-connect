@@ -421,7 +421,7 @@ final class Settings_Saver {
 			'button_label'        => sanitize_text_field( (string) ( $input['button_label'] ?? 'Chat' ) ),
 			'button_icon_library' => $icon_lib,
 			'button_icon'         => '' !== $icon ? $icon : 'comment-dots',
-			'launcher_nudge_px'   => max( 0, min( 400, (int) ( $input['launcher_nudge_px'] ?? 12 ) ) ),
+			'launcher_bottom_px'  => max( 0, min( 400, (int) ( $input['launcher_bottom_px'] ?? 16 ) ) ),
 			'launcher_scale'      => max( 30, min( 100, (int) ( $input['launcher_scale'] ?? 85 ) ) ),
 		];
 	}

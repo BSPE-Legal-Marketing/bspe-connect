@@ -396,15 +396,16 @@ final class Frontend {
 		// little. Mobile-only + Intaker-only: on desktop there's no bar
 		// to clear, and the custom provider's markup is unknown to us.
 		if ( Settings::get( 'chat.enabled', false ) && 'intaker' === (string) Settings::get( 'chat.provider', 'intaker' ) ) {
-			$nudge   = max( 0, min( 400, (int) Settings::get( 'chat.launcher_nudge_px', 12 ) ) );
+			$bottom  = max( 0, min( 400, (int) Settings::get( 'chat.launcher_bottom_px', 16 ) ) );
 			$scale   = max( 30, min( 100, (int) Settings::get( 'chat.launcher_scale', 85 ) ) );
 			$scale_f = number_format( $scale / 100, 2, '.', '' );
 
 			echo '@media (max-width: ' . esc_html( (string) ( $breakpoint - 1 ) ) . "px) {\n";
-			// Lift the launcher / widget root above the bar. Applying
-			// `bottom` to a non-fixed element is a harmless no-op, so we
-			// target several candidate Intaker launcher elements.
-			echo "\t#icw, .icw--launcher, .icw--launcher--item { bottom: calc(var(--bspe-bar-h, 0px) + " . esc_html( (string) $nudge ) . "px) !important; }\n";
+			// Position the launcher / widget root a fixed distance from
+			// the screen bottom. #icw is Intaker's fixed root (verified);
+			// applying `bottom` to a non-fixed candidate is a harmless
+			// no-op.
+			echo "\t#icw, .icw--launcher, .icw--launcher--item { bottom: " . esc_html( (string) $bottom ) . "px !important; }\n";
 			// Scale just the launcher, anchored to its bottom-right so it
 			// stays in the corner.
 			echo "\t.icw--launcher--item, #icw .widget-button, #icw .icw--multiContact-chat-icon { transform: scale(" . esc_html( $scale_f ) . ") !important; transform-origin: bottom right !important; }\n";

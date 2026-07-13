@@ -169,6 +169,21 @@
 		}, { passive: true });
 	}
 
+	// Pin our root as the last <body> child. Third-party widgets (live
+	// chat, accessibility toolbars) inject themselves late and squat at
+	// the 32-bit max z-index; since our root now matches that z-index,
+	// DOM order breaks the tie — being last means our welcome bubble
+	// wins. Run once after a beat (so those widgets have mounted) and
+	// again whenever the welcome bubble is about to show.
+	function pinRootLast() {
+		try {
+			if (document.body && document.body.lastElementChild !== root) {
+				document.body.appendChild(root);
+			}
+		} catch (e) { /* ignore */ }
+	}
+	setTimeout(pinRootLast, 1500);
+
 	// Reserve footer clearance now, and re-measure when anything that
 	// can change the bar height happens: viewport resize / rotation
 	// (also handles crossing the mobile breakpoint, where the bar goes
@@ -210,6 +225,9 @@
 
 	function showBubble() {
 		if (!bubble || bubbleVisible) { return; }
+		// Make sure we're the last body child so the bubble sits above
+		// any third-party widget that mounted after our initial pin.
+		pinRootLast();
 		bubble.removeAttribute('hidden');
 		// Force reflow so the transition can run from initial state.
 		void bubble.offsetWidth;
