@@ -190,7 +190,7 @@ final class Settings {
 				// bottom of the screen (default 16 ≈ the UserWay icon's
 				// corner spot). Raise it to lift the launcher above the
 				// bar. launcher_scale shrinks it. Intaker provider only.
-				'launcher_bottom_px' => 16,      // distance from the screen bottom
+				'launcher_bottom_px' => 36,      // distance from the screen bottom
 				'launcher_scale'     => 85,      // launcher size, percent (30-100)
 				'show_button'         => true,        // show the Chat button in the bar
 				'button_label'        => 'Chat',

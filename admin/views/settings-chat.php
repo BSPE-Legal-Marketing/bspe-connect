@@ -154,7 +154,7 @@ Components::open_card(
 Components::row(
 	__( 'Distance from bottom', 'bspe-connect' ),
 	static function () use ( $chat ): void {
-		Components::number( 'bspe[chat][launcher_bottom_px]', (int) ( $chat['launcher_bottom_px'] ?? 16 ), [
+		Components::number( 'bspe[chat][launcher_bottom_px]', (int) ( $chat['launcher_bottom_px'] ?? 36 ), [
 			'min'    => 0,
 			'max'    => 400,
 			'step'   => 2,
@@ -163,7 +163,7 @@ Components::row(
 	},
 	[
 		'id'          => 'bspe-chat-launcher_bottom_px',
-		'description' => __( 'How far the launcher sits from the bottom of the screen. Default 16 keeps it in the corner, level with a typical accessibility icon. Raise it (e.g. 80–100) to lift the launcher above the bar instead.', 'bspe-connect' ),
+		'description' => __( 'How far the launcher sits from the bottom of the screen. Default 36 keeps it low in the corner. Raise it (e.g. 80–100) to lift the launcher above the bar instead.', 'bspe-connect' ),
 	]
 );
 Components::row(

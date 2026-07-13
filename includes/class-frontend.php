@@ -396,7 +396,7 @@ final class Frontend {
 		// little. Mobile-only + Intaker-only: on desktop there's no bar
 		// to clear, and the custom provider's markup is unknown to us.
 		if ( Settings::get( 'chat.enabled', false ) && 'intaker' === (string) Settings::get( 'chat.provider', 'intaker' ) ) {
-			$bottom  = max( 0, min( 400, (int) Settings::get( 'chat.launcher_bottom_px', 16 ) ) );
+			$bottom  = max( 0, min( 400, (int) Settings::get( 'chat.launcher_bottom_px', 36 ) ) );
 			$scale   = max( 30, min( 100, (int) Settings::get( 'chat.launcher_scale', 85 ) ) );
 			$scale_f = number_format( $scale / 100, 2, '.', '' );
 
