@@ -309,26 +309,39 @@
 	// matching launcher selector. Because the provider script loads
 	// async, the launcher may not exist on the first try — retry a few
 	// times over ~2.5s before giving up.
+	function clickEl(el) {
+		if (!el) { return false; }
+		if (typeof el.click === 'function') { el.click(); }
+		else { el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window })); }
+		return true;
+	}
+
 	function openProviderChat() {
 		var cfg = (data && data.chat) || {};
 		var selectors = cfg.openSelectors || [];
+
+		// Toggle: if Intaker's widget is already expanded (preview or
+		// chat frame — both carry `icw--open`), close it via its own
+		// close button. Clicking the close button is what clears the
+		// page-dimming backdrop; just re-clicking the launcher would
+		// leave the blur behind. The chat frame itself is a cross-origin
+		// iframe with its own X, so if there's no reachable close button
+		// we fall through and let a launcher click minimize it.
+		var icw = document.querySelector('#icw');
+		if (icw && icw.classList.contains('icw--open')) {
+			var closeBtn = document.querySelector('#icw--preview--close, #icw [aria-label*="Close Intaker"], #icw [class*="--close"]');
+			if (clickEl(closeBtn)) { return; }
+		}
+
 		if (!selectors.length) { return; }
 
+		// Provider script loads async — the launcher may not exist on the
+		// first try. Retry a few times over ~2.5s before giving up.
 		var attempts = 0;
 		var maxAttempts = 10;
 		(function tryOpen() {
 			for (var i = 0; i < selectors.length; i++) {
-				var el = document.querySelector(selectors[i]);
-				if (el) {
-					// Prefer a native click (fires the provider's bound
-					// handler); fall back to a dispatched MouseEvent.
-					if (typeof el.click === 'function') {
-						el.click();
-					} else {
-						el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
-					}
-					return;
-				}
+				if (clickEl(document.querySelector(selectors[i]))) { return; }
 			}
 			attempts++;
 			if (attempts < maxAttempts) {

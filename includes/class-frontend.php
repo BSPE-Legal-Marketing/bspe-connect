@@ -401,14 +401,13 @@ final class Frontend {
 			$scale_f = number_format( $scale / 100, 2, '.', '' );
 
 			echo '@media (max-width: ' . esc_html( (string) ( $breakpoint - 1 ) ) . "px) {\n";
-			// Position the launcher / widget root a fixed distance from
-			// the screen bottom. #icw is Intaker's fixed root (verified);
-			// applying `bottom` to a non-fixed candidate is a harmless
-			// no-op.
-			echo "\t#icw, .icw--launcher, .icw--launcher--item { bottom: " . esc_html( (string) $bottom ) . "px !important; }\n";
-			// Scale just the launcher, anchored to its bottom-right so it
-			// stays in the corner.
-			echo "\t.icw--launcher--item, #icw .widget-button, #icw .icw--multiContact-chat-icon { transform: scale(" . esc_html( $scale_f ) . ") !important; transform-origin: bottom right !important; }\n";
+			// Position + scale ONLY the collapsed launcher, never the open
+			// chat frame. Intaker adds `icw--is-frame` to #icw while the
+			// full conversation panel (an iframe) is open — scoping with
+			// :not(.icw--is-frame) leaves that panel's own sizing +
+			// position untouched so we don't distort it.
+			echo "\t#icw:not(.icw--is-frame) { bottom: " . esc_html( (string) $bottom ) . "px !important; }\n";
+			echo "\t#icw:not(.icw--is-frame) .icw--launcher--item, #icw:not(.icw--is-frame) .widget-button, #icw:not(.icw--is-frame) .icw--multiContact-chat-icon { transform: scale(" . esc_html( $scale_f ) . ") !important; transform-origin: bottom right !important; }\n";
 			echo "}\n";
 		}
 
