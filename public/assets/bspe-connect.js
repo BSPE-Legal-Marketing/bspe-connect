@@ -201,10 +201,16 @@
 	// sites actually use:
 	//   1. A toggle that flips aria-expanded / an active class
 	//      (Elementor nav: `.elementor-menu-toggle.elementor-active`).
-	//   2. A full-screen overlay/popup that adds a scroll-lock body class
-	//      (Elementor popup menus add `dialog-prevent-scroll` +
-	//      `dialog-lightbox-body`; Popup Maker adds `pum-open`) and/or
-	//      mounts a fixed full-viewport modal element.
+	//   2. A full-screen overlay/popup: we watch a TRANSIENT scroll-lock
+	//      body class (Elementor `dialog-prevent-scroll`, Popup Maker
+	//      `pum-open`) AND the actual visible modal element via
+	//      hasBlockingOverlay(). We deliberately do NOT key off Elementor's
+	//      `dialog-lightbox-body` / `dialog-container` classes: Elementor
+	//      adds those to <body> on the first popup open and NEVER removes
+	//      them, so treating them as "open" would leave the flag stuck on
+	//      after the menu closes (bar + widgets hidden forever). The modal
+	//      itself goes display:none on close, so hasBlockingOverlay() is the
+	//      reliable open/closed signal.
 	// A site owner can add an extra toggle signal via the
 	// `menuOpenSelector` localized string for exotic themes.
 	var MENU_OPEN_SELECTORS = [
@@ -223,16 +229,18 @@
 	if (data.menuOpenSelector) {
 		MENU_OPEN_SELECTORS.push(String(data.menuOpenSelector));
 	}
-	// Body/html classes set while a menu / full-screen modal is open.
-	// Includes Elementor's dialog library (popup menus + lightboxes) and
-	// Popup Maker — both add a body class we can read cheaply.
+	// Body/html classes set ONLY while a menu / full-screen modal is open.
+	// Every entry here must be TRANSIENT (added on open, removed on close).
+	// Elementor's `dialog-prevent-scroll` qualifies; its `dialog-lightbox-body`
+	// / `dialog-container` do NOT (they persist for the page lifetime) so they
+	// are intentionally absent — see hasBlockingOverlay() for the popup signal.
 	var MENU_OPEN_BODY_CLASSES = [
 		'menu-open', 'nav-open', 'mobile-menu-open', 'mobile-nav-open',
 		'off-canvas-open', 'ast-off-canvas-open', 'is-menu-open',
 		'has-mobile-menu-open', 'slideout-open', 'oceanwp-off-canvas-open',
 		'elementskit-menu-hamburger-active',
-		'dialog-prevent-scroll', 'dialog-lightbox-body', // Elementor popups / lightboxes
-		'pum-open', 'pum-open-overlay'                    // Popup Maker
+		'dialog-prevent-scroll',        // Elementor popup scroll-lock (transient)
+		'pum-open', 'pum-open-overlay'   // Popup Maker
 	];
 	// Fixed, roughly full-viewport overlay elements — catches Elementor
 	// popup menus / Popup Maker even if the body-class names ever change.
