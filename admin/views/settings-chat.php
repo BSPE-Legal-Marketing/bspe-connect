@@ -146,6 +146,43 @@ foreach ( [ 'fa-solid', 'fa-regular' ] as $lib ) :
 endforeach;
 Components::close_card();
 
+/* ----------------- Launcher position (Intaker) ----------------- */
+Components::open_card(
+	__( 'Intaker launcher position', 'bspe-connect' ),
+	__( 'Intaker shows its own floating chat launcher. On mobile it can overlap the bar — nudge it up and shrink it so both fit. Applies to the Intaker provider only.', 'bspe-connect' )
+);
+Components::row(
+	__( 'Nudge up', 'bspe-connect' ),
+	static function () use ( $chat ): void {
+		Components::number( 'bspe[chat][launcher_nudge_px]', (int) ( $chat['launcher_nudge_px'] ?? 12 ), [
+			'min'    => 0,
+			'max'    => 400,
+			'step'   => 2,
+			'suffix' => __( 'px', 'bspe-connect' ),
+		] );
+	},
+	[
+		'id'          => 'bspe-chat-launcher_nudge_px',
+		'description' => __( 'Extra gap between the top of the bar and the launcher. The bar height is added automatically, so this is just the breathing room above it. Default 12.', 'bspe-connect' ),
+	]
+);
+Components::row(
+	__( 'Launcher size', 'bspe-connect' ),
+	static function () use ( $chat ): void {
+		Components::number( 'bspe[chat][launcher_scale]', (int) ( $chat['launcher_scale'] ?? 85 ), [
+			'min'    => 30,
+			'max'    => 100,
+			'step'   => 1,
+			'suffix' => __( '%', 'bspe-connect' ),
+		] );
+	},
+	[
+		'id'          => 'bspe-chat-launcher_scale',
+		'description' => __( 'Scale of the Intaker launcher. 100% is Intaker\'s default size; lower values shrink it. Default 85.', 'bspe-connect' ),
+	]
+);
+Components::close_card();
+
 /* ----------------- Advanced ----------------- */
 Components::open_card(
 	__( 'Advanced', 'bspe-connect' ),

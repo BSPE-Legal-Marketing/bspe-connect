@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 3.5.1
+Stable tag: 3.5.2
 License: Proprietary
 
 Mobile contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -48,6 +48,7 @@ Reach out to BSPE Legal Marketing through your usual channel.
 
 == Changelog ==
 
+= 3.5.2 = Intaker launcher position controls — nudge the floating chat launcher up above the bar and shrink it (Chat tab), so it stops overlapping the bar on mobile.
 = 3.5.1 = Chat button now uses the same visual icon-library picker as the other buttons; Account ID placeholder relabeled "client id".
 = 3.5.0 = New Chat feature — load Intaker or a custom chat provider, with an optional Chat button on the bar that opens it. Also fixes a double-unslash that could mangle backslashes in the In-Post Widget shortcode.
 = 3.4.3 = Footer clearance gap set to 0 — footer sits flush above the bar, no gap.

@@ -185,6 +185,11 @@ final class Settings {
 				'intaker_odl'   => '',          // Intaker account id (the trailing arg in their snippet)
 				'custom_script' => '',          // raw <script> for the custom provider
 				'open_selector' => '',          // CSS selector our button clicks; '' = provider default
+				// Intaker's own floating launcher overlaps the bar on
+				// mobile. These nudge it up above the bar and shrink it a
+				// little. Only applied for the Intaker provider on mobile.
+				'launcher_nudge_px' => 12,      // extra gap above the bar top
+				'launcher_scale'    => 85,      // launcher size, percent (30-100)
 				'show_button'         => true,        // show the Chat button in the bar
 				'button_label'        => 'Chat',
 				'button_icon_library' => 'fa-solid',  // none | fa-solid | fa-regular

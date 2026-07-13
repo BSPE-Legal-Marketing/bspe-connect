@@ -98,8 +98,12 @@
 		var h = bar.offsetHeight;
 		if (h > 0) {
 			document.body.style.setProperty('padding-bottom', (h + SNUG_GAP) + 'px', 'important');
+			// Publish the bar height so the inline stylesheet can lift a
+			// third-party chat launcher above the bar via calc().
+			document.documentElement.style.setProperty('--bspe-bar-h', h + 'px');
 		} else {
 			document.body.style.removeProperty('padding-bottom');
+			document.documentElement.style.removeProperty('--bspe-bar-h');
 		}
 	}
 
