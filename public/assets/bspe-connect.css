@@ -32,7 +32,13 @@
 	left: 0;
 	right: 0;
 	bottom: 0;
-	z-index: 9998;
+	/* Sit above third-party bottom-corner widgets (live chat, accessibility
+	   toolbars) so our welcome bubble + bar are never buried under them.
+	   Intaker's root (#icw) is ~2147482900 and UserWay's visible launcher
+	   is low, so 2147483000 clears both while staying under INT_MAX. This is
+	   the root stacking context — the bubble / modal keep their own smaller
+	   z-index for internal ordering. */
+	z-index: 2147483000;
 	pointer-events: none;
 	font-family: var(--bspe-font-family);
 }
