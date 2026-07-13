@@ -181,6 +181,17 @@ Components::row(
 		'description' => __( 'Scale of the Intaker launcher. 100% is Intaker\'s default size; lower values shrink it. Default 85.', 'bspe-connect' ),
 	]
 );
+Components::row(
+	__( 'Hide Intaker\'s Call button', 'bspe-connect' ),
+	static function () use ( $chat ): void {
+		Components::toggle( 'bspe[chat][hide_intaker_call]', ! empty( $chat['hide_intaker_call'] ), [
+			'label' => __( 'Hide Intaker\'s own floating "Call us" button', 'bspe-connect' ),
+		] );
+	},
+	[
+		'description' => __( 'On by default. The bar already has a Call button, so Intaker\'s separate green Call launcher is usually a redundant duplicate. Turn off to let Intaker show it.', 'bspe-connect' ),
+	]
+);
 Components::close_card();
 
 /* ----------------- Advanced ----------------- */

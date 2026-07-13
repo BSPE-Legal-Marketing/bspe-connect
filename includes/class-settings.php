@@ -192,6 +192,7 @@ final class Settings {
 				// bar. launcher_scale shrinks it. Intaker provider only.
 				'launcher_bottom_px' => 36,      // distance from the screen bottom
 				'launcher_scale'     => 85,      // launcher size, percent (30-100)
+				'hide_intaker_call'  => true,    // hide Intaker's own floating "Call us" button (the bar already has Call)
 				'show_button'         => true,        // show the Chat button in the bar
 				'button_label'        => 'Chat',
 				'button_icon_library' => 'fa-solid',  // none | fa-solid | fa-regular

@@ -321,16 +321,23 @@
 		var selectors = cfg.openSelectors || [];
 
 		// Toggle: if Intaker's widget is already expanded (preview or
-		// chat frame — both carry `icw--open`), close it via its own
-		// close button. Clicking the close button is what clears the
-		// page-dimming backdrop; just re-clicking the launcher would
-		// leave the blur behind. The chat frame itself is a cross-origin
-		// iframe with its own X, so if there's no reachable close button
-		// we fall through and let a launcher click minimize it.
+		// chat frame — both carry `icw--open`), close it. Just re-clicking
+		// the launcher leaves the page-dimming backdrop behind, which was
+		// the reported "still blurry" bug. We close robustly:
+		//   1. Click the backdrop — Intaker's own "click outside to close"
+		//      handler, which both closes the widget and clears the blur.
+		//   2. Click the preview close button as well.
+		//   3. Force-remove the backdrop's open class, so the blur is gone
+		//      even if Intaker's own teardown left it on.
 		var icw = document.querySelector('#icw');
 		if (icw && icw.classList.contains('icw--open')) {
-			var closeBtn = document.querySelector('#icw--preview--close, #icw [aria-label*="Close Intaker"], #icw [class*="--close"]');
-			if (clickEl(closeBtn)) { return; }
+			var backdrop = document.querySelector('#icw--backdrop-container');
+			if (backdrop && backdrop.classList.contains('icw--backdrop-open')) {
+				clickEl(backdrop);
+			}
+			clickEl(document.querySelector('#icw--preview--close, #icw [aria-label*="Close Intaker"], #icw [class*="--close"]'));
+			if (backdrop) { backdrop.classList.remove('icw--backdrop-open'); }
+			return;
 		}
 
 		if (!selectors.length) { return; }

@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 3.5.6
+Stable tag: 3.5.7
 License: Proprietary
 
 Mobile contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -48,6 +48,7 @@ Reach out to BSPE Legal Marketing through your usual channel.
 
 == Changelog ==
 
+= 3.5.7 = Chat close now clears Intaker's page-dim blur reliably; new toggle hides Intaker's redundant floating "Call us" button (on by default).
 = 3.5.6 = Intaker launcher default distance from bottom set to 36px.
 = 3.5.5 = Chat button now toggles the chat open/closed (closing clears the page-dim backdrop); our launcher position/size no longer distorts the open Intaker chat panel.
 = 3.5.4 = Intaker launcher position is now a direct distance-from-bottom (defaults to the corner, level with the accessibility icon); welcome bubble reliably sits above the UserWay icon (max z-index + pinned last in the DOM).
