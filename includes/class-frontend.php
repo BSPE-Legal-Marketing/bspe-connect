@@ -414,18 +414,31 @@ final class Frontend {
 			// already carries a Call button, so it's a redundant
 			// duplicate. Emitted OUTSIDE the mobile media query (redundant
 			// on every viewport). Selector set derived from Intaker's
-			// chat.min.js source:
+			// chat.min.js source — BOTH call buttons are IDs, not classes:
 			//   - the multiContact call button is <button
 			//     id="icw--multiContact-call" class="icw--multiContact--button">
-			//     — an ID, not a class (our earlier .class selector was
-			//     the bug: it matched nothing).
-			//   - the standalone call-channel launcher button is
-			//     .icw--call--button.
-			//   - plus the call glyph .icw--multiContact-call-icon.
+			//   - the compact contact widget's green "CALL US" button is
+			//     <button id="icw--call--button" class="widget-button">,
+			//     inside <div id="icw--call--content"> which Intaker appends
+			//     DIRECTLY to <body> (a sibling of #icw, not a child — which
+			//     is why hiding #icw never touched it).
+			// The legacy .class variants stay as a belt-and-suspenders match.
 			if ( Settings::get( 'chat.hide_intaker_call', true ) ) {
-				echo "#icw--multiContact-call, .icw--multiContact-call, .icw--multiContact-call-icon, .icw--call--button { display: none !important; }\n";
+				echo "#icw--multiContact-call, #icw--call--button, .icw--multiContact-call, .icw--multiContact-call-icon, .icw--call--button { display: none !important; }\n";
 			}
 		}
+
+		// Anti-flash (FOUC) guard. Optimization plugins (NitroPack et al.)
+		// defer our stylesheet, so for a beat the bar's raw markup renders
+		// unstyled — plain stacked links with tofu boxes where the icon font
+		// hasn't loaded. This inline rule (always present in the HTML head)
+		// keeps the root invisible until the real stylesheet applies; the
+		// stylesheet reveals it with `#bspe-connect.bspe-connect
+		// { visibility: visible }` — deliberately HIGHER specificity (1,1,0
+		// vs 1,0,0) so it wins regardless of the order an optimizer injects
+		// styles in. By the time the sheet is live, the bar is position:fixed
+		// and translated off-screen until the show-delay, so nothing flashes.
+		echo "#bspe-connect { visibility: hidden; }\n";
 
 		// While the visitor has the site's own mobile menu (hamburger) open,
 		// hide our bar and the third-party chat / accessibility launchers we
@@ -434,12 +447,16 @@ final class Frontend {
 		// browsing), so without this they'd float on top of the full-screen
 		// menu. The frontend JS detects the open menu (Elementor's toggle,
 		// common body classes, aria-expanded) and stamps `html.bspe-menu-open`;
-		// these rules do the hiding. #icw is Intaker (its green "Call us" lives
-		// inside it, so it goes too); .userway_buttons_wrapper is UserWay. Both
-		// third-party selectors harmlessly match nothing when absent. Emitted
-		// outside the media query: the flag is only ever set on mobile menus,
-		// and hiding a stray desktop overlay's floaters is equally desirable.
-		echo "html.bspe-menu-open #bspe-connect, html.bspe-menu-open #icw, html.bspe-menu-open .userway_buttons_wrapper { display: none !important; }\n";
+		// these rules do the hiding. #icw is Intaker's chat root;
+		// #icw--call--content is Intaker's contact-buttons widget (green
+		// "Call us" / "Text us"), which Intaker appends DIRECTLY to <body> as
+		// a sibling of #icw — it must be listed separately or it floats over
+		// the menu; .userway_buttons_wrapper is UserWay. All third-party
+		// selectors harmlessly match nothing when absent. Emitted outside the
+		// media query: the flag is only ever set while a menu/overlay is
+		// open, and hiding a stray desktop overlay's floaters is equally
+		// desirable.
+		echo "html.bspe-menu-open #bspe-connect, html.bspe-menu-open #icw, html.bspe-menu-open #icw--call--content, html.bspe-menu-open .userway_buttons_wrapper { display: none !important; }\n";
 
 		echo "</style>\n";
 	}

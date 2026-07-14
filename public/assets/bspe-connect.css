@@ -43,6 +43,18 @@
 	font-family: var(--bspe-font-family);
 }
 
+/* Anti-flash reveal. An inline `#bspe-connect { visibility: hidden }` rule
+   in wp_head keeps the raw markup invisible while an optimization plugin
+   (NitroPack etc.) defers this stylesheet — otherwise the bar flashes as
+   unstyled stacked links with unloaded icon-font tofu. This selector is
+   deliberately one class MORE specific (1,1,0 beats the inline head rule's
+   1,0,0) so the reveal wins no matter what order the optimizer injects
+   styles in. Once this sheet is live the bar is fixed + translated
+   off-screen until the show-delay, so the reveal itself never flashes. */
+#bspe-connect.bspe-connect {
+	visibility: visible;
+}
+
 .bspe-connect *,
 .bspe-connect *::before,
 .bspe-connect *::after {
