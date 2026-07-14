@@ -81,6 +81,17 @@
 	transform: translateY(0);
 }
 
+/* The bar ships with the `hidden` attribute (see bar.php) so the UA's
+   [hidden]{display:none} collapses the raw markup while an optimizer is
+   still deferring this stylesheet — the anti-flash guard. Once this sheet
+   IS live, this rule restores the bar. Written as .parent .child[hidden]
+   (0,2,0 + attribute) so it also beats theme resets that declare a bare
+   [hidden]{display:none}; resets using !important are handled by the JS,
+   which removes the attribute after proving the sheet applied. */
+.bspe-connect .bspe-connect__bar[hidden] {
+	display: flex;
+}
+
 /* ---------------------------------------------------------------------- */
 /*  Buttons                                                                */
 /* ---------------------------------------------------------------------- */

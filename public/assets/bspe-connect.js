@@ -107,6 +107,32 @@
 		}
 	}
 
+	// ----- Anti-flash unhide -------------------------------------------
+	// The bar ships with the `hidden` attribute so its raw markup stays
+	// collapsed while an optimizer (NitroPack etc.) is still deferring our
+	// stylesheet — no unstyled flash, zero layout height. The stylesheet
+	// restores it via `.bspe-connect .bspe-connect__bar[hidden]
+	// { display:flex }`, but a theme reset declaring
+	// `[hidden] { display:none !important }` would keep the bar dead — so
+	// strip the attribute as soon as we can PROVE the sheet has applied.
+	// Sentinel: only our stylesheet makes the root position:fixed (the
+	// inline head guard only touches visibility), so a fixed root means
+	// the sheet is live. Poll briefly to ride out deferred-CSS setups.
+	(function unhideWhenStyled() {
+		if (!bar || !bar.hasAttribute('hidden')) { return; }
+		var tries = 0;
+		(function attempt() {
+			var styled = false;
+			try { styled = getComputedStyle(root).position === 'fixed'; } catch (e) { /* treat as not yet styled */ }
+			if (styled) {
+				bar.removeAttribute('hidden');
+				syncBodyClearance();
+				return;
+			}
+			if (++tries < 200) { setTimeout(attempt, 150); } // give up after ~30s: no CSS, no bar
+		})();
+	})();
+
 	// ----- Bar show / hide ---------------------------------------------
 	// Two layered triggers. Both are opt-in via the General → Display
 	// behavior settings; with defaults (threshold = 0, hideOnScrollUp =

@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 3.6.2
+Stable tag: 3.6.3
 License: Proprietary
 
 Mobile contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -48,6 +48,7 @@ Reach out to BSPE Legal Marketing through your usual channel.
 
 == Changelog ==
 
+= 3.6.3 = Exclude the bar's CSS/JS from page optimizers and harden the anti-flash guard. The plugin now stamps opt-out attributes (nitro-exclude, nowprocket, data-no-optimize, data-noptimize, data-no-defer) on its own asset tags so NitroPack / WP Rocket / LiteSpeed / Autoptimize leave them alone. The bar div also ships with the `hidden` attribute (restored by the stylesheet, stripped by JS once the sheet is proven live), so even a partial critical-CSS extraction can never flash unstyled markup or reserve phantom footer padding.
 = 3.6.2 = Actually hide Intaker's green "CALL US" button: it is the compact contact widget `<button id="icw--call--button">` inside `#icw--call--content`, which Intaker appends directly to <body> as a sibling of #icw — an ID (not a class) and outside the container we were hiding. Both the hide-call rule and the menu-yield rule now target it. Also fix the unstyled flash of the bar on page load under CSS-deferring optimizers (NitroPack): inline visibility guard in wp_head + higher-specificity reveal in the stylesheet.
 = 3.6.1 = Fix menu-yield getting stuck: Elementor adds a `dialog-lightbox-body` class to the page on the first popup open and never removes it, so the bar + widgets stayed hidden after the menu closed. Detection now keys off only transient signals (scroll-lock class + the actually-visible modal), so everything reappears when the menu closes.
 = 3.6.0 = Yield to the site's mobile menu: when the hamburger menu is open, the bar and the third-party chat (Intaker) + accessibility (UserWay) launchers are hidden so they no longer float on top of the full-screen menu. Theme-agnostic detection covers both nav-toggle menus (Elementor nav, aria-expanded/active toggles) and popup/off-canvas menus (Elementor popups, Popup Maker, scroll-lock body classes, full-screen fixed overlays).

@@ -34,6 +34,39 @@ final class Frontend {
 		// Live-chat provider script — printed late in the footer, after
 		// the bar, only when chat is enabled and the bar context applies.
 		add_action( 'wp_footer', [ self::class, 'print_chat_widget' ], 105 );
+		// Stamp optimizer opt-out attributes on our own asset tags so page
+		// optimizers (NitroPack, WP Rocket, LiteSpeed, Autoptimize) leave
+		// the bar's CSS/JS alone instead of deferring / re-bundling them —
+		// deferred CSS is what causes the unstyled-bar flash on load.
+		add_filter( 'style_loader_tag', [ self::class, 'mark_tag_optimizer_exempt' ], 10, 2 );
+		add_filter( 'script_loader_tag', [ self::class, 'mark_tag_optimizer_exempt' ], 10, 2 );
+	}
+
+	/**
+	 * Adds the opt-out attributes each major optimizer honors to our style
+	 * and script tags (plugin CSS/JS + the Font Awesome sheet):
+	 *   - nitro-exclude            NitroPack: skip this resource entirely
+	 *   - nowprocket               WP Rocket: no delay/defer/combine
+	 *   - data-no-optimize="1"     LiteSpeed Cache
+	 *   - data-noptimize="1"       Autoptimize
+	 *   - data-no-defer="1"        LiteSpeed / misc defer plugins
+	 * Unknown attributes are ignored by browsers, so stacking them is safe
+	 * on sites running any (or none) of these optimizers.
+	 *
+	 * @param string $tag    Full HTML tag as WordPress will print it.
+	 * @param string $handle Asset handle.
+	 */
+	public static function mark_tag_optimizer_exempt( string $tag, string $handle ): string {
+		if ( self::HANDLE !== $handle && 'bspe-connect-fa' !== $handle ) {
+			return $tag;
+		}
+		if ( false !== strpos( $tag, 'nitro-exclude' ) ) {
+			return $tag; // already stamped (filter ran twice)
+		}
+		$attrs = 'nitro-exclude nowprocket data-no-optimize="1" data-noptimize="1" data-no-defer="1"';
+		$tag   = str_replace( '<link ', '<link ' . $attrs . ' ', $tag );
+		$tag   = str_replace( '<script ', '<script ' . $attrs . ' ', $tag );
+		return $tag;
 	}
 
 	/**

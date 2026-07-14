@@ -23,11 +23,22 @@ if ( empty( $buttons ) ) {
 	aria-label="<?php esc_attr_e( 'Contact options', 'bspe-connect' ); ?>"
 	data-bspe-state="hidden"
 >
+	<?php
+	// `hidden` (like the bubble + modal already carry) is the anti-flash
+	// guard: while an optimizer (NitroPack etc.) is still deferring our
+	// stylesheet, the UA's [hidden]{display:none} keeps this raw markup
+	// collapsed — no unstyled flash, zero layout height, so the JS body
+	// clearance stays correct. The stylesheet overrides it once live
+	// (.bspe-connect .bspe-connect__bar[hidden] { display:flex }), and the
+	// JS also strips the attribute once it can prove the sheet applied —
+	// covering theme resets that declare [hidden]{display:none !important}.
+	?>
 	<div
 		class="bspe-connect__bar"
 		data-bspe-bar
 		data-bspe-state="hidden"
 		data-bspe-button-count="<?php echo esc_attr( (string) count( $buttons ) ); ?>"
+		hidden
 	>
 		<?php foreach ( $buttons as $btn ) : ?>
 			<?php
