@@ -1,0 +1,55 @@
+<!--
+	WPML / Polylang language configuration for BSPE Connect.
+
+	Registers the user-facing strings that live inside the plugin's single
+	serialized option (bspe_connect_settings) so they show up under
+	WPML -> String Translation -> "Admin texts" (Polylang Pro reads this
+	file too). WPML then filters get_option() on the frontend, so
+	Settings::all() transparently returns the current language's values —
+	no plugin code changes needed.
+
+	Strings printed through __()/esc_html_e() with the 'bspe-connect' text
+	domain (form field labels, aria labels, etc.) are NOT listed here —
+	those are normal gettext strings; scan the plugin in WPML String
+	Translation to pick them up.
+-->
+<wpml-config>
+	<admin-texts>
+		<key name="bspe_connect_settings">
+			<key name="welcome_bubble">
+				<key name="heading" />
+				<key name="message" />
+			</key>
+			<key name="buttons">
+				<key name="connect">
+					<key name="label" />
+				</key>
+				<key name="call">
+					<key name="label" />
+				</key>
+				<key name="text">
+					<key name="label" />
+				</key>
+				<key name="email">
+					<key name="label" />
+				</key>
+			</key>
+			<key name="chat">
+				<key name="button_label" />
+			</key>
+			<key name="form">
+				<key name="text_heading" />
+				<key name="email_heading" />
+				<key name="text_subheading" />
+				<key name="email_subheading" />
+				<key name="submit_label" />
+				<key name="success_msg" />
+				<key name="mail_subject" />
+				<key name="mail_from_name" />
+			</key>
+			<key name="design">
+				<key name="firm_name" />
+			</key>
+		</key>
+	</admin-texts>
+</wpml-config>

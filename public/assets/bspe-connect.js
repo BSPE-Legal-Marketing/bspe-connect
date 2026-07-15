@@ -832,14 +832,14 @@
 				if (errors._form) {
 					setFormError(errors._form);
 				} else if (!hadFieldError) {
-					setFormError('Something went wrong. Please try again.');
+					setFormError((data.i18n && data.i18n.submitError) || 'Something went wrong. Please try again.');
 				}
 				fire('form_error');
 			}).catch(function (err) {
 				submitBtn.removeAttribute('aria-busy');
 				submitBtn.disabled = false;
 				console.error('[BSPE Connect] Network error during form submit. Endpoint:', endpoint, ' Error:', err);
-				setFormError('Network error. Please try again.');
+				setFormError((data.i18n && data.i18n.networkError) || 'Network error. Please try again.');
 				fire('form_error');
 			});
 		});

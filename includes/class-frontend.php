@@ -208,6 +208,13 @@ final class Frontend {
 				],
 				'restEndpoint'     => esc_url_raw( rest_url( 'bspe-connect/v1/event' ) ),
 				'restNonce'        => wp_create_nonce( 'wp_rest' ),
+				// Strings the JS shows directly. Routed through gettext so
+				// WPML / Polylang / .po files can translate them — the JS
+				// falls back to English when a key is absent.
+				'i18n'             => [
+					'submitError'  => __( 'Something went wrong. Please try again.', 'bspe-connect' ),
+					'networkError' => __( 'Network error. Please try again.', 'bspe-connect' ),
+				],
 				'chat'             => [
 					'enabled'       => (bool) Settings::get( 'chat.enabled', false ),
 					// Ordered list of selectors the Chat button tries to
