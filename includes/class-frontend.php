@@ -689,7 +689,16 @@ final class Frontend {
 		}
 		?>
 <!-- BSPE Connect: Intaker chat widget -->
-<script>(function (w,d,s,v,odl){(w[v]=w[v]||{})['odl']=odl;
+<?php
+	// The optimizer opt-out attributes matter here: NitroPack (and other
+	// delay-JS optimizers) hold EVERY script until the first user
+	// interaction. On desktop that's an early mouse-move, so Intaker is
+	// long loaded before anyone clicks Chat — but on a phone the first
+	// interaction IS the tap on the Chat button, so without the exclusion
+	// Intaker only STARTS downloading at that tap and the button appears
+	// dead (the original iOS "Chat does nothing" bug).
+?>
+<script nitro-exclude nowprocket data-no-optimize="1" data-noptimize="1" data-no-defer="1">(function (w,d,s,v,odl){(w[v]=w[v]||{})['odl']=odl;
 var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;
 j.src='https://intaker.azureedge.net/widget/chat.min.js';
 f.parentNode.insertBefore(j,f);

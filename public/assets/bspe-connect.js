@@ -456,6 +456,19 @@
 	// times over ~2.5s before giving up.
 	function clickEl(el) {
 		if (!el) { return false; }
+		// Fire the full press sequence, not just `click`. Some widgets
+		// (especially on touch devices) bind pointer/mouse events instead
+		// of — or in addition to — click; a bare synthetic click() skips
+		// those entirely. Extra events on listeners that only want click
+		// are harmless.
+		try {
+			if (typeof PointerEvent === 'function') {
+				el.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
+				el.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, cancelable: true }));
+			}
+			el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window }));
+			el.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window }));
+		} catch (e) { /* old engine — the click() below still fires */ }
 		if (typeof el.click === 'function') { el.click(); }
 		else { el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window })); }
 		return true;
@@ -488,16 +501,27 @@
 		if (!selectors.length) { return; }
 
 		// Provider script loads async — the launcher may not exist on the
-		// first try. Retry a few times over ~2.5s before giving up.
+		// first try. Worse, delay-JS optimizers (NitroPack) hold third-party
+		// scripts until the FIRST user interaction: on a phone that first
+		// interaction is this very tap, so the provider only starts
+		// downloading now and can need several seconds on mobile networks to
+		// mount its launcher. Poll fast for the common case (2.5s at 250ms),
+		// then patiently at 1s for ~15s total before giving up.
 		var attempts = 0;
-		var maxAttempts = 10;
 		(function tryOpen() {
 			for (var i = 0; i < selectors.length; i++) {
-				if (clickEl(document.querySelector(selectors[i]))) { return; }
+				var el = document.querySelector(selectors[i]);
+				// Skip launchers that exist but are display:none (e.g. the
+				// hidden green Call button shares the .widget-button class) —
+				// clicking those would silently "succeed" doing nothing.
+				if (el && el.offsetParent === null) { continue; }
+				if (clickEl(el)) { return; }
 			}
 			attempts++;
-			if (attempts < maxAttempts) {
-				setTimeout(tryOpen, 250);
+			if (attempts < 10) {
+				setTimeout(tryOpen, 250);       // fast phase: ~2.5s
+			} else if (attempts < 23) {
+				setTimeout(tryOpen, 1000);      // patient phase: ~15s total
 			}
 		})();
 	}

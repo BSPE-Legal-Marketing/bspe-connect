@@ -93,7 +93,7 @@ Components::row(
 	},
 	[
 		'id'          => 'bspe-chat-custom_script',
-		'description' => __( 'Paste the full snippet your chat provider gave you, including the &lt;script&gt; tags. It is output verbatim in the site footer. Only administrators can edit this.', 'bspe-connect' ),
+		'description' => __( 'Paste the full snippet your chat provider gave you, including the &lt;script&gt; tags. It is output verbatim in the site footer. Only administrators can edit this. Tip: if the site runs NitroPack / WP Rocket / LiteSpeed, add <code>nitro-exclude nowprocket data-no-optimize="1"</code> to the script tag so the chat is not delay-loaded — otherwise the Chat button can appear dead on phones until the provider finishes loading.', 'bspe-connect' ),
 	]
 );
 Components::close_card();
