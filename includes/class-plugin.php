@@ -72,6 +72,7 @@ final class Plugin {
 			External_Links::init();
 			QR_Indexer::init();
 			In_Post_Widget::init();
+			Hide_Untranslated_Languages::init();
 		}
 
 		// Daily prune of analytics events older than retention window.

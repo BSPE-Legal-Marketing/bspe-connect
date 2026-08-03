@@ -247,6 +247,7 @@ final class Settings_Saver {
 			'qr_max_width_px'        => max( 320, min( 2400, (int) ( $input['qr_max_width_px'] ?? 1240 ) ) ),
 			'external_links_new_tab' => ! empty( $input['external_links_new_tab'] ),
 			'hide_users_rest'        => ! empty( $input['hide_users_rest'] ),
+			'wpml_hide_untranslated' => ! empty( $input['wpml_hide_untranslated'] ),
 		];
 	}
 

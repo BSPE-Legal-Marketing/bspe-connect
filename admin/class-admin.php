@@ -131,6 +131,10 @@ final class Admin {
 		// on every wp-admin page so the gap doesn't go unnoticed.
 		add_action( 'admin_notices', [ self::class, 'render_license_notice' ] );
 
+		// Nudge on the plugin's own pages when WPML is running but the
+		// hide-untranslated-languages utility is still off.
+		add_action( 'admin_notices', [ self::class, 'render_wpml_notice' ] );
+
 		// Map the currently-active tab onto the right entry of the
 		// wp-admin sidebar flyout. Without this, the WP sidebar would
 		// always highlight the first submenu regardless of which tab
@@ -177,6 +181,38 @@ final class Admin {
 				<strong><?php echo esc_html( $headline ); ?>:</strong>
 				<?php echo esc_html( $body ); ?>
 				<a href="<?php echo esc_url( $tab_url ); ?>"><?php esc_html_e( 'Open the License tab', 'bspe-connect' ); ?> &rarr;</a>
+			</p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Info notice on the plugin's own admin pages when WPML is active
+	 * but the hide-untranslated-languages utility is off. Points the
+	 * admin at the General tab's Site utilities card where the toggle
+	 * lives. Intentionally NOT admin-wide: it is a suggestion, not an
+	 * error, so it only shows where plugin settings are being managed.
+	 */
+	public static function render_wpml_notice(): void {
+		if ( ! current_user_can( self::CAPABILITY ) ) {
+			return;
+		}
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || false === strpos( (string) $screen->id, self::PAGE_SLUG ) ) {
+			return;
+		}
+		if ( ! \BSPE\Connect\Hide_Untranslated_Languages::wpml_active() ) {
+			return;
+		}
+		if ( (bool) \BSPE\Connect\Settings::get( 'utilities.wpml_hide_untranslated', false ) ) {
+			return;
+		}
+		?>
+		<div class="notice notice-info">
+			<p>
+				<strong><?php esc_html_e( 'WPML detected:', 'bspe-connect' ); ?></strong>
+				<?php esc_html_e( 'the language switcher may be linking visitors to pages that have no translation yet. Turn on "Hide untranslated languages" under General, Site utilities, so each page only offers the languages it actually exists in.', 'bspe-connect' ); ?>
+				<a href="<?php echo esc_url( self::tab_url( 'general' ) ); ?>"><?php esc_html_e( 'Open Site utilities', 'bspe-connect' ); ?> &rarr;</a>
 			</p>
 		</div>
 		<?php

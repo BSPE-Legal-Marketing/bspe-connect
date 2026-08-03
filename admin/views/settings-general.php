@@ -256,6 +256,20 @@ Components::row(
 		'description' => __( 'WordPress publishes the list of authors at <code>/wp-json/wp/v2/users</code> by default — useful for usernames-then-passwords attacks. This toggle closes that endpoint for anonymous requests while leaving it open to logged-in admins.', 'bspe-connect' ),
 	]
 );
+
+Components::row(
+	__( 'Hide untranslated languages (WPML)', 'bspe-connect' ),
+	static function () use ( $utilities ): void {
+		Components::toggle( 'bspe[utilities][wpml_hide_untranslated]', ! empty( $utilities['wpml_hide_untranslated'] ), [
+			'label' => __( 'Remove switcher links to languages this page is not translated into', 'bspe-connect' ),
+		] );
+	},
+	[
+		'description' => \BSPE\Connect\Hide_Untranslated_Languages::wpml_active()
+			? __( 'WPML is active on this site. When a page has no published translation in a language (or only an automatic duplicate), that language is dropped from the WPML language switcher on that page, so visitors never land on untranslated copies or 404s. Archives, search and the 404 page are left alone. Off by default.', 'bspe-connect' )
+			: __( 'Only applies when WPML is installed. WPML is not active on this site right now, so this toggle has no effect.', 'bspe-connect' ),
+	]
+);
 Components::close_card();
 
 Components::close_form();
