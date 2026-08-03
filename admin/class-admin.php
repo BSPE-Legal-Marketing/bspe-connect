@@ -187,19 +187,15 @@ final class Admin {
 	}
 
 	/**
-	 * Info notice on the plugin's own admin pages when WPML is active
-	 * but its native "Skip language" behavior is off, so switchers link
-	 * visitors to homepages of languages without translation. Points the
-	 * admin at WPML's own setting (BSPE Connect only observes, see
-	 * WPML_Status). Intentionally NOT admin-wide: it is a suggestion,
-	 * not an error, so it only shows where plugin settings are managed.
+	 * Admin-wide warning when WPML is active but its native "Skip
+	 * language" behavior is off, so switchers link visitors to
+	 * homepages of languages without translation. Shown on every
+	 * wp-admin page (like the license notice) so it gets acted on, and
+	 * points at WPML's own setting (BSPE Connect only observes, see
+	 * WPML_Status). Disappears the moment Skip is turned on.
 	 */
 	public static function render_wpml_notice(): void {
 		if ( ! current_user_can( self::CAPABILITY ) ) {
-			return;
-		}
-		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( ! $screen || false === strpos( (string) $screen->id, self::PAGE_SLUG ) ) {
 			return;
 		}
 		if ( ! \BSPE\Connect\WPML_Status::wpml_active() ) {
@@ -209,7 +205,7 @@ final class Admin {
 			return; // skip is on (or unreadable): nothing to nag about
 		}
 		?>
-		<div class="notice notice-info">
+		<div class="notice notice-warning">
 			<p>
 				<strong><?php esc_html_e( 'WPML detected:', 'bspe-connect' ); ?></strong>
 				<?php esc_html_e( '"Skip language" is off, so the language switcher links visitors to the homepage of languages that have no translation yet. Turn it on under WPML, Languages, Language switcher options. The WPML check in General, Site utilities shows the current state and common gotchas.', 'bspe-connect' ); ?>
