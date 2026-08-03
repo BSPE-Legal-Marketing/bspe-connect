@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 3.6.6
+Stable tag: 3.6.7
 License: Proprietary
 
 Mobile contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -48,6 +48,7 @@ Reach out to BSPE Legal Marketing through your usual channel.
 
 == Changelog ==
 
+= 3.6.7 = Replace the 3.6.6 hide-untranslated-languages filter with a read-only WPML check: WPML ships this natively ("Skip language" under WPML, Languages, Language switcher options), so the toggle and filter are removed. The Site utilities card now shows whether Skip language is on or off, and flags published WPML duplicates: WPML counts a duplicate as a translation, so duplicated pages keep their languages visible even with Skip on, which is the usual reason the option seems broken. The admin notice now points at WPML's own setting when Skip is off.
 = 3.6.6 = New Site utility: "Hide untranslated languages (WPML)". When on, the WPML language switcher drops languages the current page has no published translation in (missing, draft, or automatic-duplicate translations), so visitors never land on untranslated copies or 404s. Archives, search and the 404 page are untouched, and the current language is never removed. Off by default; when WPML is detected and the toggle is off, an info notice on the plugin pages suggests enabling it. Licensed-gated like the other utilities.
 = 3.6.5 = Fix the Chat button doing nothing on phones (iOS Safari): delay-JS optimizers (NitroPack) hold every script until the first user interaction — on a phone that first interaction is the Chat tap itself, so the provider only started loading then and the old 2.5s retry gave up before its launcher mounted. The printed Intaker snippet now carries the optimizer opt-out attributes, the launcher retry polls for ~15s, hidden launchers (e.g. the hidden green Call button sharing .widget-button) are skipped, and the synthetic click now fires the full pointerdown/mousedown/up/click sequence for widgets that bind pointer events.
 = 3.6.4 = WPML / Polylang compatibility: new wpml-config.xml registers all settings-stored frontend strings (button labels, welcome bubble heading/message, chat button label, form headings/subheadings/submit/success message, mail subject/from name, firm name) as translatable admin texts in WPML String Translation. Template strings were already gettext ('bspe-connect' domain); the two hardcoded JS form-error strings are now localized too.

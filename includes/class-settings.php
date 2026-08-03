@@ -210,11 +210,6 @@ final class Settings {
 				'qr_max_width_px'        => 1240,
 				'external_links_new_tab' => true,
 				'hide_users_rest'        => true,
-				// Default OFF (unlike the other utilities): hiding switcher
-				// languages is a per-site content decision. When WPML is
-				// detected and this is off, an admin notice on the plugin
-				// pages suggests turning it on.
-				'wpml_hide_untranslated' => false,
 			],
 			// In-Post Widget — injects a saved shortcode into blog post
 			// content. Posts only (no pages / CPTs). Placement: before

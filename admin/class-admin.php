@@ -188,10 +188,11 @@ final class Admin {
 
 	/**
 	 * Info notice on the plugin's own admin pages when WPML is active
-	 * but the hide-untranslated-languages utility is off. Points the
-	 * admin at the General tab's Site utilities card where the toggle
-	 * lives. Intentionally NOT admin-wide: it is a suggestion, not an
-	 * error, so it only shows where plugin settings are being managed.
+	 * but its native "Skip language" behavior is off, so switchers link
+	 * visitors to homepages of languages without translation. Points the
+	 * admin at WPML's own setting (BSPE Connect only observes, see
+	 * WPML_Status). Intentionally NOT admin-wide: it is a suggestion,
+	 * not an error, so it only shows where plugin settings are managed.
 	 */
 	public static function render_wpml_notice(): void {
 		if ( ! current_user_can( self::CAPABILITY ) ) {
@@ -201,18 +202,18 @@ final class Admin {
 		if ( ! $screen || false === strpos( (string) $screen->id, self::PAGE_SLUG ) ) {
 			return;
 		}
-		if ( ! \BSPE\Connect\Hide_Untranslated_Languages::wpml_active() ) {
+		if ( ! \BSPE\Connect\WPML_Status::wpml_active() ) {
 			return;
 		}
-		if ( (bool) \BSPE\Connect\Settings::get( 'utilities.wpml_hide_untranslated', false ) ) {
-			return;
+		if ( false !== \BSPE\Connect\WPML_Status::skip_enabled() ) {
+			return; // skip is on (or unreadable): nothing to nag about
 		}
 		?>
 		<div class="notice notice-info">
 			<p>
 				<strong><?php esc_html_e( 'WPML detected:', 'bspe-connect' ); ?></strong>
-				<?php esc_html_e( 'the language switcher may be linking visitors to pages that have no translation yet. Turn on "Hide untranslated languages" under General, Site utilities, so each page only offers the languages it actually exists in.', 'bspe-connect' ); ?>
-				<a href="<?php echo esc_url( self::tab_url( 'general' ) ); ?>"><?php esc_html_e( 'Open Site utilities', 'bspe-connect' ); ?> &rarr;</a>
+				<?php esc_html_e( '"Skip language" is off, so the language switcher links visitors to the homepage of languages that have no translation yet. Turn it on under WPML, Languages, Language switcher options. The WPML check in General, Site utilities shows the current state and common gotchas.', 'bspe-connect' ); ?>
+				<a href="<?php echo esc_url( self::tab_url( 'general' ) ); ?>"><?php esc_html_e( 'Open the WPML check', 'bspe-connect' ); ?> &rarr;</a>
 			</p>
 		</div>
 		<?php

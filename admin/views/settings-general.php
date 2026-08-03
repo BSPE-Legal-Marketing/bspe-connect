@@ -258,16 +258,36 @@ Components::row(
 );
 
 Components::row(
-	__( 'Hide untranslated languages (WPML)', 'bspe-connect' ),
-	static function () use ( $utilities ): void {
-		Components::toggle( 'bspe[utilities][wpml_hide_untranslated]', ! empty( $utilities['wpml_hide_untranslated'] ), [
-			'label' => __( 'Remove switcher links to languages this page is not translated into', 'bspe-connect' ),
-		] );
+	__( 'WPML language switcher', 'bspe-connect' ),
+	static function (): void {
+		if ( ! \BSPE\Connect\WPML_Status::wpml_active() ) {
+			echo '<p style="margin:0;color:#646970;">' . esc_html__( 'WPML is not active on this site, nothing to check.', 'bspe-connect' ) . '</p>';
+			return;
+		}
+
+		$skip  = \BSPE\Connect\WPML_Status::skip_enabled();
+		$dupes = \BSPE\Connect\WPML_Status::published_duplicate_count();
+
+		if ( true === $skip ) {
+			echo '<p style="margin:0 0 6px;"><span style="color:#00a32a;font-weight:600;">&#10003; ' . esc_html__( '"Skip language" is ON', 'bspe-connect' ) . '</span>: ' . esc_html__( 'languages without translation are hidden from the switcher.', 'bspe-connect' ) . '</p>';
+		} elseif ( false === $skip ) {
+			echo '<p style="margin:0 0 6px;"><span style="color:#d63638;font-weight:600;">&#10007; ' . esc_html__( '"Skip language" is OFF', 'bspe-connect' ) . '</span>: ' . esc_html__( 'the switcher links visitors to the homepage of languages that have no translation. Turn it on under WPML, Languages, Language switcher options ("What to do for languages without translation").', 'bspe-connect' ) . '</p>';
+		} else {
+			echo '<p style="margin:0 0 6px;color:#646970;">' . esc_html__( 'Could not read the setting from WPML (never saved yet, so WPML\'s default applies). Check WPML, Languages, Language switcher options.', 'bspe-connect' ) . '</p>';
+		}
+
+		if ( $dupes > 0 ) {
+			echo '<p style="margin:0;color:#996800;">';
+			printf(
+				/* translators: %d: number of published duplicate posts/pages */
+				esc_html__( 'Heads up: %d published pages on this site are WPML duplicates. WPML counts a duplicate as a translation, so those languages keep showing in the switcher even with "Skip language" on. This is the usual reason the option seems not to work. Translate the duplicates (or delete them) to hide those languages.', 'bspe-connect' ),
+				(int) $dupes
+			);
+			echo '</p>';
+		}
 	},
 	[
-		'description' => \BSPE\Connect\Hide_Untranslated_Languages::wpml_active()
-			? __( 'WPML is active on this site. When a page has no published translation in a language (or only an automatic duplicate), that language is dropped from the WPML language switcher on that page, so visitors never land on untranslated copies or 404s. Archives, search and the 404 page are left alone. Off by default.', 'bspe-connect' )
-			: __( 'Only applies when WPML is installed. WPML is not active on this site right now, so this toggle has no effect.', 'bspe-connect' ),
+		'description' => __( 'Read-only check of WPML\'s own behavior for languages without translation. BSPE Connect does not change the switcher; it only reports whether WPML is set to skip untranslated languages, and flags duplicated content that makes the option look broken.', 'bspe-connect' ),
 	]
 );
 Components::close_card();
