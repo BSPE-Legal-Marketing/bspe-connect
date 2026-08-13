@@ -210,15 +210,6 @@ final class Settings {
 				'qr_max_width_px'        => 1240,
 				'external_links_new_tab' => true,
 				'hide_users_rest'        => true,
-				// WPML schema stripper: remove all JSON-LD from pages in a
-				// non-default language (SEOPress custom schemas are written
-				// in English only, so translated pages carry wrong schema).
-				// Default OFF: turning it on is a per-site decision, nudged
-				// by an admin notice when WPML is detected. The allow list
-				// holds IDs of translated pages that keep their own schema.
-				'wpml_strip_schema'      => false,
-				'wpml_schema_strip_langs' => 'es',
-				'wpml_schema_allow_ids'  => '',
 			],
 			// In-Post Widget — injects a saved shortcode into blog post
 			// content. Posts only (no pages / CPTs). Placement: before

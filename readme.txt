@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 3.7.1
+Stable tag: 3.7.2
 License: Proprietary
 
 Mobile contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -48,6 +48,7 @@ Reach out to BSPE Legal Marketing through your usual channel.
 
 == Changelog ==
 
+= 3.7.2 = Remove the WPML schema stripper (added 3.7.0, narrowed 3.7.1): SEOPress manual schemas turned out not to leak onto translated pages on these sites, so per-language schemas are simply managed in SEOPress on each translation and the feature is unnecessary. Functionally identical to 3.6.8. Leftover stripper settings in the stored option are ignored. The WPML Skip-language check and admin-wide notice (3.6.7/3.6.8) remain.
 = 3.7.1 = Schema stripper made surgical: acts only on configured languages (new "Strip on languages" field, default es; the site's default language is never stripped) and removes only UNMARKED application/ld+json blocks (script tags with no id/class attribute, which is how SEOPress prints Manual schemas including the Custom type). Schema tagged by its generator, like a theme's website-schema block, is kept. Verified against the live site markup: 3 JSON-LD blocks before, only the tagged website-schema after.
 = 3.7.0 = New Site utility: "Strip schema on translated pages (WPML)". SEOPress custom schemas are authored once in the default language, so WPML serves the same English JSON-LD on every translated page. When on, wp_head is buffered on non-default-language pages and every application/ld+json block is removed (hardened buffer unwinding, default language read from WPML instead of hardcoding 'en'). A "Pages allowed to keep schema" ID list exempts translated pages that have their own correct schema. Warnings: an admin-wide notice when WPML is active and the stripper is off, a notice on the edit screen of any translated page whose schema will be stripped (with the ID to allow), and the same note injected into the SEOPress Schemas panel itself. Off by default; license-gated.
 = 3.6.8 = The WPML "Skip language is off" notice is now shown on every wp-admin page (yellow warning, like the license notice) instead of only on the plugin's own pages, so it gets seen and fixed. It disappears as soon as Skip language is turned on in WPML.
