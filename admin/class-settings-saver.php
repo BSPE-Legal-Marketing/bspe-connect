@@ -248,6 +248,23 @@ final class Settings_Saver {
 			'external_links_new_tab' => ! empty( $input['external_links_new_tab'] ),
 			'hide_users_rest'        => ! empty( $input['hide_users_rest'] ),
 			'wpml_strip_schema'      => ! empty( $input['wpml_strip_schema'] ),
+			// Language codes only ('es', 'pt-br'), lowercased, deduped.
+			'wpml_schema_strip_langs' => implode(
+				', ',
+				array_values(
+					array_unique(
+						array_filter(
+							array_map(
+								static function ( $piece ): string {
+									$piece = strtolower( trim( (string) $piece ) );
+									return preg_match( '/^[a-z]{2}(-[a-z0-9]{2,8})?$/', $piece ) ? $piece : '';
+								},
+								preg_split( '/[\s,]+/', (string) ( $input['wpml_schema_strip_langs'] ?? '' ) ) ?: []
+							)
+						)
+					)
+				)
+			),
 			// Keep only digits, commas and whitespace, then normalize to a
 			// clean comma separated ID list.
 			'wpml_schema_allow_ids'  => implode(

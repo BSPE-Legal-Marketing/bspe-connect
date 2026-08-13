@@ -300,8 +300,21 @@ Components::row(
 	},
 	[
 		'description' => \BSPE\Connect\WPML_Status::wpml_active()
-			? __( 'SEOPress custom schemas are written once, in the default language, so WPML serves the same English schema on every translated page, which is wrong structured data for those URLs. When on, every <code>application/ld+json</code> block is stripped from the head of non-default-language pages. Pages listed below keep their schema.', 'bspe-connect' )
+			? __( 'SEOPress custom schemas are written once, in the default language, so WPML serves the same English schema on every translated page, which is wrong structured data for those URLs. When on, unmarked <code>application/ld+json</code> blocks (no id/class on the script tag, which is how SEOPress prints Manual schemas, the Custom type included) are stripped from the head of pages in the languages below. Schema tagged by its generator, like the theme\'s <code>website-schema</code>, is kept. Pages on the allow list keep everything.', 'bspe-connect' )
 			: __( 'Only applies when WPML is installed. WPML is not active on this site right now, so this toggle has no effect.', 'bspe-connect' ),
+	]
+);
+
+Components::row(
+	__( 'Strip on languages', 'bspe-connect' ),
+	static function () use ( $utilities ): void {
+		Components::text( 'bspe[utilities][wpml_schema_strip_langs]', (string) ( $utilities['wpml_schema_strip_langs'] ?? 'es' ), [
+			'placeholder' => 'es',
+		] );
+	},
+	[
+		'id'          => 'bspe-utilities-wpml_schema_strip_langs',
+		'description' => __( 'Comma separated WPML language codes the stripper acts on. Default: <code>es</code> (Spanish only). The site\'s default language is never stripped, even if listed here.', 'bspe-connect' ),
 	]
 );
 

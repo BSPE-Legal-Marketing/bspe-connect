@@ -13,8 +13,12 @@ defined( 'ABSPATH' ) || exit;
  * SEOPress (and similar) custom schemas are written once, in the site's
  * default language. WPML then serves the SAME English JSON-LD on every
  * Spanish page, which is wrong structured data for that URL. This
- * utility buffers wp_head on non-default-language pages and removes
- * every <script type="application/ld+json"> block from it.
+ * utility buffers wp_head on pages in the configured strip languages
+ * (Spanish by default) and removes the UNMARKED
+ * <script type="application/ld+json"> blocks from it: tags with no
+ * id/class attribute, which is how SEOPress outputs manual schemas.
+ * Blocks tagged by their generator (like the theme's
+ * <script id="website-schema">) survive.
  *
  * Allow list: individual translated pages that DO have their own
  * correct schema can be exempted by ID (utilities.wpml_schema_allow_ids,
@@ -46,8 +50,28 @@ final class WPML_Schema_Stripper {
 	}
 
 	/**
-	 * True when the current frontend request is a translated-language
-	 * page whose schema should be stripped.
+	 * Language codes the stripper acts on. Managed in Site utilities
+	 * (utilities.wpml_schema_strip_langs, comma separated); falls back
+	 * to Spanish when the field is empty, matching the original
+	 * SEOPress-writes-English-only problem this exists for.
+	 *
+	 * @return string[] Lowercase codes, e.g. ['es'] or ['es', 'pt-br'].
+	 */
+	public static function strip_langs(): array {
+		$raw   = strtolower( (string) Settings::get( 'utilities.wpml_schema_strip_langs', 'es' ) );
+		$langs = [];
+		foreach ( preg_split( '/[\s,]+/', $raw ) ?: [] as $piece ) {
+			if ( preg_match( '/^[a-z]{2}(-[a-z0-9]{2,8})?$/', $piece ) ) {
+				$langs[] = $piece;
+			}
+		}
+		return $langs ? array_values( array_unique( $langs ) ) : [ 'es' ];
+	}
+
+	/**
+	 * True when the current frontend request is a page in one of the
+	 * configured strip languages (Spanish by default) whose schema
+	 * should be stripped.
 	 */
 	public static function should_strip(): bool {
 		if ( is_admin() ) {
@@ -58,11 +82,15 @@ final class WPML_Schema_Stripper {
 		if ( null === $lang || '' === (string) $lang ) {
 			return false;
 		}
-		$default = apply_filters( 'wpml_default_language', null );
-		if ( null === $default || '' === (string) $default ) {
-			$default = 'en'; // matches the original site setup
+		if ( ! in_array( strtolower( (string) $lang ), self::strip_langs(), true ) ) {
+			return false;
 		}
-		if ( (string) $lang === (string) $default ) {
+		// Safety: never strip the site's DEFAULT language, even if it
+		// was (mis)listed in the strip languages. The stripper exists
+		// for translations carrying the default language's schema, not
+		// for the original pages.
+		$default = apply_filters( 'wpml_default_language', null );
+		if ( null !== $default && '' !== (string) $default && strtolower( (string) $lang ) === strtolower( (string) $default ) ) {
 			return false;
 		}
 		// Translated pages allowed to keep their own schema output.
@@ -95,8 +123,9 @@ final class WPML_Schema_Stripper {
 	/**
 	 * Whether a specific post would have its schema stripped (used by
 	 * the admin warnings on the post edit screen). True when the
-	 * feature is on, the post's WPML language differs from the default
-	 * language, and the post is not on the allow list.
+	 * feature is on, the post's WPML language is one of the configured
+	 * strip languages (and not the site default), and the post is not
+	 * on the allow list.
 	 */
 	public static function post_gets_stripped( int $post_id ): bool {
 		if ( $post_id <= 0 ) {
@@ -112,11 +141,12 @@ final class WPML_Schema_Stripper {
 		if ( ! is_array( $details ) || empty( $details['language_code'] ) ) {
 			return false;
 		}
-		$default = apply_filters( 'wpml_default_language', null );
-		if ( null === $default || '' === (string) $default ) {
-			$default = 'en';
+		$lang = strtolower( (string) $details['language_code'] );
+		if ( ! in_array( $lang, self::strip_langs(), true ) ) {
+			return false;
 		}
-		if ( (string) $details['language_code'] === (string) $default ) {
+		$default = apply_filters( 'wpml_default_language', null );
+		if ( null !== $default && '' !== (string) $default && $lang === strtolower( (string) $default ) ) {
 			return false;
 		}
 		return ! in_array( $post_id, self::allowed_ids(), true );
@@ -142,8 +172,16 @@ final class WPML_Schema_Stripper {
 			ob_end_flush();
 		}
 		$head = (string) ob_get_clean();
+		// Strip only UNMARKED JSON-LD blocks: script tags whose opening
+		// tag carries no id= and no class= attribute. SEOPress prints
+		// manual schemas (the Custom data type included) as bare
+		// <script type="application/ld+json"> with no identifying
+		// attribute, while schemas that should survive are tagged by
+		// their generators (e.g. the theme's <script id="website-schema">).
+		// The negative lookahead scans the whole opening tag, so the
+		// attribute order does not matter.
 		echo preg_replace(
-			'#<script[^>]*type=["\']application/ld\+json["\'][^>]*>.*?</script>#si',
+			'#<script(?![^>]*\b(?:id|class)\s*=)[^>]*type=["\']application/ld\+json["\'][^>]*>.*?</script>#si',
 			'',
 			$head
 		); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- re-emitting already-escaped head markup minus JSON-LD blocks

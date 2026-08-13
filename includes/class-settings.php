@@ -217,6 +217,7 @@ final class Settings {
 				// by an admin notice when WPML is detected. The allow list
 				// holds IDs of translated pages that keep their own schema.
 				'wpml_strip_schema'      => false,
+				'wpml_schema_strip_langs' => 'es',
 				'wpml_schema_allow_ids'  => '',
 			],
 			// In-Post Widget — injects a saved shortcode into blog post
