@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 3.6.8
+Stable tag: 3.7.0
 License: Proprietary
 
 Mobile contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -48,6 +48,7 @@ Reach out to BSPE Legal Marketing through your usual channel.
 
 == Changelog ==
 
+= 3.7.0 = New Site utility: "Strip schema on translated pages (WPML)". SEOPress custom schemas are authored once in the default language, so WPML serves the same English JSON-LD on every translated page. When on, wp_head is buffered on non-default-language pages and every application/ld+json block is removed (hardened buffer unwinding, default language read from WPML instead of hardcoding 'en'). A "Pages allowed to keep schema" ID list exempts translated pages that have their own correct schema. Warnings: an admin-wide notice when WPML is active and the stripper is off, a notice on the edit screen of any translated page whose schema will be stripped (with the ID to allow), and the same note injected into the SEOPress Schemas panel itself. Off by default; license-gated.
 = 3.6.8 = The WPML "Skip language is off" notice is now shown on every wp-admin page (yellow warning, like the license notice) instead of only on the plugin's own pages, so it gets seen and fixed. It disappears as soon as Skip language is turned on in WPML.
 = 3.6.7 = Replace the 3.6.6 hide-untranslated-languages filter with a read-only WPML check: WPML ships this natively ("Skip language" under WPML, Languages, Language switcher options), so the toggle and filter are removed. The Site utilities card now shows whether Skip language is on or off, and flags published WPML duplicates: WPML counts a duplicate as a translation, so duplicated pages keep their languages visible even with Skip on, which is the usual reason the option seems broken. The admin notice now points at WPML's own setting when Skip is off.
 = 3.6.6 = New Site utility: "Hide untranslated languages (WPML)". When on, the WPML language switcher drops languages the current page has no published translation in (missing, draft, or automatic-duplicate translations), so visitors never land on untranslated copies or 404s. Archives, search and the 404 page are untouched, and the current language is never removed. Off by default; when WPML is detected and the toggle is off, an info notice on the plugin pages suggests enabling it. Licensed-gated like the other utilities.

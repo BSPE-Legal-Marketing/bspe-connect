@@ -290,6 +290,33 @@ Components::row(
 		'description' => __( 'Read-only check of WPML\'s own behavior for languages without translation. BSPE Connect does not change the switcher; it only reports whether WPML is set to skip untranslated languages, and flags duplicated content that makes the option look broken.', 'bspe-connect' ),
 	]
 );
+
+Components::row(
+	__( 'Strip schema on translated pages (WPML)', 'bspe-connect' ),
+	static function () use ( $utilities ): void {
+		Components::toggle( 'bspe[utilities][wpml_strip_schema]', ! empty( $utilities['wpml_strip_schema'] ), [
+			'label' => __( 'Remove all JSON-LD structured data from pages in a non-default language', 'bspe-connect' ),
+		] );
+	},
+	[
+		'description' => \BSPE\Connect\WPML_Status::wpml_active()
+			? __( 'SEOPress custom schemas are written once, in the default language, so WPML serves the same English schema on every translated page, which is wrong structured data for those URLs. When on, every <code>application/ld+json</code> block is stripped from the head of non-default-language pages. Pages listed below keep their schema.', 'bspe-connect' )
+			: __( 'Only applies when WPML is installed. WPML is not active on this site right now, so this toggle has no effect.', 'bspe-connect' ),
+	]
+);
+
+Components::row(
+	__( 'Pages allowed to keep schema', 'bspe-connect' ),
+	static function () use ( $utilities ): void {
+		Components::text( 'bspe[utilities][wpml_schema_allow_ids]', (string) ( $utilities['wpml_schema_allow_ids'] ?? '' ), [
+			'placeholder' => __( 'e.g. 1234, 5678', 'bspe-connect' ),
+		] );
+	},
+	[
+		'id'          => 'bspe-utilities-wpml_schema_allow_ids',
+		'description' => __( 'Comma separated page/post IDs. A translated page listed here keeps its own schema output even with the stripper on. Use it once a page has its own correct schema in its own language. The page ID is shown in the edit screen URL (post=...) and in the schema warning on translated pages.', 'bspe-connect' ),
+	]
+);
 Components::close_card();
 
 Components::close_form();

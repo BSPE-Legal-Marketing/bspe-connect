@@ -247,6 +247,22 @@ final class Settings_Saver {
 			'qr_max_width_px'        => max( 320, min( 2400, (int) ( $input['qr_max_width_px'] ?? 1240 ) ) ),
 			'external_links_new_tab' => ! empty( $input['external_links_new_tab'] ),
 			'hide_users_rest'        => ! empty( $input['hide_users_rest'] ),
+			'wpml_strip_schema'      => ! empty( $input['wpml_strip_schema'] ),
+			// Keep only digits, commas and whitespace, then normalize to a
+			// clean comma separated ID list.
+			'wpml_schema_allow_ids'  => implode(
+				', ',
+				array_values(
+					array_unique(
+						array_filter(
+							array_map(
+								'intval',
+								preg_split( '/[\s,]+/', (string) ( $input['wpml_schema_allow_ids'] ?? '' ) ) ?: []
+							)
+						)
+					)
+				)
+			),
 		];
 	}
 

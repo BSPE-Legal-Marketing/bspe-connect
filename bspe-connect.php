@@ -3,7 +3,7 @@
  * Plugin Name:       BSPE Connect
  * Plugin URI:        https://github.com/BSPE-Legal-Marketing/bspe-connect
  * Description:       Mobile contact bar with lead capture, by BSPE Legal Marketing.
- * Version:           3.6.8
+ * Version:           3.7.0
  * Requires at least: 6.0
  * Requires PHP:      8.0
  * Author:            BSPE Legal Marketing
@@ -18,7 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'BSPE_CONNECT_VERSION', '3.6.8' );
+define( 'BSPE_CONNECT_VERSION', '3.7.0' );
 define( 'BSPE_CONNECT_FILE', __FILE__ );
 define( 'BSPE_CONNECT_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BSPE_CONNECT_URL', plugin_dir_url( __FILE__ ) );
@@ -43,6 +43,7 @@ require_once BSPE_CONNECT_DIR . 'includes/class-hide-users-rest.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-external-links.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-qr-indexer.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-wpml-status.php';
+require_once BSPE_CONNECT_DIR . 'includes/class-wpml-schema-stripper.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-in-post-widget.php';
 require_once BSPE_CONNECT_DIR . 'admin/class-admin.php';
 require_once BSPE_CONNECT_DIR . 'admin/class-settings-saver.php';
