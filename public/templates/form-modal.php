@@ -86,9 +86,10 @@ $render_error = static function ( string $field ): void {
 
 		<header class="bspe-connect__modal-header">
 			<div class="bspe-connect__modal-header-text">
-				<h2 id="bspe-connect-modal-heading" class="bspe-connect__modal-heading" data-bspe-modal-heading>
+				<?php // A <p>, not a heading: the modal title ("Send us an email" / "Send us a text") must stay out of the page's H-tag outline for SEO. Styling is class-based and identical either way. ?>
+				<p id="bspe-connect-modal-heading" class="bspe-connect__modal-heading" data-bspe-modal-heading>
 					<?php echo esc_html( $email_heading ); ?>
-				</h2>
+				</p>
 				<p class="bspe-connect__modal-subheading" data-bspe-modal-subheading>
 					<?php echo esc_html( $email_subheading ); ?>
 				</p>

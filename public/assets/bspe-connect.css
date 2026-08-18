@@ -503,9 +503,10 @@
 	flex-shrink: 0;
 }
 
-/* modal-heading is an <h2>, modal-subheading is a <p> — both get the
-   #bspe-connect prefix so theme `h2` / `p` rules can't override the
-   plugin's spacing (see the bubble-heading note above). */
+/* modal-heading and modal-subheading are both <p> elements (the title
+   is deliberately NOT an H tag, so it stays out of the page's heading
+   outline). Both get the #bspe-connect prefix so theme `p` rules can't
+   override the plugin's spacing (see the bubble-heading note above). */
 #bspe-connect .bspe-connect__modal-heading {
 	margin: 0;
 	font-size: 18px;
