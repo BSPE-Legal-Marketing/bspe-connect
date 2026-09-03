@@ -31,6 +31,7 @@ tests
 # Dev docs (the spec ships with the repo but not in client installs)
 bspe-connect-spec.md
 README-dev.md
+docs
 
 # BSPE Connect Manager — sibling project, separate private repo, never
 # ships with the plugin. Already gitignored upstream but kept here as

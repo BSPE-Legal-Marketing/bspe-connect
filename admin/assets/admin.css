@@ -2418,3 +2418,75 @@
 		gap: 10px;
 	}
 }
+
+
+/* ------------------------------------------------------------------ */
+/*  Translate tab                                                      */
+/* ------------------------------------------------------------------ */
+.bspe-translate__urlrow {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+.bspe-translate__urlrow .bspe-input { flex: 1 1 auto; }
+.bspe-translate__error {
+	margin: 8px 0 0;
+	color: #a92a3a;
+	font-size: 13px;
+}
+.bspe-translate__retry { margin-left: 6px; min-height: 30px; padding: 4px 10px; font-size: 12px; }
+.bspe-translate__page {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 12px;
+	align-items: baseline;
+	font-size: 13px;
+}
+.bspe-translate__page strong { font-size: 14px; }
+.bspe-translate__meta { color: rgba(53, 30, 40, 0.6); font-size: 12px; }
+.bspe-translate__warn {
+	margin: 8px 0 0;
+	padding: 8px 12px;
+	border-radius: 8px;
+	background: rgba(220, 160, 30, 0.12);
+	border: 1px solid rgba(220, 160, 30, 0.4);
+	color: #6f5200;
+	font-size: 13px;
+}
+.bspe-translate__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	align-items: center;
+}
+.bspe-translate__actions .bspe-select-wrap { min-width: 180px; }
+.bspe-translate__overwrite { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; }
+.bspe-translate__progress { margin-top: 14px; }
+.bspe-translate__bar {
+	height: 8px;
+	border-radius: 999px;
+	background: rgba(53, 30, 40, 0.10);
+	overflow: hidden;
+}
+.bspe-translate__bar span {
+	display: block;
+	height: 100%;
+	width: 2%;
+	border-radius: 999px;
+	background: var(--bspe-teal, #3aafb9);
+	transition: width .3s ease;
+}
+.bspe-translate__status { margin: 6px 0 0; font-size: 12px; color: rgba(53, 30, 40, 0.7); }
+.bspe-translate__result {
+	margin-top: 14px;
+	padding: 10px 14px;
+	border-radius: 8px;
+	background: rgba(58, 175, 185, 0.10);
+	border: 1px solid rgba(58, 175, 185, 0.30);
+	font-size: 13px;
+}
+.bspe-translate__result p { margin: 0; }
+.bspe-translate__result a { margin-left: 8px; }
+.bspe-translate__blockers,
+.bspe-translate__notes { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.5; }
+.bspe-translate__blockers li { color: #a92a3a; }
