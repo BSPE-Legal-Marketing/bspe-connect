@@ -44,15 +44,13 @@ require_once BSPE_CONNECT_DIR . 'includes/class-external-links.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-qr-indexer.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-wpml-status.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-in-post-widget.php';
-require_once BSPE_CONNECT_DIR . 'includes/class-claude-client.php';
 require_once BSPE_CONNECT_DIR . 'includes/class-translate-extractor.php';
-require_once BSPE_CONNECT_DIR . 'includes/class-translate-job.php';
+require_once BSPE_CONNECT_DIR . 'includes/class-translate-endpoint.php';
 require_once BSPE_CONNECT_DIR . 'admin/class-admin.php';
 require_once BSPE_CONNECT_DIR . 'admin/class-settings-saver.php';
 require_once BSPE_CONNECT_DIR . 'admin/class-submissions-controller.php';
 require_once BSPE_CONNECT_DIR . 'admin/class-analytics-controller.php';
 require_once BSPE_CONNECT_DIR . 'admin/class-license-controller.php';
-require_once BSPE_CONNECT_DIR . 'admin/class-translate-controller.php';
 require_once BSPE_CONNECT_DIR . 'admin/views/components.php';
 
 register_activation_hook( __FILE__, [ 'BSPE\\Connect\\Activator', 'activate' ] );
