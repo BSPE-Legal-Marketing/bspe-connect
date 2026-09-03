@@ -105,6 +105,44 @@ final class Translate_Job {
 		delete_transient( self::TRANSIENT_PREFIX . preg_replace( '/[^A-Za-z0-9]/', '', $id ) );
 	}
 
+	public const HISTORY_OPTION = 'bspe_connect_translate_history';
+	public const HISTORY_MAX    = 50;
+
+	/**
+	 * Append a completed job to the cost history (last HISTORY_MAX kept)
+	 * and bump the lifetime totals. Autoload off; only the Translate tab
+	 * reads it.
+	 *
+	 * @param array<string,mixed> $entry time, source_id, target_id, title, lang, model, input, output, cost
+	 */
+	public static function record_history( array $entry ): void {
+		$h = self::history();
+		$h['jobs'][] = $entry;
+		if ( count( $h['jobs'] ) > self::HISTORY_MAX ) {
+			$h['jobs'] = array_slice( $h['jobs'], -self::HISTORY_MAX );
+		}
+		$h['total_cost']  += (float) ( $entry['cost'] ?? 0 );
+		$h['total_jobs']  += 1;
+		$h['total_input'] += (int) ( $entry['input'] ?? 0 );
+		$h['total_output'] += (int) ( $entry['output'] ?? 0 );
+		update_option( self::HISTORY_OPTION, $h, false );
+	}
+
+	/** @return array{jobs: array<int,array<string,mixed>>, total_cost: float, total_jobs: int, total_input: int, total_output: int} */
+	public static function history(): array {
+		$h = get_option( self::HISTORY_OPTION, [] );
+		if ( ! is_array( $h ) ) {
+			$h = [];
+		}
+		return [
+			'jobs'         => isset( $h['jobs'] ) && is_array( $h['jobs'] ) ? $h['jobs'] : [],
+			'total_cost'   => (float) ( $h['total_cost'] ?? 0 ),
+			'total_jobs'   => (int) ( $h['total_jobs'] ?? 0 ),
+			'total_input'  => (int) ( $h['total_input'] ?? 0 ),
+			'total_output' => (int) ( $h['total_output'] ?? 0 ),
+		];
+	}
+
 	/** @param array<string,mixed> $job */
 	public static function total_chars( array $job ): int {
 		$n = 0;
