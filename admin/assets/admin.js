@@ -51,7 +51,6 @@
 		var resultView = q('[data-bspe-translate-result-view]');
 		var resultEdit = q('[data-bspe-translate-result-edit]');
 		var resultUse  = q('[data-bspe-translate-result-usage]');
-		var estimateEl = q('[data-bspe-translate-estimate]');
 
 		var page = null;   // lookup result
 		var job  = null;   // { id, total }
@@ -147,10 +146,6 @@
 				titleEl.textContent = data.title;
 				metaEl.textContent = fmt(i18n.meta || '', data.type_label, data.status, data.language, num(data.segments), num(data.chars), data.elementor ? (i18n.elementor || '') : '');
 				editLink.href = data.edit_url;
-				if (estimateEl) {
-					estimateEl.textContent = fmt(i18n.estimate || '', data.estimate, data.model);
-					estimateEl.hidden = false;
-				}
 				panels.forEach(function (p) { p.hidden = false; });
 				refreshExisting();
 			}).catch(function (e) {
@@ -198,11 +193,7 @@
 				resultText.textContent = data.created ? (i18n.done || 'Done.') : (i18n.updated || 'Updated.');
 				resultView.href = data.view_url;
 				resultEdit.href = data.edit_url;
-				resultUse.textContent = data.usage ? fmt(i18n.usage || '', data.cost, num(data.usage.input), num(data.usage.output), data.total_cost, num(data.total_jobs)) : '';
-				var totalEl = document.querySelector('[data-bspe-translate-total]');
-				if (totalEl && data.total_cost) { totalEl.textContent = data.total_cost; }
-				var jobsEl = document.querySelector('[data-bspe-translate-total-jobs]');
-				if (jobsEl) { jobsEl.textContent = num(data.total_jobs); }
+				resultUse.textContent = data.usage ? fmt(i18n.usage || '', num(data.usage.input), num(data.usage.output)) : '';
 				result.hidden = false;
 				job = null;
 				// Refresh lookup so the "already exists" state is accurate.

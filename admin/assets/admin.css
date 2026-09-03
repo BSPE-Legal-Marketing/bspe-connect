@@ -2490,20 +2490,3 @@
 .bspe-translate__blockers,
 .bspe-translate__notes { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.5; }
 .bspe-translate__blockers li { color: #a92a3a; }
-
-.bspe-translate__estimate { margin: 8px 0 0; font-size: 13px; color: var(--bspe-plum, #351e28); }
-.bspe-translate__totals { display: flex; flex-wrap: wrap; gap: 12px; }
-.bspe-translate__total {
-	min-width: 140px;
-	padding: 10px 14px;
-	border-radius: 10px;
-	background: rgba(53, 30, 40, 0.04);
-	border: 1px solid rgba(53, 30, 40, 0.10);
-}
-.bspe-translate__total-value { display: block; font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.bspe-translate__total-label { display: block; font-size: 12px; color: rgba(53, 30, 40, 0.6); }
-.bspe-translate__tablewrap { overflow-x: auto; }
-.bspe-translate__table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.bspe-translate__table th, .bspe-translate__table td { padding: 6px 10px; border-bottom: 1px solid rgba(53, 30, 40, 0.10); text-align: left; white-space: nowrap; }
-.bspe-translate__table th { font-size: 12px; color: rgba(53, 30, 40, 0.6); font-weight: 600; }
-.bspe-translate__table .is-num { text-align: right; font-variant-numeric: tabular-nums; }

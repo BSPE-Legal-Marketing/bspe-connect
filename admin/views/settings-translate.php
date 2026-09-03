@@ -64,7 +64,6 @@ if ( ! $available ) : ?>
 					<span class="bspe-translate__meta" data-bspe-translate-meta></span>
 					<a href="#" target="_blank" rel="noopener" data-bspe-translate-edit><?php esc_html_e( 'Edit original', 'bspe-connect' ); ?></a>
 				</div>
-				<p class="bspe-translate__estimate" hidden data-bspe-translate-estimate></p>
 				<p class="bspe-translate__warn" hidden data-bspe-translate-existing></p>
 				<p class="bspe-translate__warn" hidden data-bspe-translate-langwarn></p>
 			</div>
@@ -110,76 +109,6 @@ if ( ! $available ) : ?>
 <?php endif;
 Components::close_card();
 
-/* ----------------- Costs ----------------- */
-$history = \BSPE\Connect\Translate_Job::history();
-Components::open_card(
-	__( 'Translation costs', 'bspe-connect' ),
-	__( 'What this site has spent on Claude for translations, computed from the tokens each job used at the model\'s list price. Billed by Anthropic to the account that owns the API key.', 'bspe-connect' )
-);
-?>
-<div class="bspe-row">
-	<div class="bspe-row__label-col"><span class="bspe-row__label"><?php esc_html_e( 'Total spent', 'bspe-connect' ); ?></span></div>
-	<div class="bspe-row__control-col">
-		<div class="bspe-translate__totals">
-			<div class="bspe-translate__total">
-				<span class="bspe-translate__total-value" data-bspe-translate-total><?php echo esc_html( Claude_Client::format_cost( $history['total_cost'] ) ); ?></span>
-				<span class="bspe-translate__total-label"><?php esc_html_e( 'all time', 'bspe-connect' ); ?></span>
-			</div>
-			<div class="bspe-translate__total">
-				<span class="bspe-translate__total-value" data-bspe-translate-total-jobs><?php echo esc_html( number_format_i18n( $history['total_jobs'] ) ); ?></span>
-				<span class="bspe-translate__total-label"><?php esc_html_e( 'pages translated', 'bspe-connect' ); ?></span>
-			</div>
-			<div class="bspe-translate__total">
-				<span class="bspe-translate__total-value"><?php echo esc_html( $history['total_jobs'] > 0 ? Claude_Client::format_cost( $history['total_cost'] / $history['total_jobs'] ) : '—' ); ?></span>
-				<span class="bspe-translate__total-label"><?php esc_html_e( 'average per page', 'bspe-connect' ); ?></span>
-			</div>
-		</div>
-		<p class="bspe-row__description" style="margin-top:8px;">
-			<?php
-			foreach ( Claude_Client::MODELS as $m => $label ) {
-				$pr = Claude_Client::PRICES[ $m ];
-				printf( '%s: $%s / $%s per million tokens in / out. ', esc_html( $label ), esc_html( number_format( $pr[0], 2 ) ), esc_html( number_format( $pr[1], 2 ) ) );
-			}
-			?>
-		</p>
-	</div>
-</div>
-<?php if ( ! empty( $history['jobs'] ) ) : ?>
-<div class="bspe-row">
-	<div class="bspe-row__label-col"><span class="bspe-row__label"><?php esc_html_e( 'Recent jobs', 'bspe-connect' ); ?></span></div>
-	<div class="bspe-row__control-col">
-		<div class="bspe-translate__tablewrap">
-			<table class="bspe-translate__table">
-				<thead><tr>
-					<th><?php esc_html_e( 'Date', 'bspe-connect' ); ?></th>
-					<th><?php esc_html_e( 'Page', 'bspe-connect' ); ?></th>
-					<th><?php esc_html_e( 'Lang', 'bspe-connect' ); ?></th>
-					<th><?php esc_html_e( 'Model', 'bspe-connect' ); ?></th>
-					<th class="is-num"><?php esc_html_e( 'Tokens in / out', 'bspe-connect' ); ?></th>
-					<th class="is-num"><?php esc_html_e( 'Cost', 'bspe-connect' ); ?></th>
-				</tr></thead>
-				<tbody>
-				<?php foreach ( array_reverse( $history['jobs'] ) as $j ) : ?>
-					<tr>
-						<td><?php echo esc_html( mysql2date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), (string) ( $j['time'] ?? '' ) ) ); ?></td>
-						<td>
-							<?php $tid = (int) ( $j['target_id'] ?? 0 ); $edit = $tid > 0 ? get_edit_post_link( $tid, 'raw' ) : ''; ?>
-							<?php if ( $edit ) : ?><a href="<?php echo esc_url( $edit ); ?>"><?php echo esc_html( (string) ( $j['title'] ?? '' ) ); ?></a><?php else : ?><?php echo esc_html( (string) ( $j['title'] ?? '' ) ); ?><?php endif; ?>
-						</td>
-						<td><?php echo esc_html( strtoupper( (string) ( $j['lang'] ?? '' ) ) ); ?></td>
-						<td><?php echo esc_html( str_replace( 'claude-', '', (string) ( $j['model'] ?? '' ) ) ); ?></td>
-						<td class="is-num"><?php echo esc_html( number_format_i18n( (int) ( $j['input'] ?? 0 ) ) . ' / ' . number_format_i18n( (int) ( $j['output'] ?? 0 ) ) ); ?></td>
-						<td class="is-num"><?php echo esc_html( Claude_Client::format_cost( (float) ( $j['cost'] ?? 0 ) ) ); ?></td>
-					</tr>
-				<?php endforeach; ?>
-				</tbody>
-			</table>
-		</div>
-	</div>
-</div>
-<?php endif;
-Components::close_card();
-
 /* ----------------- Settings ----------------- */
 Components::open_form( 'translate', $action_url );
 Components::open_card(
@@ -207,7 +136,7 @@ Components::row(
 	static function () use ( $translate ): void {
 		Components::select( 'bspe[translate][model]', (string) ( $translate['model'] ?? 'claude-opus-5' ), Claude_Client::MODELS );
 	},
-	[ 'description' => __( 'Opus gives the most natural legal Spanish. A typical page costs a few cents; a very long Elementor page well under a dollar. Exact cost is shown after every job and totalled above.', 'bspe-connect' ) ]
+	[ 'description' => __( 'Opus gives the most natural legal Spanish. A typical page costs a few cents; a very long Elementor page well under a dollar.', 'bspe-connect' ) ]
 );
 Components::row(
 	__( 'Default language', 'bspe-connect' ),

@@ -114,13 +114,11 @@ final class Translate_Controller {
 
 		$job = Translate_Job::create( $post_id, (string) $info['language'], $target, $overwrite, $extracted['segments'], $extracted['map'] );
 
-		$chars = Translate_Job::total_chars( $job );
 		wp_send_json_success( [
 			'job'      => $job['id'],
 			'batches'  => count( $job['batches'] ),
 			'segments' => count( $job['segments'] ),
-			'chars'    => $chars,
-			'estimate' => Claude_Client::format_cost( Claude_Client::estimate_cost( self::model(), $chars, count( $job['batches'] ) ) ),
+			'chars'    => Translate_Job::total_chars( $job ),
 		] );
 	}
 
@@ -257,21 +255,6 @@ final class Translate_Controller {
 
 		Translate_Job::delete( (string) $job['id'] );
 
-		$model = self::model();
-		$cost  = Claude_Client::cost( $model, (int) $job['usage']['input'], (int) $job['usage']['output'] );
-		Translate_Job::record_history( [
-			'time'      => current_time( 'mysql' ),
-			'source_id' => $source_id,
-			'target_id' => (int) $target_id,
-			'title'     => (string) $source->post_title,
-			'lang'      => $target,
-			'model'     => $model,
-			'input'     => (int) $job['usage']['input'],
-			'output'    => (int) $job['usage']['output'],
-			'cost'      => $cost,
-			'user'      => get_current_user_id(),
-		] );
-
 		Logger::log( 'info', 'Translate: page translated', [
 			'source_id'     => $source_id,
 			'target_id'     => (int) $target_id,
@@ -281,20 +264,15 @@ final class Translate_Controller {
 			'segments'      => count( (array) $job['segments'] ),
 			'input_tokens'  => (int) $job['usage']['input'],
 			'output_tokens' => (int) $job['usage']['output'],
-			'model'         => $model,
-			'cost_usd'      => round( $cost, 4 ),
+			'model'         => (string) Settings::get( 'translate.model', 'claude-opus-5' ),
 		] );
 
-		$history = Translate_Job::history();
 		wp_send_json_success( [
-			'id'         => (int) $target_id,
-			'created'    => $created,
-			'edit_url'   => (string) get_edit_post_link( (int) $target_id, 'raw' ),
-			'view_url'   => (string) get_permalink( (int) $target_id ),
-			'usage'      => $job['usage'],
-			'cost'       => Claude_Client::format_cost( $cost ),
-			'total_cost' => Claude_Client::format_cost( $history['total_cost'] ),
-			'total_jobs' => $history['total_jobs'],
+			'id'       => (int) $target_id,
+			'created'  => $created,
+			'edit_url' => (string) get_edit_post_link( (int) $target_id, 'raw' ),
+			'view_url' => (string) get_permalink( (int) $target_id ),
+			'usage'    => $job['usage'],
 		] );
 	}
 
@@ -343,11 +321,6 @@ final class Translate_Controller {
 			'chars_done' => Translate_Job::done_chars( $job ),
 			'chars'      => Translate_Job::total_chars( $job ),
 		];
-	}
-
-	private static function model(): string {
-		$m = (string) Settings::get( 'translate.model', 'claude-opus-5' );
-		return array_key_exists( $m, Claude_Client::MODELS ) ? $m : 'claude-opus-5';
 	}
 
 	private static function firm_name(): string {
@@ -437,12 +410,9 @@ final class Translate_Controller {
 		foreach ( $extracted['segments'] as $s ) {
 			$chars += strlen( $s );
 		}
-		$obj     = get_post_type_object( $type );
-		$batches = count( Translate_Job::build_batches( $extracted['segments'], Translate_Job::BATCH_CHARS ) );
+		$obj = get_post_type_object( $type );
 
 		return [
-			'estimate'     => Claude_Client::format_cost( Claude_Client::estimate_cost( self::model(), $chars, max( 1, $batches ) ) ),
-			'model'        => self::model(),
 			'id'           => $post_id,
 			'title'        => (string) $post->post_title,
 			'type'         => $type,

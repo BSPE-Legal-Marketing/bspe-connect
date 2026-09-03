@@ -31,36 +31,6 @@ final class Claude_Client {
 		'es' => 'Spanish',
 	];
 
-	/** USD per million tokens (input, output), Anthropic first-party rates. */
-	public const PRICES = [
-		'claude-opus-5'   => [ 5.0, 25.0 ],
-		'claude-sonnet-5' => [ 2.0, 10.0 ],
-	];
-
-	/** Dollar cost of a token usage on a model. */
-	public static function cost( string $model, int $input_tokens, int $output_tokens ): float {
-		$p = self::PRICES[ $model ] ?? self::PRICES['claude-opus-5'];
-		return ( $input_tokens * $p[0] + $output_tokens * $p[1] ) / 1000000;
-	}
-
-	/**
-	 * Rough pre-flight estimate from source characters: ~4 chars per token
-	 * in, output about the same size as input (Spanish runs ~15% longer),
-	 * plus the system prompt and JSON keys on every batch.
-	 */
-	public static function estimate_cost( string $model, int $chars, int $batches ): float {
-		$in  = (int) ceil( $chars / 4 ) + $batches * 600;
-		$out = (int) ceil( $chars / 4 * 1.15 );
-		return self::cost( $model, $in, $out );
-	}
-
-	public static function format_cost( float $usd ): string {
-		if ( $usd < 0.01 && $usd > 0 ) {
-			return '< $0.01';
-		}
-		return '$' . number_format( $usd, 2 );
-	}
-
 	/** Human language names for the prompt, keyed by WPML code. */
 	private const LANGUAGE_NAMES = [
 		'en' => 'English',
