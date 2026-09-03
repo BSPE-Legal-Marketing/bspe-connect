@@ -72,9 +72,6 @@ final class Plugin {
 			External_Links::init();
 			QR_Indexer::init();
 			In_Post_Widget::init();
-			// Fleet translation endpoints (signed requests from the
-			// Manager only; no wp-admin surface).
-			Translate_Endpoint::init();
 		}
 
 		// Daily prune of analytics events older than retention window.

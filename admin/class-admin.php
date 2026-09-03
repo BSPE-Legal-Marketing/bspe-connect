@@ -94,6 +94,13 @@ final class Admin {
 			'icon'  => 'chat',
 			'hint'  => 'Live-chat integration (Intaker / custom) + an optional Chat button on the bar.',
 		],
+		'translate'   => [
+			'label' => 'Translate',
+			'view'  => 'settings-translate.php',
+			'phase' => 4,
+			'icon'  => 'translate',
+			'hint'  => 'Translate a page into Spanish with Claude — every field WPML translates, at API cost instead of per-word credits.',
+		],
 		'license'     => [
 			'label' => 'License',
 			'view'  => 'settings-license.php',
@@ -110,6 +117,7 @@ final class Admin {
 	 * @var array<string, string>
 	 */
 	private const ICONS = [
+		'translate' => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4.5h8M6.5 2.5v2M4 8.5c1.2 2.6 3 4.4 5.5 5.5M9 8.5c-.8 2.4-2.6 4.4-5 5.5"/><path d="M11 17.5l3-8 3 8M12.2 15h3.6"/></svg>',
 		'gear'      => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="2.5"/><path d="M10 1.5v2M10 16.5v2M3.5 3.5l1.4 1.4M15.1 15.1l1.4 1.4M1.5 10h2M16.5 10h2M3.5 16.5l1.4-1.4M15.1 4.9l1.4-1.4"/></svg>',
 		'buttons'   => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="15" height="8" rx="2.5"/><path d="M6.5 10h7"/></svg>',
 		'form'      => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 3.5h13v13h-13z"/><path d="M6.5 7h7M6.5 10h7M6.5 13h4"/></svg>',
@@ -145,6 +153,7 @@ final class Admin {
 		Submissions_Controller::init();
 		Analytics_Controller::init();
 		License_Controller::init();
+		Translate_Controller::init();
 	}
 
 	/**
@@ -306,6 +315,32 @@ final class Admin {
 			[ 'wp-color-picker', 'jquery' ],
 			BSPE_CONNECT_VERSION,
 			true
+		);
+
+		// Translate tab: nonce + strings for the chunked AJAX workflow.
+		wp_localize_script(
+			'bspe-connect-admin',
+			'bspeTranslate',
+			[
+				'ajaxUrl' => esc_url_raw( admin_url( 'admin-ajax.php' ) ),
+				'nonce'   => wp_create_nonce( Translate_Controller::NONCE ),
+				'i18n'    => [
+					'looking'   => __( 'Looking up the page…', 'bspe-connect' ),
+					'preparing' => __( 'Reading the page and preparing chunks…', 'bspe-connect' ),
+					'batch'     => __( 'Translating chunk %1$d of %2$d (%3$s of %4$s characters)…', 'bspe-connect' ),
+					'applying'  => __( 'Creating the translated page…', 'bspe-connect' ),
+					'done'      => __( 'Translation created.', 'bspe-connect' ),
+					'updated'   => __( 'Existing translation updated.', 'bspe-connect' ),
+					'retry'     => __( 'Retry', 'bspe-connect' ),
+					'network'   => __( 'Network error. Check the connection and retry.', 'bspe-connect' ),
+					'existing'  => __( 'A %s translation already exists (status: %s). Translating again will replace its text; the URL and ID stay the same.', 'bspe-connect' ),
+					'langwarn'  => __( 'This page is in "%s", not the site\'s default language "%s". Translations should start from the original page.', 'bspe-connect' ),
+					'usage'     => __( 'Cost of this page: %1$s (%2$s tokens in, %3$s out). Total spent on this site: %4$s across %5$s pages.', 'bspe-connect' ),
+					'estimate'  => __( 'Estimated cost: about %1$s on %2$s.', 'bspe-connect' ),
+					'meta'      => __( '%1$s · %2$s · language: %3$s · %4$s text segments, %5$s characters%6$s', 'bspe-connect' ),
+					'elementor' => __( ' · Elementor', 'bspe-connect' ),
+				],
+			]
 		);
 
 		// On the Buttons tab the visual icon picker needs Font Awesome

@@ -227,6 +227,15 @@ final class Settings {
 			'diagnostics'    => [
 				'logging_enabled' => false,
 			],
+			// Claude-powered page translation for WPML sites (Translate
+			// tab). Off until an API key is saved. See
+			// class-translate-controller.php.
+			'translate'      => [
+				'api_key'        => '',
+				'model'          => 'claude-opus-5',
+				'default_target' => 'es',
+				'firm_name_hint' => '',
+			],
 		];
 
 		/**

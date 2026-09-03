@@ -193,10 +193,9 @@ XQIDAQAB
 
 		$domain = self::current_domain();
 		$response = self::post( '/v1/activate', [
-			'key'      => $key,
-			'domain'   => $domain,
-			'version'  => BSPE_CONNECT_VERSION,
-			'site_url' => home_url( '/' ),
+			'key'     => $key,
+			'domain'  => $domain,
+			'version' => BSPE_CONNECT_VERSION,
 		] );
 
 		if ( isset( $response['error'] ) ) {
@@ -246,9 +245,8 @@ XQIDAQAB
 
 		$response = self::post( '/v1/check', [
 			'key'     => $state['key'],
-			'domain'   => self::current_domain(),
-			'version'  => BSPE_CONNECT_VERSION,
-			'site_url' => home_url( '/' ),
+			'domain'  => self::current_domain(),
+			'version' => BSPE_CONNECT_VERSION,
 		] );
 
 		$state['last_check_at'] = time();
@@ -339,17 +337,6 @@ XQIDAQAB
 	 *
 	 * @return array<string,mixed>|null
 	 */
-	/**
-	 * Verify a bare RS256 token issued by the Manager and return its
-	 * claims, or null. Used by the translate endpoint to authenticate
-	 * dashboard requests with the same key pair as license checks.
-	 *
-	 * @return array<string,mixed>|null
-	 */
-	public static function verify_token( string $token ): ?array {
-		return self::verify_signed_payload( [ 'token' => $token ] );
-	}
-
 	private static function verify_signed_payload( array $response ): ?array {
 		$token = (string) ( $response['token'] ?? '' );
 		if ( '' === $token ) {

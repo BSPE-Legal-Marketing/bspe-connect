@@ -25,6 +25,7 @@ delete_option( 'bspe_connect_settings' );
 delete_option( 'bspe_connect_db_version' );
 delete_option( 'bspe_connect_log' );
 delete_option( 'bspe_connect_license' );
+delete_option( 'bspe_connect_translate_history' );
 
 // Clear scheduled cron jobs so WP doesn't try to fire callbacks into
 // classes that no longer exist after uninstall.
@@ -34,4 +35,4 @@ wp_clear_scheduled_hook( 'bspe_connect_license_check' );
 
 // Clean any rate-limit / event-rate / global-rate transients that
 // may be lingering.
-$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_bspe_connect_rl_%' OR option_name LIKE '_transient_timeout_bspe_connect_rl_%' OR option_name LIKE '_transient_bspe_connect_evt_rl_%' OR option_name LIKE '_transient_timeout_bspe_connect_evt_rl_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
+$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_bspe_connect_rl_%' OR option_name LIKE '_transient_timeout_bspe_connect_rl_%' OR option_name LIKE '_transient_bspe_connect_evt_rl_%' OR option_name LIKE '_transient_timeout_bspe_connect_evt_rl_%' OR option_name LIKE '_transient_bspe_connect_tjob_%' OR option_name LIKE '_transient_timeout_bspe_connect_tjob_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
