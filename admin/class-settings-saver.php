@@ -28,7 +28,7 @@ final class Settings_Saver {
 	public const RESET_NONCE   = 'bspe_connect_reset_settings';
 	public const RESET_PHRASE  = 'RESET';
 
-	private const ALLOWED_TABS = [ 'general', 'buttons', 'form', 'design', 'display', 'logs', 'in_post_widget', 'chat', 'translate' ];
+	private const ALLOWED_TABS = [ 'general', 'buttons', 'form', 'design', 'display', 'logs', 'in_post_widget', 'chat' ];
 
 	private const ALLOWED_ICON_LIBRARIES = [ 'none', 'fa-solid', 'fa-regular' ];
 
@@ -163,9 +163,6 @@ final class Settings_Saver {
 				break;
 			case 'chat':
 				$existing['chat'] = self::sanitize_chat( $payload['chat'] ?? [], $existing['chat'] ?? [] );
-				break;
-			case 'translate':
-				$existing['translate'] = self::sanitize_translate( $payload['translate'] ?? [], $existing['translate'] ?? [] );
 				break;
 		}
 
@@ -384,41 +381,6 @@ final class Settings_Saver {
 	 *
 	 * @return array<string,mixed>
 	 */
-	/**
-	 * Translate tab. The API key field is a password input: blank keeps the
-	 * stored key, the literal CLEAR removes it, anything else replaces it.
-	 *
-	 * @param array<string,mixed> $input
-	 * @param array<string,mixed> $current
-	 *
-	 * @return array<string,mixed>
-	 */
-	private static function sanitize_translate( array $input, array $current ): array {
-		$key_in = trim( (string) ( $input['api_key'] ?? '' ) );
-		$key    = (string) ( $current['api_key'] ?? '' );
-		if ( 'CLEAR' === $key_in ) {
-			$key = '';
-		} elseif ( '' !== $key_in ) {
-			$key = preg_replace( '/[^A-Za-z0-9_\-]/', '', $key_in ) ?? '';
-		}
-
-		$model = (string) ( $input['model'] ?? 'claude-opus-5' );
-		if ( ! array_key_exists( $model, \BSPE\Connect\Claude_Client::MODELS ) ) {
-			$model = 'claude-opus-5';
-		}
-		$target = (string) ( $input['default_target'] ?? 'es' );
-		if ( ! array_key_exists( $target, \BSPE\Connect\Claude_Client::LANGUAGES ) ) {
-			$target = 'es';
-		}
-
-		return [
-			'api_key'        => $key,
-			'model'          => $model,
-			'default_target' => $target,
-			'firm_name_hint' => sanitize_text_field( (string) ( $input['firm_name_hint'] ?? '' ) ),
-		];
-	}
-
 	private static function sanitize_chat( array $input, array $current ): array {
 		$provider = (string) ( $input['provider'] ?? 'intaker' );
 		$provider = in_array( $provider, [ 'intaker', 'custom' ], true ) ? $provider : 'intaker';
