@@ -300,8 +300,23 @@
 		// selector checks all missed.
 		return hasBlockingOverlay();
 	}
+	// Intaker's open panel (preview video or full chat frame) is a
+	// bottom-anchored sheet whose answer chips, input row and Send button
+	// sit exactly where the bar is. While it's open we stamp
+	// `html.bspe-chat-open` and the stylesheet hides the bar (only the
+	// bar — #icw itself must stay visible, unlike the menu case).
+	function isChatOpen() {
+		var icw = document.getElementById('icw');
+		return !!icw && (icw.classList.contains('icw--open') || icw.classList.contains('icw--is-frame'));
+	}
 	var menuOpenNow = false;
+	var chatOpenNow = false;
 	function syncMenuOpenState() {
+		var chat = isChatOpen();
+		if (chat !== chatOpenNow) {
+			chatOpenNow = chat;
+			document.documentElement.classList.toggle('bspe-chat-open', chat);
+		}
 		var open = isMobileMenuOpen();
 		if (open === menuOpenNow) { return; }
 		menuOpenNow = open;

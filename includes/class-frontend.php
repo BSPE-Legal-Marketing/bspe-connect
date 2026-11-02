@@ -498,6 +498,11 @@ final class Frontend {
 		// desirable.
 		echo "html.bspe-menu-open #bspe-connect, html.bspe-menu-open #icw, html.bspe-menu-open #icw--call--content, html.bspe-menu-open .userway_buttons_wrapper { display: none !important; }\n";
 
+		// While Intaker's panel is open the JS stamps `html.bspe-chat-open`;
+		// hide only our bar so it stops covering the panel's answer chips,
+		// input row and Send button.
+		echo "html.bspe-chat-open #bspe-connect { display: none !important; }\n";
+
 		echo "</style>\n";
 	}
 
