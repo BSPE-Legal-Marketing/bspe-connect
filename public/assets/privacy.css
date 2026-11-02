@@ -1,0 +1,124 @@
+/*
+ * BSPE Connect privacy notice card. Small, non-blocking, bottom-left on
+ * desktop and above the contact bar on mobile (privacy.js sets `bottom`).
+ * Colors follow the Design tab when the bar is on, neutral otherwise.
+ */
+.bspe-privacy {
+	--bspe-privacy-bg: var(--bspe-bubble-bg, #ffffff);
+	--bspe-privacy-fg: var(--bspe-bubble-fg, #1d2327);
+	--bspe-privacy-accent: var(--bspe-bar-bg, #1d2327);
+	--bspe-privacy-accent-fg: var(--bspe-button-fg, #ffffff);
+	position: fixed;
+	left: 16px;
+	bottom: 16px;
+	z-index: 2147483646;
+	box-sizing: border-box;
+	width: 360px;
+	max-width: calc(100vw - 32px);
+	margin: 0;
+	padding: 16px 40px 14px 16px;
+	background: var(--bspe-privacy-bg);
+	color: var(--bspe-privacy-fg);
+	border-radius: 12px;
+	box-shadow: 0 6px 28px rgba(0, 0, 0, 0.18), 0 1px 3px rgba(0, 0, 0, 0.12);
+	font-size: 14px;
+	line-height: 1.45;
+	text-align: left;
+}
+.bspe-privacy *,
+.bspe-privacy *::before,
+.bspe-privacy *::after {
+	box-sizing: border-box;
+}
+.bspe-privacy .bspe-privacy__text,
+.bspe-privacy .bspe-privacy__links {
+	margin: 0 0 10px;
+	padding: 0;
+	color: inherit;
+	font: inherit;
+}
+.bspe-privacy .bspe-privacy__links {
+	font-size: 13px;
+}
+.bspe-privacy .bspe-privacy__link {
+	color: inherit;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+.bspe-privacy .bspe-privacy__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+.bspe-privacy .bspe-privacy__btn {
+	flex: 1 1 auto;
+	min-height: 40px;
+	margin: 0;
+	padding: 8px 14px;
+	border: 1.5px solid var(--bspe-privacy-accent);
+	border-radius: 8px;
+	background: transparent;
+	color: var(--bspe-privacy-fg);
+	font: inherit;
+	font-weight: 600;
+	letter-spacing: normal;
+	text-transform: none;
+	line-height: 1.2;
+	cursor: pointer;
+	box-shadow: none;
+}
+.bspe-privacy .bspe-privacy__btn--primary {
+	background: var(--bspe-privacy-accent);
+	color: var(--bspe-privacy-accent-fg);
+}
+.bspe-privacy .bspe-privacy__btn:focus-visible,
+.bspe-privacy .bspe-privacy__link:focus-visible {
+	outline: 2px solid var(--bspe-privacy-accent);
+	outline-offset: 2px;
+}
+.bspe-privacy .bspe-privacy__btn--close {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	flex: none;
+	width: 32px;
+	min-height: 32px;
+	height: 32px;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	color: inherit;
+	font-size: 22px;
+	font-weight: 400;
+	line-height: 1;
+	opacity: 0.6;
+}
+.bspe-privacy .bspe-privacy__btn--close:hover {
+	opacity: 1;
+}
+@media (max-width: 767px) {
+	.bspe-privacy {
+		left: 8px;
+		right: 8px;
+		width: auto;
+		max-width: none;
+	}
+}
+
+/* "Your Privacy Choices" link (auto link + shortcode). */
+.bspe-privacy-choices {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+.bspe-privacy-choices svg {
+	width: 30px;
+	height: 14px;
+	flex: none;
+}
+.bspe-privacy-autolink {
+	margin: 0;
+	padding: 12px 16px;
+	font-size: 13px;
+	text-align: center;
+}

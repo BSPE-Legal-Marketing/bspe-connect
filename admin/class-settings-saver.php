@@ -28,7 +28,7 @@ final class Settings_Saver {
 	public const RESET_NONCE   = 'bspe_connect_reset_settings';
 	public const RESET_PHRASE  = 'RESET';
 
-	private const ALLOWED_TABS = [ 'general', 'buttons', 'form', 'design', 'display', 'logs', 'in_post_widget', 'chat' ];
+	private const ALLOWED_TABS = [ 'general', 'buttons', 'form', 'design', 'display', 'logs', 'in_post_widget', 'chat', 'privacy' ];
 
 	private const ALLOWED_ICON_LIBRARIES = [ 'none', 'fa-solid', 'fa-regular' ];
 
@@ -163,6 +163,9 @@ final class Settings_Saver {
 				break;
 			case 'chat':
 				$existing['chat'] = self::sanitize_chat( $payload['chat'] ?? [], $existing['chat'] ?? [] );
+				break;
+			case 'privacy':
+				$existing['privacy'] = self::sanitize_privacy( $payload['privacy'] ?? [] );
 				break;
 		}
 
@@ -424,6 +427,32 @@ final class Settings_Saver {
 			'launcher_bottom_px'  => max( 0, min( 400, (int) ( $input['launcher_bottom_px'] ?? 36 ) ) ),
 			'launcher_scale'      => max( 30, min( 100, (int) ( $input['launcher_scale'] ?? 85 ) ) ),
 			'hide_intaker_call'   => ! empty( $input['hide_intaker_call'] ),
+		];
+	}
+
+	/**
+	 * @param array<string,mixed> $input
+	 *
+	 * @return array<string,mixed>
+	 */
+	private static function sanitize_privacy( array $input ): array {
+		$profile = sanitize_key( (string) ( $input['profile'] ?? 'us' ) );
+		$paths   = [];
+		foreach ( preg_split( '/[\r\n,]+/', (string) ( $input['pixel_off_paths'] ?? '' ) ) ?: [] as $line ) {
+			$line = trim( sanitize_text_field( $line ) );
+			if ( '' === $line ) {
+				continue;
+			}
+			// Keep only path globs: a leading slash, then URL path characters and *.
+			$line = '/' . ltrim( (string) preg_replace( '#[^A-Za-z0-9/_\-.*~%]#', '', $line ), '/' );
+			$paths[] = $line;
+		}
+		return [
+			'enabled'         => ! empty( $input['enabled'] ),
+			'profile'         => in_array( $profile, \BSPE\Connect\Privacy::PROFILES, true ) ? $profile : 'us',
+			'policy_url'      => esc_url_raw( trim( (string) ( $input['policy_url'] ?? '' ) ) ),
+			'pixel_off_paths' => implode( "\n", array_slice( array_unique( $paths ), 0, 50 ) ),
+			'auto_link'       => ! empty( $input['auto_link'] ),
 		];
 	}
 

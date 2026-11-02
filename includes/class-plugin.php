@@ -116,6 +116,8 @@ final class Plugin {
 			Admin\Admin::init();
 		} elseif ( $licensed ) {
 			Frontend::init();
+			// Privacy notice runs on its own: it does not depend on the bar.
+			Privacy::init();
 		}
 	}
 

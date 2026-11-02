@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 3.7.3
+Stable tag: 3.8.0
 License: Proprietary
 
 Mobile contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -48,6 +48,7 @@ Reach out to BSPE Legal Marketing through your usual channel.
 
 == Changelog ==
 
+= 3.8.0 = New Privacy tab: a small, non-blocking privacy notice and opt-out. Three profiles: US opt-out (tracking runs from the first page; OK / Opt out), US + California (adds Do Not Sell or Share wording and the California opt-out icon) and Strict opt-in (nothing that tracks runs before Accept). An inline guard printed first in <head> holds Clarity, CallRail, Meta Pixel and direct gtag.js after an opt-out, with Global Privacy Control, or before Accept in Strict (Consent Mode v2 + Clarity consent API, scripts rewritten to text/plain), while GTM keeps loading. The notice shows after 20 s of visible time across pages, once per session until the visitor chooses, never over an open chat, menu or popup; the choice is kept 12 months. Clarity masks every form, input and chat widget, Meta Pixel's automatic events are off, and the Pixel can be held on form pages. A "Your Privacy Choices" link (auto, #privacy-choices, or [bspe_privacy_choices]) reopens the choice. All decisions are made in the browser so NitroPack / LiteSpeed caches stay valid. Off by default. Also: the bar now hides while Intaker's chat panel (video preview or full chat) is open, so it no longer covers the panel's answer chips, input row and Send button.
 = 3.7.3 = The form modal title ("Send us an email" / "Send us a text") is now a <p>, not an <h2>, so it stays out of the page's heading outline for SEO. Styling is unchanged: the rule is class-based with a #bspe-connect prefix, so it renders identically and theme paragraph styles cannot touch it (and it cannot affect other paragraphs). aria-labelledby still points at the same element, so the dialog keeps its accessible name. This was the only H tag in the plugin's frontend output.
 = 3.7.2 = Remove the WPML schema stripper (added 3.7.0, narrowed 3.7.1): SEOPress manual schemas turned out not to leak onto translated pages on these sites, so per-language schemas are simply managed in SEOPress on each translation and the feature is unnecessary. Functionally identical to 3.6.8. Leftover stripper settings in the stored option are ignored. The WPML Skip-language check and admin-wide notice (3.6.7/3.6.8) remain.
 = 3.7.1 = Schema stripper made surgical: acts only on configured languages (new "Strip on languages" field, default es; the site's default language is never stripped) and removes only UNMARKED application/ld+json blocks (script tags with no id/class attribute, which is how SEOPress prints Manual schemas including the Custom type). Schema tagged by its generator, like a theme's website-schema block, is kept. Verified against the live site markup: 3 JSON-LD blocks before, only the tagged website-schema after.

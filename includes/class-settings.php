@@ -227,6 +227,15 @@ final class Settings {
 			'diagnostics'    => [
 				'logging_enabled' => false,
 			],
+			// Privacy notice + opt-out (class-privacy.php). Off until a
+			// site is switched on, so updating the plugin changes nothing.
+			'privacy'        => [
+				'enabled'         => false,
+				'profile'         => 'us',   // us | us_ca | strict
+				'policy_url'      => '',     // '' = the WordPress privacy policy page
+				'pixel_off_paths' => "/contact*\n/free-consultation*\n/case-evaluation*",
+				'auto_link'       => true,   // print a "Your Privacy Choices" link at the end of <body>
+			],
 		];
 
 		/**
