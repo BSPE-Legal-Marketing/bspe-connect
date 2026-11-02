@@ -431,23 +431,38 @@ final class Frontend {
 		echo "}\n";
 
 		// Intaker's own floating launcher sits at the bottom-right and
-		// overlaps the mobile bar. Raise it above the bar (using the
-		// JS-measured --bspe-bar-h, falling back to 0) and shrink it a
-		// little. Mobile-only + Intaker-only: on desktop there's no bar
-		// to clear, and the custom provider's markup is unknown to us.
-		if ( Settings::get( 'chat.enabled', false ) && 'intaker' === (string) Settings::get( 'chat.provider', 'intaker' ) ) {
+		// overlaps the mobile bar. Keep it clear of the bar (at least the
+		// JS-measured --bspe-bar-h + 10px, or the configured distance if
+		// that is higher) and shrink it a little. Mobile-only: on desktop
+		// there's no bar to clear. Applied whenever the site isn't using
+		// the Custom provider — Intaker often arrives through the theme or
+		// GTM with our chat setting off, and these #icw rules match nothing
+		// when it's absent.
+		$custom_chat = Settings::get( 'chat.enabled', false ) && 'custom' === (string) Settings::get( 'chat.provider', 'intaker' );
+		if ( ! $custom_chat ) {
 			$bottom  = max( 0, min( 400, (int) Settings::get( 'chat.launcher_bottom_px', 36 ) ) );
 			$scale   = max( 30, min( 100, (int) Settings::get( 'chat.launcher_scale', 85 ) ) );
 			$scale_f = number_format( $scale / 100, 2, '.', '' );
 
 			echo '@media (max-width: ' . esc_html( (string) ( $breakpoint - 1 ) ) . "px) {\n";
-			// Position + scale ONLY the collapsed launcher, never the open
-			// chat frame. Intaker adds `icw--is-frame` to #icw while the
-			// full conversation panel (an iframe) is open — scoping with
-			// :not(.icw--is-frame) leaves that panel's own sizing +
-			// position untouched so we don't distort it.
-			echo "\t#icw:not(.icw--is-frame) { bottom: " . esc_html( (string) $bottom ) . "px !important; }\n";
-			echo "\t#icw:not(.icw--is-frame) .icw--launcher--item, #icw:not(.icw--is-frame) .widget-button, #icw:not(.icw--is-frame) .icw--multiContact-chat-icon { transform: scale(" . esc_html( $scale_f ) . ") !important; transform-origin: bottom right !important; }\n";
+			// Position + scale ONLY the collapsed launcher. While the video
+			// preview or the chat frame is open (#icw.icw--open) Intaker's
+			// own sizing must win: lifting the open preview pushed its top
+			// off-screen. The bar hides while it's open (bspe-chat-open), so
+			// the panel can sit flush on the screen bottom at full height.
+			echo "\t#icw:not(.icw--open) { bottom: max(" . esc_html( (string) $bottom ) . "px, calc(var(--bspe-bar-h, 0px) + 10px)) !important; }\n";
+			echo "\t#icw:not(.icw--open) .icw--launcher--item, #icw:not(.icw--open) .widget-button, #icw:not(.icw--open) .icw--multiContact-chat-icon { transform: scale(" . esc_html( $scale_f ) . ") !important; transform-origin: bottom right !important; }\n";
+			echo "\t#icw.icw--open:not(.icw--is-frame) { bottom: 0 !important; max-height: 100% !important; max-height: 100dvh !important; }\n";
+			// Full-screen chat: Intaker's container fills the screen but it
+			// sizes the iframe inside with an inline pixel height (666px on
+			// an 812px phone), leaving a white band above the video.
+			echo "\t#icw.icw--is-frame #icw--frame { top: 0 !important; height: 100% !important; max-height: 100% !important; }\n";
+			// Intaker's floating contact widget (call / SMS / WhatsApp /
+			// "talk to us" buttons, bottom-left) duplicates the bar's Call
+			// and Text buttons on mobile.
+			if ( Settings::get( 'chat.hide_intaker_call', true ) ) {
+				echo "\t#icw--call--content, #icw--compact--mode--widgets--container { display: none !important; }\n";
+			}
 			echo "}\n";
 
 			// Hide Intaker's own floating "Call us" element. The bar
