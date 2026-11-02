@@ -457,12 +457,6 @@ final class Frontend {
 			// sizes the iframe inside with an inline pixel height (666px on
 			// an 812px phone), leaving a white band above the video.
 			echo "\t#icw.icw--is-frame #icw--frame { top: 0 !important; height: 100% !important; max-height: 100% !important; }\n";
-			// Intaker's floating contact widget (call / SMS / WhatsApp /
-			// "talk to us" buttons, bottom-left) duplicates the bar's Call
-			// and Text buttons on mobile.
-			if ( Settings::get( 'chat.hide_intaker_call', true ) ) {
-				echo "\t#icw--call--content, #icw--compact--mode--widgets--container { display: none !important; }\n";
-			}
 			echo "}\n";
 
 			// Hide Intaker's own floating "Call us" element. The bar
@@ -478,8 +472,12 @@ final class Frontend {
 			//     DIRECTLY to <body> (a sibling of #icw, not a child — which
 			//     is why hiding #icw never touched it).
 			// The legacy .class variants stay as a belt-and-suspenders match.
+			// Intaker's whole floating contact widget (#icw--call--content:
+			// the blue "Text us" plus Call / WhatsApp / Messenger buttons,
+			// bottom-left) goes too, on every screen size: the firm only
+			// wants the chat launcher.
 			if ( Settings::get( 'chat.hide_intaker_call', true ) ) {
-				echo "#icw--multiContact-call, #icw--call--button, .icw--multiContact-call, .icw--multiContact-call-icon, .icw--call--button { display: none !important; }\n";
+				echo "#icw--multiContact-call, #icw--call--button, .icw--multiContact-call, .icw--multiContact-call-icon, .icw--call--button, #icw--call--content, #icw--compact--mode--widgets--container, #icw--sms--button { display: none !important; }\n";
 			}
 		}
 

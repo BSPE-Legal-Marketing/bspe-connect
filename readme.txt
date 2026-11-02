@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 3.8.1
+Stable tag: 3.8.2
 License: Proprietary
 
 Mobile contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -48,6 +48,7 @@ Reach out to BSPE Legal Marketing through your usual channel.
 
 == Changelog ==
 
+= 3.8.2 = Hide Intaker's floating contact widget (the blue "Text us" button, plus its Call / WhatsApp / Messenger buttons, bottom-left) on every screen size, not only on mobile, whenever "Hide Intaker's Call us" is on (the default).
 = 3.8.1 = Intaker on mobile: the collapsed launcher (face + "How can I help you?" bubble) now always sits above the bar (the configured distance or bar height + 10px, whichever is higher) instead of hanging over it; Intaker's floating bottom-left contact widget (Text us / Call us) is hidden on mobile, since the bar already has Call and Text; the open video preview is no longer lifted (its top was cut off); and the full-screen chat fills the whole screen height (Intaker sized its iframe in pixels, leaving a white band above the video). These rules now apply whenever the bar shows and the site is not on the Custom chat provider, so Intaker loaded by the theme or GTM is handled too.
 = 3.8.0 = New Privacy tab: a small, non-blocking privacy notice and opt-out. Three profiles: US opt-out (tracking runs from the first page; OK / Opt out), US + California (adds Do Not Sell or Share wording and the California opt-out icon) and Strict opt-in (nothing that tracks runs before Accept). An inline guard printed first in <head> holds Clarity, CallRail, Meta Pixel and direct gtag.js after an opt-out, with Global Privacy Control, or before Accept in Strict (Consent Mode v2 + Clarity consent API, scripts rewritten to text/plain), while GTM keeps loading. The notice shows after 20 s of visible time across pages, once per session until the visitor chooses, never over an open chat, menu or popup; the choice is kept 12 months. Clarity masks every form, input and chat widget, Meta Pixel's automatic events are off, and the Pixel can be held on form pages. A "Your Privacy Choices" link (auto, #privacy-choices, or [bspe_privacy_choices]) reopens the choice. All decisions are made in the browser so NitroPack / LiteSpeed caches stay valid. Off by default. Also: the bar now hides while Intaker's chat panel (video preview or full chat) is open, so it no longer covers the panel's answer chips, input row and Send button.
 = 3.7.3 = The form modal title ("Send us an email" / "Send us a text") is now a <p>, not an <h2>, so it stays out of the page's heading outline for SEO. Styling is unchanged: the rule is class-based with a #bspe-connect prefix, so it renders identically and theme paragraph styles cannot touch it (and it cannot affect other paragraphs). aria-labelledby still points at the same element, so the dialog keeps its accessible name. This was the only H tag in the plugin's frontend output.

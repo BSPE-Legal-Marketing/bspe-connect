@@ -182,14 +182,14 @@ Components::row(
 	]
 );
 Components::row(
-	__( 'Hide Intaker\'s Call button', 'bspe-connect' ),
+	__( 'Hide Intaker\'s Call / Text buttons', 'bspe-connect' ),
 	static function () use ( $chat ): void {
 		Components::toggle( 'bspe[chat][hide_intaker_call]', ! empty( $chat['hide_intaker_call'] ), [
-			'label' => __( 'Hide Intaker\'s own floating "Call us" button', 'bspe-connect' ),
+			'label' => __( 'Hide Intaker\'s own floating "Call us" and "Text us" buttons', 'bspe-connect' ),
 		] );
 	},
 	[
-		'description' => __( 'On by default. The bar already has a Call button, so Intaker\'s separate green Call launcher is usually a redundant duplicate. Turn off to let Intaker show it.', 'bspe-connect' ),
+		'description' => __( 'On by default. The bar already has Call and Text buttons, so Intaker\'s separate floating contact buttons (green Call us, blue Text us, WhatsApp / Messenger) are redundant duplicates and are hidden on every screen size. The chat launcher itself stays. Turn off to let Intaker show them.', 'bspe-connect' ),
 	]
 );
 Components::close_card();
