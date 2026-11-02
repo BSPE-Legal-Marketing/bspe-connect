@@ -50,3 +50,6 @@ debug.log
 *.swo
 .env
 .env.local
+
+# Design docs
+docs
