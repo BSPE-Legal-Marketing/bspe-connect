@@ -214,6 +214,15 @@ final class Frontend {
 				'i18n'             => [
 					'submitError'  => __( 'Something went wrong. Please try again.', 'bspe-connect' ),
 					'networkError' => __( 'Network error. Please try again.', 'bspe-connect' ),
+					// Multi-step (custom) form, client-side step checks.
+					'required'     => __( 'This field is required.', 'bspe-connect' ),
+					'choose'       => __( 'Please make a selection.', 'bspe-connect' ),
+					'check'        => __( 'Please check this box to continue.', 'bspe-connect' ),
+					'email'        => __( 'Please enter a valid email address.', 'bspe-connect' ),
+					'phone'        => __( 'Please enter a 10-digit US phone number.', 'bspe-connect' ),
+					'phoneIntl'    => __( 'Please enter a valid phone number.', 'bspe-connect' ),
+					'number'       => __( 'Please enter a number.', 'bspe-connect' ),
+					'range'        => __( 'Please enter a number in the allowed range.', 'bspe-connect' ),
 				],
 				'chat'             => [
 					'enabled'       => (bool) Settings::get( 'chat.enabled', false ),

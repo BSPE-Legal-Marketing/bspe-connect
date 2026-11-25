@@ -30,6 +30,11 @@ $submit_label     = (string) ( $form_settings['submit_label']     ?? __( 'Send',
 $turnstile_enabled  = (bool) ( $form_settings['antispam']['turnstile_enabled']  ?? false );
 $turnstile_site_key = (string) ( $form_settings['antispam']['turnstile_site_key'] ?? '' );
 
+// Custom (multi-step) form replaces the five standard fields + submit
+// button. Everything else — nonce, honeypot, time trap, source, success
+// state — is shared, so the anti-spam pipeline is identical in both modes.
+$custom_form_active = \BSPE\Connect\Custom_Form::is_active();
+
 $is_visible = static function ( string $name ) use ( $fields_cfg ): bool {
 	if ( ! isset( $fields_cfg[ $name ] ) ) {
 		return in_array( $name, [ 'name', 'phone', 'email', 'message' ], true );
@@ -109,8 +114,9 @@ $render_error = static function ( string $field ): void {
 		<div class="bspe-connect__modal-body">
 
 			<form
-				class="bspe-connect__form"
+				class="bspe-connect__form<?php echo $custom_form_active ? ' bspe-connect__form--custom' : ''; ?>"
 				data-bspe-form
+				<?php echo $custom_form_active ? 'data-bspe-multistep' : ''; ?>
 				action="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
 				method="post"
 				novalidate
@@ -120,6 +126,7 @@ $render_error = static function ( string $field ): void {
 				<input type="hidden" name="bspe_connect_form_ts" value="<?php echo esc_attr( (string) time() ); ?>" />
 				<input type="hidden" name="bspe_source" value="email" data-bspe-source />
 				<input type="hidden" name="bspe_page_url" value="" data-bspe-page-url />
+				<input type="hidden" name="bspe_form_sig" value="<?php echo esc_attr( \BSPE\Connect\Custom_Form::signature() ); ?>" />
 
 				<!-- Honeypot — visually hidden via CSS, intentionally not type=hidden so
 				     bots fill it and we silently drop the submission. -->
@@ -129,6 +136,10 @@ $render_error = static function ( string $field ): void {
 						<input type="text" name="bspe_website" value="" tabindex="-1" autocomplete="off" />
 					</label>
 				</div>
+
+				<?php if ( $custom_form_active ) : ?>
+					<?php require BSPE_CONNECT_DIR . 'public/templates/form-custom.php'; ?>
+				<?php else : ?>
 
 				<?php if ( $is_visible( 'name' ) ) : ?>
 					<div class="bspe-connect__field" data-field="name">
@@ -231,6 +242,8 @@ $render_error = static function ( string $field ): void {
 					</span>
 					<span class="bspe-connect__submit-spinner" data-bspe-submit-spinner aria-hidden="true"></span>
 				</button>
+
+				<?php endif; // custom vs standard ?>
 
 				<p class="bspe-connect__form-error" data-bspe-form-error role="alert" hidden></p>
 			</form>

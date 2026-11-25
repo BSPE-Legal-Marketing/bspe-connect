@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 3.8.2
+Stable tag: 3.9.0
 License: Proprietary
 
 Mobile contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -47,6 +47,8 @@ notice on your Plugins page. Click **Update** to install.
 Reach out to BSPE Legal Marketing through your usual channel.
 
 == Changelog ==
+
+= 3.9.0 = Custom multi-step lead form. Form tab, new "Form layout": Standard (the five fixed fields, unchanged) or Custom multi-step, built from steps of fields (text, email, phone, number, long text, dropdown, single / multiple choice, consent checkbox, date, hidden value) with required, half width, placeholder, help text, options and a "maps to" role that keeps Name / Phone / Email / Message filled. "Import fields" copies an Elementor Pro form from the site, global widgets included (keys, options, steps). The bar's form then shows a progress bar and Back / Next with per-step validation; the server re-validates against the saved schema. Submissions store every answer (new fields_json column, shown in the Submissions detail and the CSV "Form answers" column) and the email lists them in form order. The webhook also sends first_name, last_name, phone_e164 (+1…), phone_formatted, form_mode, summary and every custom field under its key; existing keys are unchanged. Every form change purges the page cache (NitroPack, LiteSpeed, WP Rocket, W3TC, WP Super Cache, SiteGround), and a submission from a page cached before the change is answered with "please refresh" instead of being lost. The phone mask now drops a pasted/autofilled +1 instead of cutting the last digit. New management REST API (bspe-connect/v1/manage/* for admins, and bspe-agent/v1/bspe-connect/* signed by the BSPE Fleet connector): status, read / update the form with dry runs and optimistic locking, list + import Elementor forms, revisions with restore (layout only by default; every change keeps the previous version), send a test lead to the webhook, and read / patch any settings section through the same sanitizers as the admin tabs. Custom form strings are registered for WPML String Translation.
 
 = 3.8.2 = Hide Intaker's floating contact widget (the blue "Text us" button, plus its Call / WhatsApp / Messenger buttons, bottom-left) on every screen size, not only on mobile, whenever "Hide Intaker's Call us" is on (the default).
 = 3.8.1 = Intaker on mobile: the collapsed launcher (face + "How can I help you?" bubble) now always sits above the bar (the configured distance or bar height + 10px, whichever is higher) instead of hanging over it; Intaker's floating bottom-left contact widget (Text us / Call us) is hidden on mobile, since the bar already has Call and Text; the open video preview is no longer lifted (its top was cut off); and the full-screen chat fills the whole screen height (Intaker sized its iframe in pixels, leaving a white band above the video). These rules now apply whenever the bar shows and the site is not on the Custom chat provider, so Intaker loaded by the theme or GTM is handled too.

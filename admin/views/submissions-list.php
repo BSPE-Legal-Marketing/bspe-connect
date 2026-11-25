@@ -227,6 +227,7 @@ $status_options = [
 						$page_url     = (string) $row['page_url'];
 						$status       = (string) $row['mail_status'];
 						$user_agent   = (string) $row['user_agent'];
+						$answers      = \BSPE\Connect\Submissions::decode_fields( $row['fields_json'] ?? null );
 
 						$page_short   = $page_url;
 						$parsed       = wp_parse_url( $page_url );
@@ -286,10 +287,23 @@ $status_options = [
 						<tr class="bspe-table__detail" hidden>
 							<td colspan="9">
 								<div class="bspe-detail">
+									<?php foreach ( $answers as $answer ) :
+										if ( '' === trim( $answer['value'] ) || 'hidden' === $answer['type'] ) {
+											continue;
+										}
+										$answer_value = 'tel' === $answer['type'] ? \BSPE\Connect\Custom_Form::format_phone( $answer['value'] ) : $answer['value'];
+										?>
+										<div class="bspe-detail__group">
+											<span class="bspe-detail__label"><?php echo esc_html( $answer['label'] ); ?></span>
+											<p class="bspe-detail__value<?php echo 'textarea' === $answer['type'] ? ' bspe-detail__value--message' : ''; ?>"><?php echo nl2br( esc_html( $answer_value ) ); ?></p>
+										</div>
+									<?php endforeach; ?>
+									<?php if ( empty( $answers ) ) : ?>
 									<div class="bspe-detail__group">
 										<span class="bspe-detail__label"><?php esc_html_e( 'Message', 'bspe-connect' ); ?></span>
 										<p class="bspe-detail__value bspe-detail__value--message"><?php echo nl2br( esc_html( '' !== $message ? $message : '—' ) ); ?></p>
 									</div>
+									<?php endif; ?>
 									<?php if ( '' !== $pref ) : ?>
 										<div class="bspe-detail__group">
 											<span class="bspe-detail__label"><?php esc_html_e( 'Preferred contact', 'bspe-connect' ); ?></span>

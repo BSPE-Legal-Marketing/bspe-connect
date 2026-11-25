@@ -45,6 +45,7 @@ final class Activator {
 			email VARCHAR(255) NOT NULL DEFAULT '',
 			message TEXT NULL,
 			contact_pref VARCHAR(20) NULL,
+			fields_json LONGTEXT NULL,
 			page_url VARCHAR(500) NOT NULL DEFAULT '',
 			user_agent VARCHAR(500) NOT NULL DEFAULT '',
 			ip_hash VARCHAR(64) NOT NULL DEFAULT '',

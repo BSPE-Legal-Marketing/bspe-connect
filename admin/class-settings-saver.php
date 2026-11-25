@@ -64,6 +64,24 @@ final class Settings_Saver {
 
 	private const ALLOWED_GOOGLE_FONTS = [ 'DM Sans', 'Inter', 'Lato', 'Roboto', 'Open Sans', 'Source Sans 3', 'Poppins', 'Manrope', 'Nunito', 'Work Sans', 'Plus Jakarta Sans', 'IBM Plex Sans', 'Figtree', 'Montserrat', 'Public Sans' ];
 
+	/**
+	 * Problems found in the custom-form JSON during the current save. A
+	 * non-empty list aborts the save (nothing is written) so a broken
+	 * builder state can never replace a working form.
+	 *
+	 * @var string[]
+	 */
+	private static array $form_errors = [];
+
+	/**
+	 * Custom-form problems that did NOT block the save because the site is
+	 * in standard mode (an unfinished draft in the hidden builder). Shown
+	 * with the success message so nothing fails silently.
+	 *
+	 * @var string[]
+	 */
+	private static array $form_warnings = [];
+
 	private const ALLOWED_DISPLAY_MODES = [ 'sitewide', 'pages_only', 'posts_only', 'pages_except', 'posts_except', 'sitewide_except_pages', 'sitewide_except_posts' ];
 
 	public static function init(): void {
@@ -147,7 +165,21 @@ final class Settings_Saver {
 				$existing['buttons']        = self::sanitize_buttons( $payload['buttons'] ?? [], $existing['buttons'] ?? [] );
 				break;
 			case 'form':
-				$existing['form']           = self::sanitize_form( $payload['form'] ?? [], $existing['form'] ?? [] );
+				$form_before                = is_array( $existing['form'] ?? null ) ? $existing['form'] : [];
+				self::$form_errors          = [];
+				self::$form_warnings        = [];
+				$existing['form']           = self::sanitize_form( $payload['form'] ?? [], $form_before );
+				if ( ! empty( self::$form_errors ) ) {
+					$message = __( 'The custom form was not saved: ', 'bspe-connect' ) . implode( ' ', array_slice( self::$form_errors, 0, 6 ) );
+					if ( self::is_xhr_request() ) {
+						wp_send_json_error( [ 'message' => $message, 'errors' => self::$form_errors ], 400 );
+					}
+					wp_die( esc_html( $message ), esc_html__( 'Custom form not saved', 'bspe-connect' ), [ 'response' => 400, 'back_link' => true ] );
+				}
+				if ( wp_json_encode( $form_before ) !== wp_json_encode( $existing['form'] ) ) {
+					\BSPE\Connect\Form_Api::record_revision( $form_before, [], 'wp-admin save' );
+					$purge_after_save = true;
+				}
 				break;
 			case 'design':
 				$existing['design']         = self::sanitize_design( $payload['design'] ?? [], $existing['design'] ?? [] );
@@ -171,6 +203,11 @@ final class Settings_Saver {
 
 		Settings::save( $existing );
 
+		// The bar and its form are printed into every cached page.
+		if ( ! empty( $purge_after_save ) ) {
+			\BSPE\Connect\Cache_Purge::all( 'wp-admin form save' );
+		}
+
 		// AJAX path — the admin.js form-submit handler intercepts the
 		// settings form and re-POSTs with X-Requested-With set. We
 		// detect that header and respond with JSON instead of doing
@@ -178,8 +215,12 @@ final class Settings_Saver {
 		// pipeline either way (cap check, nonce, sanitize, save) —
 		// only the response shape changes.
 		if ( self::is_xhr_request() ) {
+			$message = __( 'Settings saved.', 'bspe-connect' );
+			if ( ! empty( self::$form_warnings ) ) {
+				$message .= ' ' . __( 'The custom form draft was NOT saved (the site is on the standard form): ', 'bspe-connect' ) . implode( ' ', array_slice( self::$form_warnings, 0, 4 ) );
+			}
 			wp_send_json_success( [
-				'message' => __( 'Settings saved.', 'bspe-connect' ),
+				'message' => $message,
 				'tab'     => $tab,
 			] );
 		}
@@ -188,6 +229,90 @@ final class Settings_Saver {
 
 		wp_safe_redirect( Admin::tab_url( $tab ) );
 		exit;
+	}
+
+	/**
+	 * Apply a partial patch to one settings section through that section's
+	 * own sanitizer — the same rules the admin tabs enforce. The patch is
+	 * merged over the CURRENT section first, so omitted keys keep their
+	 * value (the tab sanitizers treat a missing toggle as "off").
+	 *
+	 * Used by the management REST API (Form_Api::route_patch_settings).
+	 *
+	 * @param mixed               $patch
+	 * @param array<string,mixed> $existing Full settings array.
+	 * @return array<string,mixed> Full settings array with the section replaced.
+	 */
+	public static function apply_patch( string $section, $patch, array $existing ): array {
+		if ( 'enabled' === $section ) {
+			$existing['enabled'] = in_array( strtolower( (string) ( is_bool( $patch ) ? ( $patch ? '1' : '0' ) : $patch ) ), [ '1', 'true', 'yes', 'on' ], true );
+			return $existing;
+		}
+		if ( ! is_array( $patch ) ) {
+			return $existing;
+		}
+
+		$current = is_array( $existing[ $section ] ?? null ) ? $existing[ $section ] : [];
+		$merged  = self::merge_patch( $current, $patch );
+
+		// A redacted secret coming back unchanged keeps the stored secret.
+		if ( 'form' === $section && \BSPE\Connect\Form_Api::REDACTED === ( $merged['antispam']['turnstile_secret_key'] ?? '' ) ) {
+			$merged['antispam']['turnstile_secret_key'] = (string) ( $current['antispam']['turnstile_secret_key'] ?? '' );
+		}
+
+		switch ( $section ) {
+			case 'welcome_bubble':
+				$existing[ $section ] = self::sanitize_welcome_bubble( $merged, $current );
+				break;
+			case 'display':
+				$existing[ $section ] = self::sanitize_display( $merged, $current );
+				break;
+			case 'utilities':
+				$existing[ $section ] = self::sanitize_utilities( $merged, $current );
+				break;
+			case 'buttons':
+				$existing[ $section ] = self::sanitize_buttons( $merged, $current );
+				break;
+			case 'form':
+				unset( $merged['custom_json'] );
+				$existing[ $section ] = self::sanitize_form( $merged, $current );
+				break;
+			case 'design':
+				$existing[ $section ] = self::sanitize_design( $merged, $current );
+				break;
+			case 'display_rules':
+				$existing[ $section ] = self::sanitize_display_rules( $merged, $current );
+				break;
+			case 'diagnostics':
+				$existing[ $section ] = self::sanitize_diagnostics( $merged );
+				break;
+			case 'in_post_widget':
+				$existing[ $section ] = self::sanitize_in_post_widget( $merged );
+				break;
+			case 'chat':
+				$existing[ $section ] = self::sanitize_chat( $merged, $current );
+				break;
+			case 'privacy':
+				$existing[ $section ] = self::sanitize_privacy( $merged );
+				break;
+		}
+		return $existing;
+	}
+
+	/**
+	 * @param array<string,mixed> $base
+	 * @param array<string,mixed> $patch
+	 * @return array<string,mixed>
+	 */
+	private static function merge_patch( array $base, array $patch ): array {
+		foreach ( $patch as $key => $value ) {
+			if ( is_array( $value ) && isset( $base[ $key ] ) && is_array( $base[ $key ] ) && array_keys( $value ) !== range( 0, count( $value ) - 1 ) ) {
+				$base[ $key ] = self::merge_patch( $base[ $key ], $value );
+			} else {
+				$base[ $key ] = $value;
+			}
+		}
+		return $base;
 	}
 
 	/**
@@ -591,7 +716,43 @@ final class Settings_Saver {
 			'turnstile_secret_key' => self::sanitize_secret( (string) ( $as['turnstile_secret_key'] ?? '' ) ),
 		];
 
+		// Layout mode + custom (multi-step) schema. The builder posts the
+		// whole schema as one JSON string; absent = keep what is stored, so
+		// an older cached admin page can never wipe a custom form.
+		$mode = (string) ( $input['mode'] ?? ( $current['mode'] ?? 'standard' ) );
+		$mode = 'custom' === $mode ? 'custom' : 'standard';
+
+		$custom = is_array( $current['custom'] ?? null ) ? $current['custom'] : \BSPE\Connect\Custom_Form::defaults();
+		if ( isset( $input['custom'] ) && is_array( $input['custom'] ) ) {
+			$custom_input = $input['custom'];
+		} elseif ( isset( $input['custom_json'] ) && '' !== trim( (string) $input['custom_json'] ) ) {
+			$custom_input = json_decode( (string) $input['custom_json'], true );
+			if ( ! is_array( $custom_input ) ) {
+				self::$form_errors[] = __( 'The custom form data is not valid JSON.', 'bspe-connect' );
+				$custom_input        = null;
+			}
+		} else {
+			$custom_input = null;
+		}
+		if ( null !== $custom_input ) {
+			$result = \BSPE\Connect\Custom_Form::normalize( $custom_input );
+			if ( ! empty( $result['errors'] ) ) {
+				self::$form_errors = array_merge( self::$form_errors, $result['errors'] );
+			} else {
+				$custom = $result['config'];
+			}
+		}
+		// On the standard form an unfinished custom draft must not block
+		// saving mail / webhook / copy changes: keep the stored custom form
+		// and report the problem alongside "Settings saved".
+		if ( 'standard' === $mode && ! empty( self::$form_errors ) ) {
+			self::$form_warnings = array_merge( self::$form_warnings, self::$form_errors );
+			self::$form_errors   = [];
+		}
+
 		return [
+			'mode'             => $mode,
+			'custom'           => $custom,
 			'fields'           => $out_field,
 			'text_heading'     => sanitize_text_field( (string) ( $input['text_heading']     ?? 'Send us a text' ) ),
 			'email_heading'    => sanitize_text_field( (string) ( $input['email_heading']    ?? 'Send us an email' ) ),

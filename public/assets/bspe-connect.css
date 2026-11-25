@@ -882,3 +882,238 @@
 		animation: none !important;
 	}
 }
+
+/* ---------------------------------------------------------------------- */
+/*  Custom (multi-step) form — 3.9.0                                       */
+/* ---------------------------------------------------------------------- */
+/* Theme button/fieldset rules (display:inline-block, borders, padding)
+   would otherwise beat the UA [hidden] rule and the fieldset reset. */
+#bspe-connect .bspe-connect__steps [hidden],
+#bspe-connect .bspe-connect__step[hidden] {
+	display: none !important;
+}
+
+#bspe-connect .bspe-connect__steps {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+#bspe-connect .bspe-connect__step {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	min-width: 0;
+	min-inline-size: 0;
+	background: none;
+}
+
+#bspe-connect .bspe-connect__step-title {
+	display: block;
+	float: none;
+	width: 100%;
+	margin: 0 0 4px;
+	padding: 0;
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--bspe-bubble-fg);
+}
+
+#bspe-connect .bspe-connect__step-subtitle {
+	margin: 0 0 10px;
+	font-size: 13px;
+	line-height: 1.45;
+	opacity: 0.72;
+}
+
+#bspe-connect .bspe-connect__grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: 12px;
+}
+
+#bspe-connect .bspe-connect__grid > .bspe-connect__field {
+	grid-column: 1 / -1;
+	min-width: 0;
+}
+
+#bspe-connect .bspe-connect__grid > .bspe-connect__field.is-half {
+	grid-column: auto;
+}
+
+@media (max-width: 340px) {
+	#bspe-connect .bspe-connect__grid > .bspe-connect__field.is-half {
+		grid-column: 1 / -1;
+	}
+}
+
+/* Progress */
+#bspe-connect .bspe-connect__progress {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+#bspe-connect .bspe-connect__progress-label {
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	opacity: 0.7;
+}
+
+#bspe-connect .bspe-connect__progress-track {
+	display: block;
+	height: 4px;
+	border-radius: 2px;
+	background: rgba(53, 30, 40, 0.12);
+	overflow: hidden;
+}
+
+#bspe-connect .bspe-connect__progress-fill {
+	display: block;
+	height: 100%;
+	border-radius: 2px;
+	background: var(--bspe-accent);
+	transition: width 0.28s var(--bspe-ease);
+}
+
+/* Visible labels (radio / checkbox groups, date, show_label) */
+#bspe-connect .bspe-connect__label-visible,
+#bspe-connect .bspe-connect__group-label {
+	display: block;
+	margin: 0 0 2px;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.35;
+	color: var(--bspe-bubble-fg);
+}
+
+#bspe-connect .bspe-connect__help {
+	margin: 0;
+	font-size: 12px;
+	line-height: 1.4;
+	opacity: 0.7;
+}
+
+/* Radio / checkbox choices */
+#bspe-connect .bspe-connect__choices {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+#bspe-connect .bspe-connect__choice {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin: 0;
+	padding: 10px 12px;
+	border: 1px solid rgba(53, 30, 40, 0.15);
+	border-radius: 10px;
+	background: #fff;
+	font-size: 14px;
+	line-height: 1.4;
+	color: var(--bspe-bubble-fg);
+	cursor: pointer;
+}
+
+#bspe-connect .bspe-connect__choice input {
+	flex: 0 0 auto;
+	width: 18px;
+	height: 18px;
+	margin: 1px 0 0;
+	accent-color: var(--bspe-accent);
+}
+
+#bspe-connect .bspe-connect__choice:has(input:checked) {
+	border-color: var(--bspe-accent);
+	box-shadow: inset 0 0 0 1px var(--bspe-accent);
+}
+
+#bspe-connect .bspe-connect__choice:has(input[aria-invalid="true"]) {
+	border-color: #c0392b;
+}
+
+#bspe-connect .bspe-connect__choice--single {
+	padding: 4px 0;
+	border: 0;
+	background: transparent;
+	font-size: 13px;
+}
+
+#bspe-connect .bspe-connect__choice--single:has(input:checked) {
+	box-shadow: none;
+}
+
+#bspe-connect .bspe-connect__choice a {
+	color: var(--bspe-accent);
+	text-decoration: underline;
+}
+
+/* An unanswered dropdown reads as a placeholder, not as a chosen value. */
+#bspe-connect .bspe-connect__select:has(option[value=""]:checked) {
+	color: rgba(53, 30, 40, 0.42);
+}
+
+#bspe-connect .bspe-connect__select option {
+	color: var(--bspe-bubble-fg);
+}
+
+#bspe-connect input[type="date"].bspe-connect__input {
+	min-height: 46px;
+}
+
+/* Back / Next / Submit row */
+#bspe-connect .bspe-connect__step-nav {
+	display: flex;
+	align-items: stretch;
+	gap: 10px;
+	margin-top: 4px;
+}
+
+#bspe-connect .bspe-connect__step-nav .bspe-connect__submit {
+	flex: 1 1 auto;
+	width: auto;
+	margin-top: 0;
+}
+
+#bspe-connect .bspe-connect__back {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-height: 50px;
+	margin: 0;
+	padding: 0 16px;
+	border: 1px solid rgba(53, 30, 40, 0.18);
+	border-radius: 12px;
+	background: transparent;
+	color: var(--bspe-bubble-fg);
+	font: inherit;
+	font-size: 15px;
+	font-weight: 500;
+	text-transform: none;
+	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
+	-webkit-appearance: none;
+	        appearance: none;
+}
+
+#bspe-connect .bspe-connect__back:hover {
+	border-color: rgba(53, 30, 40, 0.32);
+	background: rgba(53, 30, 40, 0.04);
+	color: var(--bspe-bubble-fg);
+}
+
+#bspe-connect .bspe-connect__back:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--bspe-accent) 35%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	#bspe-connect .bspe-connect__progress-fill {
+		transition: none;
+	}
+}

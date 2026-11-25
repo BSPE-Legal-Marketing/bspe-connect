@@ -19,7 +19,7 @@ final class Settings {
 
 	public const DB_VERSION_KEY = 'bspe_connect_db_version';
 
-	public const DB_VERSION = '1.1.0';
+	public const DB_VERSION = '1.2.0';
 
 	/**
 	 * Returns the canonical default settings array (spec §9).
@@ -145,6 +145,21 @@ final class Settings {
 				'webhook'        => [
 					'enabled' => false,
 					'url'     => '',
+				],
+				// Form layout. 'standard' = the five fixed fields above.
+				// 'custom' = the multi-step form described in `custom`
+				// (Custom_Form), used when a firm's website form asks for
+				// more than name / phone / email / message. A custom form
+				// with no fields falls back to standard.
+				'mode'           => 'standard',
+				'custom'         => [
+					'steps'           => [],
+					'next_label'      => 'Next',
+					'back_label'      => 'Back',
+					'submit_label'    => 'Submit',
+					'show_progress'   => true,
+					'progress_format' => 'Step {current} of {total}',
+					'source'          => [],
 				],
 			],
 			'design'         => [

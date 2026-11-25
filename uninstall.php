@@ -25,6 +25,7 @@ delete_option( 'bspe_connect_settings' );
 delete_option( 'bspe_connect_db_version' );
 delete_option( 'bspe_connect_log' );
 delete_option( 'bspe_connect_license' );
+delete_option( 'bspe_connect_form_revisions' );
 
 // Clear scheduled cron jobs so WP doesn't try to fire callbacks into
 // classes that no longer exist after uninstall.

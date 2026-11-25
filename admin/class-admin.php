@@ -328,6 +328,51 @@ final class Admin {
 				'6.5.0'
 			);
 		}
+
+		// Form tab: the custom (multi-step) form builder. Talks to the
+		// management REST API with the logged-in admin's wp_rest nonce
+		// for Elementor import, the webhook test and revision history.
+		if ( 'form' === $active_tab ) {
+			wp_enqueue_script(
+				'bspe-connect-form-builder',
+				BSPE_CONNECT_URL . 'admin/assets/form-builder.js',
+				[ 'bspe-connect-admin' ],
+				BSPE_CONNECT_VERSION,
+				true
+			);
+			wp_localize_script(
+				'bspe-connect-form-builder',
+				'BSPE_CF',
+				[
+					'restRoot' => esc_url_raw( rest_url( \BSPE\Connect\Form_Api::ADMIN_NAMESPACE . \BSPE\Connect\Form_Api::ADMIN_PREFIX . '/' ) ),
+					'nonce'    => wp_create_nonce( 'wp_rest' ),
+					'types'    => [
+						'text'       => __( 'Text', 'bspe-connect' ),
+						'email'      => __( 'Email', 'bspe-connect' ),
+						'tel'        => __( 'Phone', 'bspe-connect' ),
+						'number'     => __( 'Number', 'bspe-connect' ),
+						'textarea'   => __( 'Long text', 'bspe-connect' ),
+						'select'     => __( 'Dropdown', 'bspe-connect' ),
+						'radio'      => __( 'Choice (one)', 'bspe-connect' ),
+						'checkboxes' => __( 'Choices (many)', 'bspe-connect' ),
+						'checkbox'   => __( 'Single checkbox / consent', 'bspe-connect' ),
+						'date'       => __( 'Date', 'bspe-connect' ),
+						'hidden'     => __( 'Hidden value', 'bspe-connect' ),
+					],
+					'roles'    => [
+						''             => __( 'Auto', 'bspe-connect' ),
+						'first_name'   => __( 'First name', 'bspe-connect' ),
+						'last_name'    => __( 'Last name', 'bspe-connect' ),
+						'full_name'    => __( 'Full name', 'bspe-connect' ),
+						'phone'        => __( 'Phone', 'bspe-connect' ),
+						'email'        => __( 'Email', 'bspe-connect' ),
+						'message'      => __( 'Message', 'bspe-connect' ),
+						'contact_pref' => __( 'Preferred contact', 'bspe-connect' ),
+					],
+					'reserved' => [ 'event', 'test', 'form_mode', 'source', 'submitted_at', 'name', 'first_name', 'last_name', 'phone', 'phone_e164', 'phone_formatted', 'email', 'message', 'contact_pref', 'summary', 'page_url', 'site_name', 'firm_name', 'submission_id' ],
+				]
+			);
+		}
 	}
 
 	/**

@@ -119,23 +119,104 @@ final class Submissions {
 			'email'         => substr( (string) ( $data['email']         ?? '' ), 0, 255 ),
 			'message'       => (string) ( $data['message']      ?? '' ),
 			'contact_pref'  => $data['contact_pref']  !== '' && $data['contact_pref'] !== null ? substr( (string) $data['contact_pref'], 0, 20 ) : null,
+			'fields_json'   => '' !== (string) ( $data['fields_json'] ?? '' ) ? (string) $data['fields_json'] : null,
 			'page_url'      => substr( (string) ( $data['page_url']      ?? '' ), 0, 500 ),
 			'user_agent'    => substr( (string) ( $data['user_agent']    ?? '' ), 0, 500 ),
 			'ip_hash'       => substr( (string) ( $data['ip_hash']       ?? '' ), 0, 64 ),
 			'mail_status'   => substr( (string) ( $data['mail_status']   ?? 'pending' ), 0, 20 ),
 		];
 
-		$ok = $wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-			self::table(),
-			$row,
-			[
-				'%s', '%s', '%s', '%s', '%s', '%s',
-				null === $row['contact_pref'] ? null : '%s',
-				'%s', '%s', '%s', '%s',
-			]
-		);
+		// fields_json is only named when there is something to store, so the
+		// standard form never depends on the 1.2.0 column existing.
+		if ( null === $row['fields_json'] ) {
+			unset( $row['fields_json'] );
+		}
+
+		$ok = $wpdb->insert( self::table(), $row, self::formats( $row ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+
+		if ( ! $ok && isset( $row['fields_json'] ) ) {
+			// The column may be missing (a schema migration that could not
+			// ALTER the table). Keep the lead: store the answers as text in
+			// the message instead of dropping the row.
+			Logger::log( 'error', 'Submission insert with fields_json failed — retrying without the column', [ 'db_error' => (string) $wpdb->last_error ] );
+			$answers = Custom_Form::summary( self::decode_fields( $row['fields_json'] ) );
+			unset( $row['fields_json'] );
+			$row['message'] = trim( $row['message'] . "\n\n" . $answers );
+			$ok = $wpdb->insert( self::table(), $row, self::formats( $row ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		}
 
 		return $ok ? (int) $wpdb->insert_id : 0;
+	}
+
+	/**
+	 * wpdb formats for a row: NULL values get NULL, everything else %s.
+	 *
+	 * @param array<string,mixed> $row
+	 * @return array<int,string|null>
+	 */
+	private static function formats( array $row ): array {
+		$out = [];
+		foreach ( $row as $value ) {
+			$out[] = null === $value ? null : '%s';
+		}
+		return $out;
+	}
+
+	/**
+	 * True once the 1.2.0 fields_json column exists.
+	 */
+	public static function has_fields_column(): bool {
+		global $wpdb;
+		$table = self::table();
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$col = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'fields_json' ) );
+		return 'fields_json' === $col;
+	}
+
+	/**
+	 * Custom-form answers as stored in fields_json: an ordered list of
+	 * {key, label, value, type}. Labels are stored with the value so an old
+	 * lead still reads correctly after the form is edited.
+	 *
+	 * @param array<int,array{key:string,label:string,value:string,type:string}> $rows
+	 */
+	public static function encode_fields( array $rows ): string {
+		$clean = [];
+		foreach ( $rows as $row ) {
+			$clean[] = [
+				'key'   => (string) ( $row['key'] ?? '' ),
+				'label' => (string) ( $row['label'] ?? '' ),
+				'value' => (string) ( $row['value'] ?? '' ),
+				'type'  => (string) ( $row['type'] ?? 'text' ),
+			];
+		}
+		$json = wp_json_encode( $clean );
+		return false === $json ? '' : $json;
+	}
+
+	/**
+	 * @return array<int,array{key:string,label:string,value:string,type:string}>
+	 */
+	public static function decode_fields( ?string $json ): array {
+		if ( null === $json || '' === $json ) {
+			return [];
+		}
+		$rows = json_decode( $json, true );
+		if ( ! is_array( $rows ) ) {
+			return [];
+		}
+		$out = [];
+		foreach ( $rows as $row ) {
+			if ( is_array( $row ) ) {
+				$out[] = [
+					'key'   => (string) ( $row['key'] ?? '' ),
+					'label' => (string) ( $row['label'] ?? '' ),
+					'value' => (string) ( $row['value'] ?? '' ),
+					'type'  => (string) ( $row['type'] ?? 'text' ),
+				];
+			}
+		}
+		return $out;
 	}
 
 	/**

@@ -100,13 +100,27 @@ final class Mailer {
 	 * @param array<string,string> $vars
 	 */
 	private static function render_body( array $vars ): string {
-		$rows = [
-			__( 'Name', 'bspe-connect' )     => $vars['name'] ?? '',
-			__( 'Phone', 'bspe-connect' )    => self::format_phone_display( $vars['phone'] ?? '' ),
-			__( 'Email', 'bspe-connect' )    => $vars['email'] ?? '',
-			__( 'Preferred', 'bspe-connect' ) => $vars['contact_pref'] ?? '',
-			__( 'Message', 'bspe-connect' )  => $vars['message'] ?? '',
-		];
+		// List of [label, value] pairs (not an assoc array: two custom
+		// fields may share a label). Custom (multi-step) forms pass their
+		// own rows, in form order; the standard form uses the fixed five.
+		$rows = [];
+		if ( ! empty( $vars['rows'] ) && is_array( $vars['rows'] ) ) {
+			foreach ( $vars['rows'] as $row ) {
+				if ( ! is_array( $row ) || 'hidden' === ( $row['type'] ?? '' ) ) {
+					continue;
+				}
+				$value  = (string) ( $row['value'] ?? '' );
+				$rows[] = [ (string) ( $row['label'] ?? '' ), 'tel' === ( $row['type'] ?? '' ) ? self::format_phone_display( $value ) : $value ];
+			}
+		} else {
+			$rows = [
+				[ __( 'Name', 'bspe-connect' ), (string) ( $vars['name'] ?? '' ) ],
+				[ __( 'Phone', 'bspe-connect' ), self::format_phone_display( (string) ( $vars['phone'] ?? '' ) ) ],
+				[ __( 'Email', 'bspe-connect' ), (string) ( $vars['email'] ?? '' ) ],
+				[ __( 'Preferred', 'bspe-connect' ), (string) ( $vars['contact_pref'] ?? '' ) ],
+				[ __( 'Message', 'bspe-connect' ), (string) ( $vars['message'] ?? '' ) ],
+			];
+		}
 
 		// Use the firm's chosen colors so the email matches the bar.
 		// Hex values are passed through self::sanitize_hex which falls back
@@ -224,7 +238,7 @@ final class Mailer {
 				<tr>
 					<td class="bspe-body" style="padding:24px 28px;">
 						<table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-						<?php foreach ( $rows as $label => $value ) :
+						<?php foreach ( $rows as [ $label, $value ] ) :
 							if ( '' === trim( (string) $value ) ) {
 								continue;
 							}

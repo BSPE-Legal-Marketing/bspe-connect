@@ -202,7 +202,8 @@ final class Submissions_Controller {
 			$args      = array_merge( $where_args, [ $per_page, $offset ] );
 		}
 
-		$sql = "SELECT id, submitted_at, source_button, name, phone, email, message, contact_pref, page_url, user_agent, ip_hash, mail_status FROM {$table} WHERE {$where_sql} ORDER BY submitted_at DESC, id DESC{$limit_sql}";
+		$fields_col = \BSPE\Connect\Submissions::has_fields_column() ? 'fields_json' : 'NULL AS fields_json';
+		$sql = "SELECT id, submitted_at, source_button, name, phone, email, message, contact_pref, {$fields_col}, page_url, user_agent, ip_hash, mail_status FROM {$table} WHERE {$where_sql} ORDER BY submitted_at DESC, id DESC{$limit_sql}";
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows = empty( $args ) ? $wpdb->get_results( $sql, ARRAY_A ) : $wpdb->get_results( $wpdb->prepare( $sql, $args ), ARRAY_A );
 		if ( ! is_array( $rows ) ) {
@@ -303,6 +304,7 @@ final class Submissions_Controller {
 			'Email',
 			'Message',
 			'Preferred contact',
+			'Form answers',
 			'Page URL',
 			'Mail status',
 			'IP hash',
@@ -318,6 +320,7 @@ final class Submissions_Controller {
 				self::csv_safe( (string) $row['email'] ),
 				self::csv_safe( (string) $row['message'] ),
 				self::csv_safe( (string) ( $row['contact_pref'] ?? '' ) ),
+				self::csv_safe( \BSPE\Connect\Custom_Form::summary( \BSPE\Connect\Submissions::decode_fields( $row['fields_json'] ?? null ) ) ),
 				self::csv_safe( (string) $row['page_url'] ),
 				self::csv_safe( (string) $row['mail_status'] ),
 				self::csv_safe( (string) $row['ip_hash'] ),

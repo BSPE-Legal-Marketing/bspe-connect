@@ -91,12 +91,46 @@ final class Form_Handler {
 			}
 		}
 
-		// 6. Sanitize + validate.
+		// 6. Sanitize + validate. Custom (multi-step) mode parses the
+		// bspe_f[…] inputs against the stored schema; standard mode keeps
+		// the original five fixed fields.
 		$source = self::clean_source( isset( $_POST['bspe_source'] ) ? (string) wp_unslash( $_POST['bspe_source'] ) : '' );
-		$fields = self::collect_fields();
-		$errors = self::validate_fields( $fields );
+		$custom = Custom_Form::is_active();
+		$rows   = [];
+		$values = [];
+
+		// 6a. Stale page cache guard. The form markup carries the signature
+		// of the form it was rendered for. A page cached before the form
+		// changed would post fields the server no longer reads (or miss the
+		// ones it requires) — tell the visitor to refresh instead of losing
+		// the lead. Pages cached by 3.8.x carry no signature: fine for the
+		// standard form, refused once the site is in custom mode.
+		$posted_sig   = isset( $_POST['bspe_form_sig'] ) ? sanitize_key( wp_unslash( (string) $_POST['bspe_form_sig'] ) ) : '';
+		$expected_sig = Custom_Form::signature();
+		$stale        = $custom ? ( $posted_sig !== $expected_sig ) : ( '' !== $posted_sig && 's' !== $posted_sig );
+		if ( $stale ) {
+			Logger::log( 'warn', 'Submission from a stale cached form refused — purge the page cache', [ 'posted' => $posted_sig, 'expected' => $expected_sig ] );
+			self::error_response( [ '_form' => __( 'This form was just updated. Please refresh the page and try again.', 'bspe-connect' ) ], 409 );
+		}
+
+		if ( $custom ) {
+			$config = Custom_Form::config();
+			$raw    = isset( $_POST[ Custom_Form::POST_KEY ] ) && is_array( $_POST[ Custom_Form::POST_KEY ] ) ? wp_unslash( $_POST[ Custom_Form::POST_KEY ] ) : []; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Custom_Form::collect sanitizes per field type.
+			$parsed = Custom_Form::collect( $raw, $config );
+			$errors = $parsed['errors'];
+			$fields = $parsed['core'];
+			$rows   = $parsed['rows'];
+			$values = $parsed['values'];
+			if ( empty( $errors ) && 0 === Custom_Form::answered_count( $rows ) ) {
+				$errors = [ '_form' => __( 'Please fill in the form before sending.', 'bspe-connect' ) ];
+			}
+		} else {
+			$fields = self::collect_fields();
+			$errors = self::validate_fields( $fields );
+		}
+
 		if ( ! empty( $errors ) ) {
-			Logger::log( 'warn', 'Validation failed', [ 'errors' => $errors, 'source' => $source ] );
+			Logger::log( 'warn', 'Validation failed', [ 'errors' => $errors, 'source' => $source, 'mode' => $custom ? 'custom' : 'standard' ] );
 			self::error_response( $errors );
 		}
 
@@ -112,6 +146,7 @@ final class Form_Handler {
 			'email'         => $fields['email'],
 			'message'       => $fields['message'],
 			'contact_pref'  => $fields['contact_pref'],
+			'fields_json'   => $custom ? Submissions::encode_fields( $rows ) : '',
 			'page_url'      => $page_url,
 			'user_agent'    => $user_agent,
 			'ip_hash'       => $ip_hash,
@@ -130,6 +165,9 @@ final class Form_Handler {
 			'message'      => $fields['message'],
 			'contact_pref' => $fields['contact_pref'] ?? '',
 		];
+		if ( $custom ) {
+			$mail_vars['rows'] = $rows;
+		}
 
 		$mail_ok = Mailer::send( $mail_vars );
 		if ( $row_id ) {
@@ -142,6 +180,7 @@ final class Form_Handler {
 			[
 				'submission_id' => $row_id,
 				'source'        => $source,
+				'mode'          => $custom ? 'custom' : 'standard',
 				'mail_to'       => (string) Settings::get( 'form.mail_to', '' ),
 				'mail_from'     => (string) Settings::get( 'form.mail_from', '' ),
 				'mail_status'   => $mail_ok ? 'sent' : 'failed',
@@ -153,20 +192,12 @@ final class Form_Handler {
 		// form.webhook.enabled setting. A failed webhook is logged but
 		// never blocks the submission from succeeding — the lead is
 		// already saved + emailed at this point.
-		Webhook::maybe_send( [
-			'event'        => 'form_submission',
-			'source'       => $source,
-			'submitted_at' => current_time( 'c' ),
-			'name'         => $fields['name'],
-			'phone'        => $fields['phone'],
-			'email'        => $fields['email'],
-			'message'      => $fields['message'],
-			'contact_pref' => $fields['contact_pref'] ?? '',
-			'page_url'     => $page_url,
-			'site_name'    => (string) get_bloginfo( 'name' ),
-			'firm_name'    => (string) ( Settings::get( 'design.firm_name', '' ) ?: get_bloginfo( 'name' ) ),
+		Webhook::maybe_send( Webhook::build_payload( $fields, $values, $rows, [
+			'form_mode'     => $custom ? 'custom' : 'standard',
+			'source'        => $source,
+			'page_url'      => $page_url,
 			'submission_id' => (int) $row_id,
-		] );
+		] ) );
 
 		// 9. Increment rate-limit transient (1-hour window).
 		if ( '' !== $ip_hash ) {

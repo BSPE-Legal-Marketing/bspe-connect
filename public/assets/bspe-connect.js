@@ -632,7 +632,20 @@
 	var pageUrlField = form ? form.querySelector('[data-bspe-page-url]') : null;
 	var submitBtn = form ? form.querySelector('[data-bspe-submit]') : null;
 	var formError = form ? form.querySelector('[data-bspe-form-error]') : null;
-	var phoneInput = form ? form.querySelector('[data-bspe-phone-mask]') : null;
+	var phoneInputs = form ? form.querySelectorAll('[data-bspe-phone-mask]') : [];
+
+	// Multi-step (custom) form. Present only when the site switched the
+	// lead form to "custom" mode; the standard form has no [data-bspe-step].
+	var steps = form ? Array.prototype.slice.call(form.querySelectorAll('[data-bspe-step]')) : [];
+	var isMultistep = steps.length > 0;
+	var stepIndex = 0;
+	var backBtn = form ? form.querySelector('[data-bspe-back]') : null;
+	var nextBtn = form ? form.querySelector('[data-bspe-next]') : null;
+	var progressWrap = form ? form.querySelector('[data-bspe-progress]') : null;
+	var progressLabel = form ? form.querySelector('[data-bspe-progress-label]') : null;
+	var progressFill = form ? form.querySelector('[data-bspe-progress-fill]') : null;
+	var modalBody = modal ? modal.querySelector('.bspe-connect__modal-body') : null;
+	var i18n = (data && data.i18n) || {};
 
 	var modalOpen = false;
 	var modalLastFocus = null;
@@ -671,7 +684,8 @@
 
 		// Focus the first focusable input after the slide-in finishes.
 		setTimeout(function () {
-			var first = form ? form.querySelector('input:not([type=hidden]):not([tabindex="-1"]), select, textarea') : null;
+			var scope = (isMultistep && steps[stepIndex]) ? steps[stepIndex] : form;
+			var first = scope ? scope.querySelector('input:not([type=hidden]):not([tabindex="-1"]), select, textarea') : null;
 			if (first && typeof first.focus === 'function') {
 				try { first.focus({ preventScroll: true }); } catch (e) { first.focus(); }
 			}
@@ -728,17 +742,178 @@
 		}
 	}
 
+	function cssEscape(value) {
+		return (window.CSS && CSS.escape) ? CSS.escape(value) : String(value).replace(/["\\]/g, '\\$&');
+	}
+
+	function fieldInputs(field) {
+		var wrap = form.querySelector('[data-field="' + cssEscape(field) + '"]');
+		var list = wrap ? wrap.querySelectorAll('input:not([type=hidden]), select, textarea') : [];
+		if (!list.length) {
+			list = form.querySelectorAll('[name="' + cssEscape(field) + '"], [name="bspe_f[' + cssEscape(field) + ']"], [name="bspe_f[' + cssEscape(field) + '][]"]');
+		}
+		return list;
+	}
+
 	function setFieldError(field, message) {
 		if (!form) { return; }
-		var node = form.querySelector('[data-bspe-error="' + field + '"]');
+		var node = form.querySelector('[data-bspe-error="' + cssEscape(field) + '"]');
 		if (node) {
 			node.textContent = message;
 			node.removeAttribute('hidden');
 		}
-		var input = form.querySelector('[name="' + field + '"]');
-		if (input) {
-			input.setAttribute('aria-invalid', 'true');
+		var inputs = fieldInputs(field);
+		for (var i = 0; i < inputs.length; i++) {
+			inputs[i].setAttribute('aria-invalid', 'true');
 		}
+	}
+
+	function clearFieldError(field) {
+		if (!form) { return; }
+		var node = form.querySelector('[data-bspe-error="' + cssEscape(field) + '"]');
+		if (node) {
+			node.textContent = '';
+			node.setAttribute('hidden', '');
+		}
+		var inputs = fieldInputs(field);
+		for (var i = 0; i < inputs.length; i++) {
+			inputs[i].removeAttribute('aria-invalid');
+		}
+	}
+
+	// ----- Multi-step controller -----
+	function focusFirst(scope, selector) {
+		var el = scope ? scope.querySelector(selector || 'input:not([type=hidden]):not([tabindex="-1"]), select, textarea') : null;
+		if (el && typeof el.focus === 'function') {
+			try { el.focus({ preventScroll: false }); } catch (e) { el.focus(); }
+		}
+	}
+
+	function showStep(index, focus) {
+		if (!isMultistep) { return; }
+		index = Math.max(0, Math.min(steps.length - 1, index));
+		stepIndex = index;
+		var last = index === steps.length - 1;
+		for (var i = 0; i < steps.length; i++) {
+			if (i === index) { steps[i].removeAttribute('hidden'); } else { steps[i].setAttribute('hidden', ''); }
+		}
+		if (backBtn) { if (index > 0) { backBtn.removeAttribute('hidden'); } else { backBtn.setAttribute('hidden', ''); } }
+		if (nextBtn) { if (last) { nextBtn.setAttribute('hidden', ''); } else { nextBtn.removeAttribute('hidden'); } }
+		if (submitBtn) { if (last) { submitBtn.removeAttribute('hidden'); } else { submitBtn.setAttribute('hidden', ''); } }
+		if (progressLabel && progressWrap) {
+			var fmt = progressWrap.getAttribute('data-format') || 'Step {current} of {total}';
+			progressLabel.textContent = fmt.replace('{current}', String(index + 1)).replace('{total}', String(steps.length));
+		}
+		if (progressFill) { progressFill.style.width = ((index + 1) / steps.length * 100) + '%'; }
+		if (modalBody) { modalBody.scrollTop = 0; }
+		if (focus) { setTimeout(function () { focusFirst(steps[index]); }, 30); }
+		// DOM event only (for GTM / site scripts): steps are not stored as
+		// analytics rows, so nothing is sent to the REST endpoint.
+		try {
+			window.dispatchEvent(new CustomEvent('bspe:form_step', { detail: { type: 'form_step', step: index + 1, total: steps.length } }));
+		} catch (e) { /* ignore */ }
+	}
+
+	function wrapValue(wrap) {
+		var type = wrap.getAttribute('data-type');
+		if (type === 'radio' || type === 'checkboxes') {
+			return wrap.querySelector('input:checked') ? 'x' : '';
+		}
+		if (type === 'checkbox') {
+			var cb = wrap.querySelector('input[type=checkbox]');
+			return (cb && cb.checked) ? '1' : '';
+		}
+		var el = wrap.querySelector('input:not([type=hidden]), select, textarea');
+		return el ? String(el.value || '').trim() : '';
+	}
+
+	function validateWrap(wrap) {
+		var key = wrap.getAttribute('data-field');
+		var type = wrap.getAttribute('data-type');
+		var value = wrapValue(wrap);
+		var err = '';
+		if (value === '') {
+			if (wrap.hasAttribute('data-required')) {
+				if (type === 'select' || type === 'radio' || type === 'checkboxes') {
+					err = i18n.choose || 'Please make a selection.';
+				} else if (type === 'checkbox') {
+					err = i18n.check || 'Please check this box to continue.';
+				} else {
+					err = i18n.required || 'This field is required.';
+				}
+			}
+		} else if (type === 'email') {
+			if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) { err = i18n.email || 'Please enter a valid email address.'; }
+		} else if (type === 'tel') {
+			var d = value.replace(/\D/g, '');
+			if (wrap.getAttribute('data-phone-format') === 'intl') {
+				if (d.length < 7 || d.length > 15) { err = i18n.phoneIntl || 'Please enter a valid phone number.'; }
+			} else {
+				if (d.length === 11 && d.charAt(0) === '1') { d = d.slice(1); }
+				if (d.length !== 10) { err = i18n.phone || 'Please enter a 10-digit US phone number.'; }
+			}
+		} else if (type === 'number') {
+			var n = value.replace(/[^0-9.\-]/g, '');
+			if (n === '' || isNaN(Number(n))) {
+				err = i18n.number || 'Please enter a number.';
+			} else {
+				var min = wrap.getAttribute('data-min');
+				var max = wrap.getAttribute('data-max');
+				if ((min !== null && min !== '' && Number(n) < Number(min)) || (max !== null && max !== '' && Number(n) > Number(max))) {
+					err = i18n.range || 'Please enter a number in the allowed range.';
+				}
+			}
+		}
+		if (err) { setFieldError(key, err); } else { clearFieldError(key); }
+		return !err;
+	}
+
+	function validateStep(index) {
+		var wraps = steps[index] ? steps[index].querySelectorAll('[data-field]') : [];
+		var firstBad = null;
+		for (var i = 0; i < wraps.length; i++) {
+			if (!validateWrap(wraps[i]) && !firstBad) { firstBad = wraps[i]; }
+		}
+		if (firstBad) {
+			focusFirst(firstBad, 'input:not([type=hidden]), select, textarea');
+		}
+		return !firstBad;
+	}
+
+	function stepOfField(field) {
+		var wrap = form.querySelector('[data-field="' + cssEscape(field) + '"]');
+		if (!wrap) { return -1; }
+		for (var i = 0; i < steps.length; i++) {
+			if (steps[i].contains(wrap)) { return i; }
+		}
+		return -1;
+	}
+
+	if (isMultistep) {
+		if (nextBtn) {
+			nextBtn.addEventListener('click', function () {
+				if (validateStep(stepIndex)) { showStep(stepIndex + 1, true); }
+			});
+		}
+		if (backBtn) {
+			backBtn.addEventListener('click', function () { showStep(stepIndex - 1, true); });
+		}
+		// Enter in a single-line input moves to the next step instead of
+		// (implicitly) submitting a half-filled form.
+		form.addEventListener('keydown', function (event) {
+			if (event.key !== 'Enter' || stepIndex >= steps.length - 1) { return; }
+			var t = event.target;
+			if (!t || t.tagName === 'TEXTAREA' || t.tagName === 'BUTTON') { return; }
+			event.preventDefault();
+			if (validateStep(stepIndex)) { showStep(stepIndex + 1, true); }
+		});
+		// Re-validate a field as soon as the visitor fixes it.
+		form.addEventListener('change', function (event) {
+			var wrap = event.target && event.target.closest ? event.target.closest('[data-field]') : null;
+			if (wrap && form.querySelector('[data-bspe-error="' + cssEscape(wrap.getAttribute('data-field')) + '"]:not([hidden])')) {
+				validateWrap(wrap);
+			}
+		});
 	}
 
 	function setFormError(message) {
@@ -752,6 +927,11 @@
 		if (successMessage && message) { successMessage.textContent = message; }
 		modal.setAttribute('data-bspe-form-state', 'success');
 		if (successWrapper) { successWrapper.removeAttribute('hidden'); }
+		// A finished multi-step form starts over at step 1 next time.
+		if (isMultistep) {
+			try { form.reset(); } catch (e) { /* ignore */ }
+			showStep(0, false);
+		}
 		// Allow CSS to animate the checkmark in.
 		setTimeout(function () {
 			if (successWrapper) { successWrapper.classList.add('is-revealed'); }
@@ -764,18 +944,22 @@
 
 	// ----- Phone live mask -----
 	function maskPhone(raw) {
-		var digits = (raw || '').replace(/\D/g, '').slice(0, 10);
+		var digits = (raw || '').replace(/\D/g, '');
+		// "+1 (555) 555-0123" (autofill, paste): drop the country code
+		// instead of cutting the last digit. US area codes never start with 1.
+		if (digits.length > 10 && digits.charAt(0) === '1') { digits = digits.slice(1); }
+		digits = digits.slice(0, 10);
 		if (digits.length === 0) { return ''; }
 		if (digits.length < 4)  { return '(' + digits; }
 		if (digits.length < 7)  { return '(' + digits.slice(0, 3) + ') ' + digits.slice(3); }
 		return '(' + digits.slice(0, 3) + ') ' + digits.slice(3, 6) + '-' + digits.slice(6);
 	}
 
-	if (phoneInput) {
-		phoneInput.addEventListener('input', function () {
-			phoneInput.value = maskPhone(phoneInput.value);
+	Array.prototype.forEach.call(phoneInputs, function (input) {
+		input.addEventListener('input', function () {
+			input.value = maskPhone(input.value);
 		});
-	}
+	});
 
 	// ----- Mobile keyboard scroll-into-view -----
 	// On iOS the soft keyboard slides up over the bottom sheet and can hide
@@ -812,6 +996,21 @@
 		form.addEventListener('submit', function (event) {
 			event.preventDefault();
 			if (!submitBtn) { return; }
+
+			if (isMultistep) {
+				// Not on the last step yet: this is a "Next", not a submit.
+				if (stepIndex < steps.length - 1) {
+					if (validateStep(stepIndex)) { showStep(stepIndex + 1, true); }
+					return;
+				}
+				for (var si = 0; si < steps.length; si++) {
+					if (!validateStep(si)) {
+						showStep(si, false);
+						validateStep(si);
+						return;
+					}
+				}
+			}
 
 			clearAllErrors();
 			submitBtn.setAttribute('aria-busy', 'true');
@@ -865,8 +1064,22 @@
 				for (var key in errors) {
 					if (!Object.prototype.hasOwnProperty.call(errors, key)) { continue; }
 					if (key === '_form') { continue; }
-					setFieldError(key, errors[key]);
-					hadFieldError = true;
+					// Only count errors this markup can actually show; an
+					// error for a field the page doesn't have (stale cache)
+					// falls through to the form-level message below.
+					if (form.querySelector('[data-bspe-error="' + cssEscape(key) + '"]')) {
+						setFieldError(key, errors[key]);
+						hadFieldError = true;
+					}
+				}
+				if (isMultistep && hadFieldError) {
+					var jumpTo = -1;
+					for (var ek in errors) {
+						if (!Object.prototype.hasOwnProperty.call(errors, ek) || ek === '_form') { continue; }
+						var at = stepOfField(ek);
+						if (at >= 0 && (jumpTo < 0 || at < jumpTo)) { jumpTo = at; }
+					}
+					if (jumpTo >= 0 && jumpTo !== stepIndex) { showStep(jumpTo, true); }
 				}
 				if (errors._form) {
 					setFormError(errors._form);

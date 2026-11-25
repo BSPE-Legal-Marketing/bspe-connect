@@ -46,6 +46,34 @@
 				<key name="success_msg" />
 				<key name="mail_subject" />
 				<key name="mail_from_name" />
+				<!-- Custom (multi-step) form: step titles, field labels,
+				     placeholders, help text and option LABELS. Option values
+				     and field keys are not translated, so the CRM receives
+				     the same values from every language. -->
+				<key name="custom">
+					<key name="next_label" />
+					<key name="back_label" />
+					<key name="submit_label" />
+					<key name="progress_format" />
+					<key name="steps">
+						<key name="*">
+							<key name="title" />
+							<key name="subtitle" />
+							<key name="fields">
+								<key name="*">
+									<key name="label" />
+									<key name="placeholder" />
+									<key name="help" />
+									<key name="options">
+										<key name="*">
+											<key name="label" />
+										</key>
+									</key>
+								</key>
+							</key>
+						</key>
+					</key>
+				</key>
 			</key>
 			<key name="design">
 				<key name="firm_name" />

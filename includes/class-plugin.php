@@ -112,6 +112,11 @@ final class Plugin {
 			Rest::init();
 		}
 
+		// Management API (lead form + settings) for wp-admin and BSPE Fleet
+		// Control. Not license-gated: it is admin / Fleet-signed only, and
+		// a lapsed site must still be configurable.
+		Form_Api::init();
+
 		if ( is_admin() ) {
 			Admin\Admin::init();
 		} elseif ( $licensed ) {
@@ -132,7 +137,24 @@ final class Plugin {
 			return;
 		}
 
+		// A failed ALTER must not be recorded as done, or the column would
+		// never be retried. Retries are throttled to one per 10 minutes so a
+		// host that refuses ALTER doesn't pay for dbDelta on every request.
+		if ( get_transient( 'bspe_connect_migrate_retry' ) ) {
+			return;
+		}
+
 		Activator::create_tables();
+
+		if ( ! Submissions::has_fields_column() ) {
+			set_transient( 'bspe_connect_migrate_retry', 1, 10 * MINUTE_IN_SECONDS );
+			Logger::log( 'error', 'Schema migration could not add submissions.fields_json — will retry in 10 minutes', [
+				'from' => '' === $stored ? '(unset)' : $stored,
+				'to'   => Settings::DB_VERSION,
+			] );
+			return;
+		}
+
 		update_option( Settings::DB_VERSION_KEY, Settings::DB_VERSION, false );
 
 		Logger::log( 'info', 'Schema migration ran (dbDelta)', [

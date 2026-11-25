@@ -25,9 +25,107 @@ $field_definitions = [
 	'message'      => __( 'Message', 'bspe-connect' ),
 ];
 
+$form_mode       = 'custom' === ( $form['mode'] ?? 'standard' ) ? 'custom' : 'standard';
+$custom_config   = \BSPE\Connect\Custom_Form::config();
+$custom_json     = wp_json_encode( $custom_config );
+$elementor_forms = \BSPE\Connect\Elementor_Import::list_forms( 40 );
+
 Components::open_form( 'form', $action_url );
 
+/* ----------------- Layout: standard vs custom ----------------- */
+Components::open_card(
+	__( 'Form layout', 'bspe-connect' ),
+	__( 'Standard is the built-in five-field form. Custom lets this site ask for more — extra fields, dropdowns, yes/no questions — split into steps, to match the firm\'s own website form.', 'bspe-connect' )
+);
+Components::row(
+	__( 'Form type', 'bspe-connect' ),
+	static function () use ( $form_mode ): void {
+		Components::radio_pills(
+			'bspe[form][mode]',
+			$form_mode,
+			[
+				'standard' => __( 'Standard (5 fields)', 'bspe-connect' ),
+				'custom'   => __( 'Custom multi-step', 'bspe-connect' ),
+			],
+			[ 'id' => 'bspe-form-mode' ]
+		);
+	},
+	[ 'id' => 'bspe-form-mode' ]
+);
+?>
+<div class="bspe-cf" data-bspe-form-mode-show="custom" data-bspe-custom-builder>
+	<input type="hidden" name="bspe[form][custom_json]" value="<?php echo esc_attr( (string) $custom_json ); ?>" data-bspe-cf-json />
+
+	<div class="bspe-cf__import">
+		<div class="bspe-cf__import-text">
+			<strong><?php esc_html_e( 'Copy a form from the website', 'bspe-connect' ); ?></strong>
+			<span><?php esc_html_e( 'Pulls the fields, keys and steps of an Elementor form on this site into the builder. Review, then click Save changes.', 'bspe-connect' ); ?></span>
+		</div>
+		<div class="bspe-cf__import-controls">
+			<select class="bspe-input" data-bspe-cf-import-select <?php disabled( empty( $elementor_forms ) ); ?>>
+				<?php if ( empty( $elementor_forms ) ) : ?>
+					<option value=""><?php esc_html_e( 'No Elementor forms found', 'bspe-connect' ); ?></option>
+				<?php else : ?>
+					<?php foreach ( $elementor_forms as $ef ) :
+						$ef_label = sprintf(
+							/* translators: 1: form name, 2: page title, 3: post id, 4: number of fields, 5: number of steps */
+							__( '%1$s — %2$s (#%3$d · %4$d fields · %5$d steps)', 'bspe-connect' ),
+							'' !== $ef['form_name'] ? $ef['form_name'] : __( 'Form', 'bspe-connect' ),
+							'' !== $ef['post_title'] ? $ef['post_title'] : $ef['post_type'],
+							$ef['post_id'],
+							$ef['fields'],
+							$ef['steps']
+						);
+						?>
+						<option value="<?php echo esc_attr( $ef['post_id'] . ':' . $ef['form_id'] ); ?>"><?php echo esc_html( $ef_label ); ?></option>
+					<?php endforeach; ?>
+				<?php endif; ?>
+			</select>
+			<button type="button" class="bspe-button bspe-button--secondary" data-bspe-cf-import <?php disabled( empty( $elementor_forms ) ); ?>><?php esc_html_e( 'Import fields', 'bspe-connect' ); ?></button>
+		</div>
+		<p class="bspe-cf__status" data-bspe-cf-import-status role="status" hidden></p>
+	</div>
+
+	<div class="bspe-cf__builder" data-bspe-cf-root>
+		<p class="bspe-cf__loading"><?php esc_html_e( 'Loading the form builder…', 'bspe-connect' ); ?></p>
+	</div>
+
+	<details class="bspe-cf__json">
+		<summary><?php esc_html_e( 'Edit as JSON (advanced)', 'bspe-connect' ); ?></summary>
+		<p class="bspe-field__help"><?php esc_html_e( 'The same schema the Fleet API reads and writes. Apply, then Save changes.', 'bspe-connect' ); ?></p>
+		<textarea class="bspe-input bspe-cf__json-editor" rows="16" spellcheck="false" data-bspe-cf-json-editor></textarea>
+		<div class="bspe-cf__row-actions">
+			<button type="button" class="bspe-button bspe-button--secondary" data-bspe-cf-json-apply><?php esc_html_e( 'Apply JSON to builder', 'bspe-connect' ); ?></button>
+			<span class="bspe-cf__status" data-bspe-cf-json-status role="status"></span>
+		</div>
+	</details>
+
+	<div class="bspe-cf__tools">
+		<div class="bspe-cf__tool">
+			<strong><?php esc_html_e( 'Webhook keys', 'bspe-connect' ); ?></strong>
+			<span><?php esc_html_e( 'Each field is sent to the webhook (Zapier) under its key, next to name, first_name, last_name, phone, phone_e164 (+1…), phone_formatted, email, message and summary.', 'bspe-connect' ); ?></span>
+			<code class="bspe-cf__keys" data-bspe-cf-keys></code>
+			<div class="bspe-cf__row-actions">
+				<button type="button" class="bspe-button bspe-button--secondary" data-bspe-cf-test-webhook><?php esc_html_e( 'Send test lead to webhook', 'bspe-connect' ); ?></button>
+				<span class="bspe-cf__status" data-bspe-cf-test-status role="status"></span>
+			</div>
+			<span class="bspe-field__help"><?php esc_html_e( 'Uses the SAVED form and the saved webhook URL (even while the webhook is switched off). The test lead carries "test": true.', 'bspe-connect' ); ?></span>
+		</div>
+		<div class="bspe-cf__tool">
+			<strong><?php esc_html_e( 'Change history', 'bspe-connect' ); ?></strong>
+			<span><?php esc_html_e( 'Every save (here or through the Fleet API) keeps the previous version, so a change can be rolled back.', 'bspe-connect' ); ?></span>
+			<div class="bspe-cf__row-actions">
+				<button type="button" class="bspe-button bspe-button--secondary" data-bspe-cf-history><?php esc_html_e( 'Show history', 'bspe-connect' ); ?></button>
+			</div>
+			<ol class="bspe-cf__history" data-bspe-cf-history-list hidden></ol>
+		</div>
+	</div>
+</div>
+<?php
+Components::close_card();
+
 /* ----------------- Field configuration ----------------- */
+echo '<div data-bspe-form-mode-show="standard">';
 Components::open_card(
 	__( 'Form fields', 'bspe-connect' ),
 	__( 'Pick which fields show in the lead form and which are required. Field order is fixed: Name → Phone → Email → Preferred contact → Message.', 'bspe-connect' )
@@ -76,6 +174,7 @@ Components::open_card(
 </div>
 <?php
 Components::close_card();
+echo '</div>';
 
 /* ----------------- Copy ----------------- */
 Components::open_card(
