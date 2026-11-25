@@ -4,7 +4,7 @@ Tags: contact, lead-capture, mobile, law-firm
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 8.0
-Stable tag: 3.9.0
+Stable tag: 3.9.1
 License: Proprietary
 
 Mobile contact bar with lead capture for BSPE Legal Marketing client sites.
@@ -47,6 +47,8 @@ notice on your Plugins page. Click **Update** to install.
 Reach out to BSPE Legal Marketing through your usual channel.
 
 == Changelog ==
+
+= 3.9.1 = Fix: after a successful submission the emptied form stayed visible above the "Thanks" message (standard and custom forms). The form's own #bspe-connect display rule (added in 3.2.3) outranked the class-only success rule; the success rules now carry the same prefix.
 
 = 3.9.0 = Custom multi-step lead form. Form tab, new "Form layout": Standard (the five fixed fields, unchanged) or Custom multi-step, built from steps of fields (text, email, phone, number, long text, dropdown, single / multiple choice, consent checkbox, date, hidden value) with required, half width, placeholder, help text, options and a "maps to" role that keeps Name / Phone / Email / Message filled. "Import fields" copies an Elementor Pro form from the site, global widgets included (keys, options, steps). The bar's form then shows a progress bar and Back / Next with per-step validation; the server re-validates against the saved schema. Submissions store every answer (new fields_json column, shown in the Submissions detail and the CSV "Form answers" column) and the email lists them in form order. The webhook also sends first_name, last_name, phone_e164 (+1…), phone_formatted, form_mode, summary and every custom field under its key; existing keys are unchanged. Every form change purges the page cache (NitroPack, LiteSpeed, WP Rocket, W3TC, WP Super Cache, SiteGround), and a submission from a page cached before the change is answered with "please refresh" instead of being lost. The phone mask now drops a pasted/autofilled +1 instead of cutting the last digit. New management REST API (bspe-connect/v1/manage/* for admins, and bspe-agent/v1/bspe-connect/* signed by the BSPE Fleet connector): status, read / update the form with dry runs and optimistic locking, list + import Elementor forms, revisions with restore (layout only by default; every change keeps the previous version), send a test lead to the webhook, and read / patch any settings section through the same sanitizers as the admin tabs. Custom form strings are registered for WPML String Translation.
 

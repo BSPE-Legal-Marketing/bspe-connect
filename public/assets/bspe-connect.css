@@ -854,11 +854,14 @@
 }
 
 /* When the form has succeeded, hide the form and show the success state. */
-.bspe-connect__modal[data-bspe-form-state="success"] .bspe-connect__form {
+/* #bspe-connect prefix: the form's own `#bspe-connect .bspe-connect__form
+   { display:flex }` (1,1,0) used to outrank a class-only rule here, so the
+   emptied form stayed visible above the success message (since 3.2.3). */
+#bspe-connect .bspe-connect__modal[data-bspe-form-state="success"] .bspe-connect__form {
 	display: none;
 }
 
-.bspe-connect__modal[data-bspe-form-state="success"] .bspe-connect__success {
+#bspe-connect .bspe-connect__modal[data-bspe-form-state="success"] .bspe-connect__success {
 	display: block;
 }
 
